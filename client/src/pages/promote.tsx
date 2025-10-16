@@ -30,12 +30,12 @@ import {
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth-context";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Product, Promotion, InsertPromotion } from "@shared/schema";
 
 export function PromotePage() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const { toast } = useToast();
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [openDialogTier, setOpenDialogTier] = useState<string | null>(null);
@@ -53,23 +53,35 @@ export function PromotePage() {
 
   // Create promotion mutation
   const createPromotionMutation = useMutation({
-    mutationFn: async (data: InsertPromotion) => {
-      const res = await apiRequest('POST', '/api/promotions', data);
+    mutationFn: async (data: InsertPromotion & { userId: string }) => {
+      const res = await fetch('/api/promotions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to create promotion");
+      }
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
+      if (data.user) {
+        setUser(data.user);
+      }
       queryClient.invalidateQueries({ queryKey: ['/api/promotions/active'] });
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/transactions', user?.id] });
       toast({
-        title: "Success!",
-        description: "Your promotion has been created successfully.",
+        title: "Promotion Activated!",
+        description: "Your promotion has been created and is now active.",
       });
       setOpenDialogTier(null);
       setSelectedProductId("");
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: "Promotion Failed",
         description: error.message || "Failed to create promotion",
         variant: "destructive",
       });
@@ -143,10 +155,20 @@ export function PromotePage() {
       return;
     }
 
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create a promotion",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + tier.duration);
 
-    const promotionData: InsertPromotion = {
+    const promotionData = {
+      userId: user.id,
       productId: selectedProductId,
       tier: tier.tier,
       price: tier.price.toString(),

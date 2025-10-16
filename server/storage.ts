@@ -46,6 +46,7 @@ export interface IStorage {
   getActivePromotions(): Promise<Promotion[]>;
   getPromotionsByProduct(productId: string): Promise<Promotion[]>;
   createPromotion(promotion: InsertPromotion): Promise<Promotion>;
+  purchasePromotion(userId: string, promotion: InsertPromotion): Promise<{ success: boolean; promotion?: Promotion; error?: string }>;
 
   // Transactions
   getAllTransactions(): Promise<Transaction[]>;
@@ -219,6 +220,47 @@ export class DatabaseStorage implements IStorage {
       .values(promotion)
       .returning();
     return newPromotion;
+  }
+
+  async purchasePromotion(userId: string, promotion: InsertPromotion): Promise<{ success: boolean; promotion?: Promotion; error?: string }> {
+    try {
+      // Get user
+      const user = await this.getUser(userId);
+      if (!user) {
+        return { success: false, error: "User not found" };
+      }
+
+      const promotionPrice = parseFloat(promotion.price);
+      const userBalance = parseFloat(user.balance);
+
+      // Check if user has sufficient balance
+      if (userBalance < promotionPrice) {
+        return { success: false, error: "Insufficient balance" };
+      }
+
+      // All operations in try block to ensure atomicity
+      // Deduct from user balance
+      await this.updateUser(userId, {
+        balance: (userBalance - promotionPrice).toFixed(2)
+      });
+
+      // Create promotion with isActive = true (default)
+      const newPromotion = await this.createPromotion(promotion);
+
+      // Create transaction record
+      await this.createTransaction({
+        userId,
+        type: 'promotion',
+        amount: promotion.price,
+        status: 'completed',
+        description: `Promotion: ${promotion.tier} tier for ${promotion.endDate.toLocaleDateString()}`
+      });
+
+      return { success: true, promotion: newPromotion };
+    } catch (error: any) {
+      // If anything fails, the error will be caught and returned
+      return { success: false, error: error.message || "Failed to create promotion" };
+    }
   }
 
   // Transactions

@@ -215,9 +215,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/promotions", async (req, res) => {
     try {
-      const data = insertPromotionSchema.parse(req.body);
-      const promotion = await storage.createPromotion(data);
-      res.json(promotion);
+      const { userId, ...promotionData } = req.body;
+      const data = insertPromotionSchema.parse(promotionData);
+      
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+
+      const result = await storage.purchasePromotion(userId, data);
+      
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
+
+      // Get updated user info
+      const updatedUser = await storage.getUser(userId);
+      if (!updatedUser) {
+        return res.status(404).json({ error: "User not found after promotion creation" });
+      }
+
+      const { password, ...userWithoutPassword } = updatedUser;
+
+      res.json({ 
+        success: true, 
+        promotion: result.promotion,
+        user: userWithoutPassword
+      });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
