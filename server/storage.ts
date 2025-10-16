@@ -52,6 +52,9 @@ export interface IStorage {
   getTransactionsByUser(userId: string): Promise<Transaction[]>;
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
   updateTransaction(id: string, status: string): Promise<Transaction | undefined>;
+  
+  // Product Purchase
+  purchaseProduct(buyerId: string, productId: string): Promise<{ success: boolean; transaction?: Transaction; error?: string }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -249,6 +252,72 @@ export class DatabaseStorage implements IStorage {
       .where(eq(transactions.id, id))
       .returning();
     return transaction || undefined;
+  }
+
+  async purchaseProduct(buyerId: string, productId: string): Promise<{ success: boolean; transaction?: Transaction; error?: string }> {
+    // Get buyer
+    const buyer = await this.getUser(buyerId);
+    if (!buyer) {
+      return { success: false, error: "Buyer not found" };
+    }
+
+    // Get product with seller
+    const product = await this.getProduct(productId);
+    if (!product) {
+      return { success: false, error: "Product not found" };
+    }
+
+    const seller = product.seller;
+    const productPrice = parseFloat(product.price);
+    const buyerBalance = parseFloat(buyer.balance);
+
+    // Check if buyer has sufficient balance
+    if (buyerBalance < productPrice) {
+      return { success: false, error: "Insufficient balance" };
+    }
+
+    // Check if buyer is not trying to buy their own product
+    if (buyerId === seller.id) {
+      return { success: false, error: "Cannot purchase your own product" };
+    }
+
+    // Deduct from buyer balance
+    await this.updateUser(buyerId, {
+      balance: (buyerBalance - productPrice).toFixed(2)
+    });
+
+    // Add to seller balance and earnings
+    const sellerBalance = parseFloat(seller.balance);
+    const sellerEarnings = parseFloat(seller.totalEarnings);
+    await this.updateUser(seller.id, {
+      balance: (sellerBalance + productPrice).toFixed(2),
+      totalEarnings: (sellerEarnings + productPrice).toFixed(2)
+    });
+
+    // Increment product sales count
+    await this.updateProduct(productId, {
+      sales: product.sales + 1
+    });
+
+    // Create buyer transaction (purchase)
+    const buyerTransaction = await this.createTransaction({
+      userId: buyerId,
+      type: 'purchase',
+      amount: product.price,
+      status: 'completed',
+      description: `Purchased "${product.title}"`
+    });
+
+    // Create seller transaction (sale)
+    await this.createTransaction({
+      userId: seller.id,
+      type: 'sale',
+      amount: product.price,
+      status: 'completed',
+      description: `Sold "${product.title}"`
+    });
+
+    return { success: true, transaction: buyerTransaction };
   }
 }
 

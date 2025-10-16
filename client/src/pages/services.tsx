@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,15 +29,63 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { ProductWithSeller } from "@shared/schema";
+import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export function ServicesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [priceRange, setPriceRange] = useState<string>("all");
+  const [selectedProduct, setSelectedProduct] = useState<ProductWithSeller | null>(null);
+  const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+
+  const { user, setUser } = useAuth();
+  const { toast } = useToast();
 
   const { data: products = [], isLoading } = useQuery<ProductWithSeller[]>({ 
     queryKey: ['/api/products'] 
+  });
+
+  const purchaseMutation = useMutation({
+    mutationFn: async (productId: string) => {
+      const response = await fetch(`/api/products/${productId}/purchase`, {
+        method: "POST",
+        body: JSON.stringify({ buyerId: user?.id }),
+        headers: { "Content-Type": "application/json" }
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Purchase failed");
+      }
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      setUser(data.buyer);
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/transactions', user?.id] });
+      toast({
+        title: "Purchase Successful!",
+        description: `You have successfully purchased "${selectedProduct?.title}"`,
+      });
+      setPurchaseDialogOpen(false);
+      setSelectedProduct(null);
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Purchase Failed",
+        description: error.message || "Failed to complete purchase",
+      });
+    }
   });
 
   const categories = [
@@ -274,9 +322,14 @@ export function ServicesPage() {
                       <Button 
                         className="w-full neon-glow-secondary" 
                         size="sm"
-                        data-testid={`button-view-${product.id}`}
+                        onClick={() => {
+                          setSelectedProduct(product);
+                          setPurchaseDialogOpen(true);
+                        }}
+                        disabled={!user || user.id === product.sellerId}
+                        data-testid={`button-buy-${product.id}`}
                       >
-                        View Details
+                        {!user ? "Login to Buy" : (user.id === product.sellerId) ? "Your Product" : "Buy Now"}
                       </Button>
                     </CardContent>
                   </Card>
@@ -295,6 +348,67 @@ export function ServicesPage() {
           </div>
         </div>
       </div>
+
+      {/* Purchase Confirmation Dialog */}
+      <Dialog open={purchaseDialogOpen} onOpenChange={setPurchaseDialogOpen}>
+        <DialogContent className="glass-morphism-strong border-border/50">
+          <DialogHeader>
+            <DialogTitle>Confirm Purchase</DialogTitle>
+            <DialogDescription>
+              Review your purchase details before confirming
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedProduct && (
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Service:</span>
+                  <span className="font-medium">{selectedProduct.title}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Seller:</span>
+                  <span className="font-medium">{selectedProduct.seller.username}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Price:</span>
+                  <span className="font-bold text-primary">${selectedProduct.price}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Your Balance:</span>
+                  <span className="font-medium">${user?.balance}</span>
+                </div>
+                <div className="flex justify-between pt-2 border-t border-border/50">
+                  <span className="text-muted-foreground">Balance After Purchase:</span>
+                  <span className="font-bold">
+                    ${(parseFloat(user?.balance || "0") - parseFloat(selectedProduct.price)).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline" 
+                  className="flex-1 border-border/50" 
+                  onClick={() => setPurchaseDialogOpen(false)}
+                  disabled={purchaseMutation.isPending}
+                  data-testid="button-cancel-purchase"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  className="flex-1 neon-glow-primary" 
+                  onClick={() => purchaseMutation.mutate(selectedProduct.id)}
+                  disabled={purchaseMutation.isPending}
+                  data-testid="button-confirm-purchase"
+                >
+                  {purchaseMutation.isPending ? "Processing..." : "Confirm Purchase"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

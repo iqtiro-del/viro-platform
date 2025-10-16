@@ -314,6 +314,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/products/:id/purchase", async (req, res) => {
+    try {
+      const { buyerId } = req.body;
+      const productId = req.params.id;
+
+      if (!buyerId) {
+        return res.status(400).json({ error: "Buyer ID is required" });
+      }
+
+      const result = await storage.purchaseProduct(buyerId, productId);
+      
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
+
+      // Get updated buyer info
+      const updatedBuyer = await storage.getUser(buyerId);
+      const { password, ...buyerWithoutPassword } = updatedBuyer!;
+
+      res.json({ 
+        success: true, 
+        transaction: result.transaction,
+        buyer: buyerWithoutPassword
+      });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   app.patch("/api/transactions/:id", async (req, res) => {
     try {
       const { status } = req.body;
