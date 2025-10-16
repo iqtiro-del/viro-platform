@@ -6,6 +6,7 @@ type AuthUser = Omit<User, 'password'>;
 
 interface AuthContextType {
   user: AuthUser | null;
+  setUser: (user: AuthUser | null) => void;
   login: (username: string, password: string) => Promise<void>;
   register: (data: { username: string; password: string; fullName: string }) => Promise<void>;
   logout: () => void;
@@ -70,8 +71,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLocation("/login");
   };
 
+  const updateUser = (updatedUser: AuthUser | null) => {
+    setUser(updatedUser);
+    if (updatedUser) {
+      localStorage.setItem("tiro-user", JSON.stringify(updatedUser));
+    } else {
+      localStorage.removeItem("tiro-user");
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, setUser: updateUser, login, register, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

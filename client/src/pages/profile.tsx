@@ -32,6 +32,21 @@ export function ProfilePage() {
     enabled: !!user 
   });
 
+  const { data: userProducts = [] } = useQuery<any[]>({ 
+    queryKey: ['/api/users', user?.id, 'products'],
+    enabled: !!user
+  });
+
+  const totalSales = userProducts.reduce((sum, p) => sum + (p.sales || 0), 0);
+  
+  const { data: statsData } = useQuery<{ verifiedSellers: number }>({
+    queryKey: ['/api/stats']
+  });
+  
+  const sellerRank = userData && statsData 
+    ? Math.min(100, Math.round((1 - (statsData.verifiedSellers > 0 ? (parseFloat(userData.rating || "0") / 5) : 0)) * 100))
+    : 100;
+
   const updateProfileMutation = useMutation({ 
     mutationFn: async (data: Partial<User>) => {
       const response = await apiRequest('PATCH', `/api/users/${user?.id}`, data);
@@ -300,12 +315,12 @@ export function ProfilePage() {
                   </div>
                   <div className="text-center p-4 glass-morphism rounded-lg border border-border/30" data-testid="card-sales">
                     <Package className="w-6 h-6 mx-auto mb-2 text-primary" />
-                    <p className="text-2xl font-bold text-foreground" data-testid="text-total-sales">0</p>
+                    <p className="text-2xl font-bold text-foreground" data-testid="text-total-sales">{totalSales}</p>
                     <p className="text-xs text-muted-foreground mt-1">Total Sales</p>
                   </div>
                   <div className="text-center p-4 glass-morphism rounded-lg border border-border/30" data-testid="card-rank">
                     <TrendingUp className="w-6 h-6 mx-auto mb-2 text-secondary" />
-                    <p className="text-2xl font-bold text-foreground" data-testid="text-seller-rank">Top 5%</p>
+                    <p className="text-2xl font-bold text-foreground" data-testid="text-seller-rank">Top {sellerRank}%</p>
                     <p className="text-xs text-muted-foreground mt-1">Seller Rank</p>
                   </div>
                 </div>

@@ -28,12 +28,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { Transaction } from "@shared/schema";
+import { useState } from "react";
 
 export function WalletPage() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
+  const { toast } = useToast();
+  const [depositAmount, setDepositAmount] = useState("");
+  const [depositMethod, setDepositMethod] = useState("");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawMethod, setWithdrawMethod] = useState("");
+  const [depositDialogOpen, setDepositDialogOpen] = useState(false);
+  const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
   
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({ 
     queryKey: ['/api/users', user?.id, 'transactions'], 
@@ -43,12 +53,89 @@ export function WalletPage() {
   const balance = user?.balance ? parseFloat(user.balance) : 0;
   const totalEarnings = user?.totalEarnings ? parseFloat(user.totalEarnings) : 0;
   
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  
+  const recentEarnings = transactions
+    .filter(t => t.type === 'sale' && t.status === 'completed' && new Date(t.createdAt) >= thirtyDaysAgo)
+    .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+  
+  const previousEarnings = transactions
+    .filter(t => t.type === 'sale' && t.status === 'completed' && new Date(t.createdAt) < thirtyDaysAgo)
+    .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+  
+  const profitPercentage = previousEarnings > 0 
+    ? ((recentEarnings - previousEarnings) / previousEarnings) * 100 
+    : recentEarnings > 0 ? 100 : 0;
+  
   const walletData = {
     balance,
     totalEarnings,
-    profitTrend: "up" as const,
-    profitPercentage: 15.3,
+    profitTrend: (profitPercentage >= 0 ? "up" : "down") as const,
+    profitPercentage: Math.abs(profitPercentage),
   };
+
+  const depositMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/wallet/deposit', {
+        userId: user?.id,
+        amount: depositAmount,
+        paymentMethod: depositMethod
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (user) {
+        setUser({ ...user, balance: data.newBalance });
+      }
+      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
+      toast({
+        title: "Deposit Successful",
+        description: `$${depositAmount} has been added to your wallet.`
+      });
+      setDepositAmount("");
+      setDepositMethod("");
+      setDepositDialogOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Deposit Failed",
+        description: error.message || "Could not complete deposit",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const withdrawMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/wallet/withdraw', {
+        userId: user?.id,
+        amount: withdrawAmount,
+        withdrawMethod: withdrawMethod
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (user) {
+        setUser({ ...user, balance: data.newBalance });
+      }
+      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
+      toast({
+        title: "Withdrawal Successful",
+        description: `$${withdrawAmount} has been withdrawn from your wallet.`
+      });
+      setWithdrawAmount("");
+      setWithdrawMethod("");
+      setWithdrawDialogOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Withdrawal Failed",
+        description: error.message || "Could not complete withdrawal",
+        variant: "destructive"
+      });
+    }
+  });
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
@@ -110,7 +197,7 @@ export function WalletPage() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-3">
-                <Dialog>
+                <Dialog open={depositDialogOpen} onOpenChange={setDepositDialogOpen}>
                   <DialogTrigger asChild>
                     <Button className="flex-1 neon-glow-secondary" data-testid="button-deposit">
                       <ArrowDownRight className="w-4 h-4 mr-2" />
@@ -130,32 +217,39 @@ export function WalletPage() {
                         <Input 
                           id="deposit-amount" 
                           type="number" 
-                          placeholder="0.00" 
+                          placeholder="0.00"
+                          value={depositAmount}
+                          onChange={(e) => setDepositAmount(e.target.value)}
                           className="glass-morphism border-border/50 mt-2"
                           data-testid="input-deposit-amount"
                         />
                       </div>
                       <div>
                         <Label htmlFor="payment-method">Payment Method</Label>
-                        <Select>
+                        <Select value={depositMethod} onValueChange={setDepositMethod}>
                           <SelectTrigger className="glass-morphism border-border/50 mt-2" data-testid="select-payment-method">
                             <SelectValue placeholder="Select payment method" />
                           </SelectTrigger>
                           <SelectContent className="glass-morphism-strong border-border/50">
-                            <SelectItem value="zaincash">Zain Cash</SelectItem>
-                            <SelectItem value="rafidain">Al-Rafidain QiServices</SelectItem>
-                            <SelectItem value="fib">FIB</SelectItem>
+                            <SelectItem value="Zain Cash">Zain Cash</SelectItem>
+                            <SelectItem value="Al-Rafidain QiServices">Al-Rafidain QiServices</SelectItem>
+                            <SelectItem value="FIB">FIB</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button className="w-full neon-glow-primary" data-testid="button-confirm-deposit">
-                        Confirm Deposit
+                      <Button 
+                        className="w-full neon-glow-primary" 
+                        data-testid="button-confirm-deposit"
+                        onClick={() => depositMutation.mutate()}
+                        disabled={!depositAmount || !depositMethod || depositMutation.isPending}
+                      >
+                        {depositMutation.isPending ? "Processing..." : "Confirm Deposit"}
                       </Button>
                     </div>
                   </DialogContent>
                 </Dialog>
 
-                <Dialog>
+                <Dialog open={withdrawDialogOpen} onOpenChange={setWithdrawDialogOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline" className="flex-1 border-border/50" data-testid="button-withdraw">
                       <ArrowUpRight className="w-4 h-4 mr-2" />
@@ -176,25 +270,32 @@ export function WalletPage() {
                           id="withdraw-amount" 
                           type="number" 
                           placeholder="0.00"
+                          value={withdrawAmount}
+                          onChange={(e) => setWithdrawAmount(e.target.value)}
                           className="glass-morphism border-border/50 mt-2"
                           data-testid="input-withdraw-amount"
                         />
                       </div>
                       <div>
                         <Label htmlFor="withdraw-method">Withdraw To</Label>
-                        <Select>
+                        <Select value={withdrawMethod} onValueChange={setWithdrawMethod}>
                           <SelectTrigger className="glass-morphism border-border/50 mt-2" data-testid="select-withdraw-method">
                             <SelectValue placeholder="Select withdrawal method" />
                           </SelectTrigger>
                           <SelectContent className="glass-morphism-strong border-border/50">
-                            <SelectItem value="zaincash">Zain Cash</SelectItem>
-                            <SelectItem value="rafidain">Al-Rafidain QiServices</SelectItem>
-                            <SelectItem value="fib">FIB</SelectItem>
+                            <SelectItem value="Zain Cash">Zain Cash</SelectItem>
+                            <SelectItem value="Al-Rafidain QiServices">Al-Rafidain QiServices</SelectItem>
+                            <SelectItem value="FIB">FIB</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button className="w-full neon-glow-primary" data-testid="button-confirm-withdraw">
-                        Confirm Withdrawal
+                      <Button 
+                        className="w-full neon-glow-primary" 
+                        data-testid="button-confirm-withdraw"
+                        onClick={() => withdrawMutation.mutate()}
+                        disabled={!withdrawAmount || !withdrawMethod || withdrawMutation.isPending}
+                      >
+                        {withdrawMutation.isPending ? "Processing..." : "Confirm Withdrawal"}
                       </Button>
                     </div>
                   </DialogContent>

@@ -59,6 +59,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stats route
+  app.get("/api/stats", async (req, res) => {
+    try {
+      const allProducts = await storage.getAllProducts();
+      const allUsers = await storage.getAllUsers();
+      const allTransactions = await storage.getAllTransactions();
+      
+      const activeServices = allProducts.filter(p => p.isActive).length;
+      const verifiedSellers = allUsers.filter(u => u.isVerified).length;
+      const totalSales = allTransactions
+        .filter(t => t.type === 'sale' && t.status === 'completed')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      
+      res.json({
+        activeServices,
+        verifiedSellers,
+        totalSales: totalSales.toFixed(2)
+      });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // User routes
   app.get("/api/users/:id", async (req, res) => {
     try {
@@ -215,6 +238,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const data = insertTransactionSchema.parse(req.body);
       const transaction = await storage.createTransaction(data);
       res.json(transaction);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/wallet/deposit", async (req, res) => {
+    try {
+      const { userId, amount, paymentMethod } = req.body;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const depositAmount = parseFloat(amount);
+      if (depositAmount <= 0) {
+        return res.status(400).json({ error: "Amount must be greater than 0" });
+      }
+
+      const newBalance = parseFloat(user.balance) + depositAmount;
+      
+      await storage.updateUser(userId, { balance: newBalance.toFixed(2) });
+      
+      const transaction = await storage.createTransaction({
+        userId,
+        type: 'deposit',
+        amount: depositAmount.toFixed(2),
+        description: `Deposited via ${paymentMethod}`
+      });
+      
+      await storage.updateTransaction(transaction.id, 'completed');
+      
+      res.json({ success: true, newBalance: newBalance.toFixed(2), transaction });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/wallet/withdraw", async (req, res) => {
+    try {
+      const { userId, amount, withdrawMethod } = req.body;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const withdrawAmount = parseFloat(amount);
+      if (withdrawAmount <= 0) {
+        return res.status(400).json({ error: "Amount must be greater than 0" });
+      }
+
+      const currentBalance = parseFloat(user.balance);
+      if (withdrawAmount > currentBalance) {
+        return res.status(400).json({ error: "Insufficient balance" });
+      }
+
+      const newBalance = currentBalance - withdrawAmount;
+      
+      await storage.updateUser(userId, { balance: newBalance.toFixed(2) });
+      
+      const transaction = await storage.createTransaction({
+        userId,
+        type: 'withdraw',
+        amount: withdrawAmount.toFixed(2),
+        description: `Withdrawn to ${withdrawMethod}`
+      });
+      
+      await storage.updateTransaction(transaction.id, 'completed');
+      
+      res.json({ success: true, newBalance: newBalance.toFixed(2), transaction });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }

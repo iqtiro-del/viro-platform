@@ -16,10 +16,14 @@ export function Dashboard() {
     queryKey: ['/api/products'] 
   });
 
+  const { data: statsData } = useQuery<{ activeServices: number; verifiedSellers: number; totalSales: string }>({
+    queryKey: ['/api/stats']
+  });
+
   const stats = [
-    { label: "Active Services", value: "1,234", icon: ShoppingBag, trend: "+12%" },
-    { label: "Verified Sellers", value: "567", icon: Users, trend: "+8%" },
-    { label: "Total Sales", value: "$45.2K", icon: TrendingUp, trend: "+23%" },
+    { label: "Active Services", value: statsData?.activeServices.toString() || "0", icon: ShoppingBag, trend: "+12%" },
+    { label: "Verified Sellers", value: statsData?.verifiedSellers.toString() || "0", icon: Users, trend: "+8%" },
+    { label: "Total Sales", value: `$${statsData?.totalSales || "0"}`, icon: TrendingUp, trend: "+23%" },
   ];
 
   return (

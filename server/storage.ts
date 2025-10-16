@@ -24,6 +24,7 @@ import { eq, desc, and, sql } from "drizzle-orm";
 export interface IStorage {
   // Users
   getUser(id: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, data: Partial<User>): Promise<User | undefined>;
@@ -47,6 +48,7 @@ export interface IStorage {
   createPromotion(promotion: InsertPromotion): Promise<Promotion>;
 
   // Transactions
+  getAllTransactions(): Promise<Transaction[]>;
   getTransactionsByUser(userId: string): Promise<Transaction[]>;
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
   updateTransaction(id: string, status: string): Promise<Transaction | undefined>;
@@ -70,6 +72,10 @@ export class DatabaseStorage implements IStorage {
       .values(insertUser)
       .returning();
     return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
   }
 
   async updateUser(id: string, data: Partial<User>): Promise<User | undefined> {
@@ -213,6 +219,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Transactions
+  async getAllTransactions(): Promise<Transaction[]> {
+    return await db
+      .select()
+      .from(transactions)
+      .orderBy(desc(transactions.createdAt));
+  }
+
   async getTransactionsByUser(userId: string): Promise<Transaction[]> {
     return await db
       .select()
