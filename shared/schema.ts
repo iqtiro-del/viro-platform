@@ -167,6 +167,7 @@ export const insertPromotionSchema = createInsertSchema(promotions).omit({
 }).extend({
   tier: z.enum(['top_3', 'top_5', 'top_10']),
   price: z.string(),
+  endDate: z.union([z.date(), z.string().transform((val) => new Date(val))]),
 });
 
 export const insertTransactionSchema = createInsertSchema(transactions).omit({
