@@ -27,58 +27,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/lib/auth-context";
+import type { Transaction } from "@shared/schema";
 
 export function WalletPage() {
-  // Mock data - will be replaced with real data
+  const { user } = useAuth();
+  
+  const { data: transactions = [], isLoading } = useQuery<Transaction[]>({ 
+    queryKey: ['/api/users', user?.id, 'transactions'], 
+    enabled: !!user 
+  });
+
+  const balance = user?.balance ? parseFloat(user.balance) : 0;
+  const totalEarnings = user?.totalEarnings ? parseFloat(user.totalEarnings) : 0;
+  
   const walletData = {
-    balance: 1250.50,
-    totalEarnings: 4580.25,
-    profitTrend: "up", // "up" or "down"
+    balance,
+    totalEarnings,
+    profitTrend: "up" as const,
     profitPercentage: 15.3,
   };
-
-  const transactions = [
-    {
-      id: "1",
-      type: "sale",
-      description: "Payment for Logo Design Service",
-      amount: 150,
-      status: "completed",
-      date: "2024-01-15 14:30",
-    },
-    {
-      id: "2",
-      type: "withdraw",
-      description: "Withdrawal to Zain Cash",
-      amount: -200,
-      status: "completed",
-      date: "2024-01-14 10:20",
-    },
-    {
-      id: "3",
-      type: "deposit",
-      description: "Deposit from Zain Cash",
-      amount: 500,
-      status: "completed",
-      date: "2024-01-12 16:45",
-    },
-    {
-      id: "4",
-      type: "promotion",
-      description: "Product Promotion - Top 3",
-      amount: -5,
-      status: "completed",
-      date: "2024-01-10 09:15",
-    },
-    {
-      id: "5",
-      type: "sale",
-      description: "Payment for Web Development",
-      amount: 300,
-      status: "pending",
-      date: "2024-01-09 11:00",
-    },
-  ];
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
@@ -125,9 +95,13 @@ export function WalletPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardDescription className="text-muted-foreground">Current Balance</CardDescription>
-                  <CardTitle className="text-5xl font-bold mt-2 neon-text-glow-cyan">
-                    ${walletData.balance.toFixed(2)}
-                  </CardTitle>
+                  {isLoading ? (
+                    <Skeleton className="h-14 w-48 mt-2" data-testid="skeleton-balance" />
+                  ) : (
+                    <CardTitle className="text-5xl font-bold mt-2 neon-text-glow-cyan" data-testid="text-wallet-balance">
+                      ${walletData.balance.toFixed(2)}
+                    </CardTitle>
+                  )}
                 </div>
                 <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center neon-glow-primary">
                   <WalletIcon className="w-8 h-8 text-primary" />
@@ -233,25 +207,33 @@ export function WalletPage() {
           <Card className="glass-morphism border-border/30">
             <CardHeader>
               <CardDescription>Total Earnings</CardDescription>
-              <CardTitle className="text-3xl font-bold">
-                ${walletData.totalEarnings.toFixed(2)}
-              </CardTitle>
+              {isLoading ? (
+                <Skeleton className="h-9 w-36 mt-2" data-testid="skeleton-earnings" />
+              ) : (
+                <CardTitle className="text-3xl font-bold" data-testid="text-total-earnings">
+                  ${walletData.totalEarnings.toFixed(2)}
+                </CardTitle>
+              )}
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-2">
-                {walletData.profitTrend === "up" ? (
-                  <>
-                    <TrendingUp className="w-5 h-5 text-green-500" />
-                    <span className="text-green-500 font-medium">+{walletData.profitPercentage}%</span>
-                  </>
-                ) : (
-                  <>
-                    <TrendingDown className="w-5 h-5 text-red-500" />
-                    <span className="text-red-500 font-medium">-{walletData.profitPercentage}%</span>
-                  </>
-                )}
-                <span className="text-sm text-muted-foreground">this month</span>
-              </div>
+              {isLoading ? (
+                <Skeleton className="h-5 w-32" data-testid="skeleton-profit-trend" />
+              ) : (
+                <div className="flex items-center gap-2">
+                  {walletData.profitTrend === "up" ? (
+                    <>
+                      <TrendingUp className="w-5 h-5 text-green-500" />
+                      <span className="text-green-500 font-medium" data-testid="text-profit-percentage">+{walletData.profitPercentage}%</span>
+                    </>
+                  ) : (
+                    <>
+                      <TrendingDown className="w-5 h-5 text-red-500" />
+                      <span className="text-red-500 font-medium" data-testid="text-profit-percentage">-{walletData.profitPercentage}%</span>
+                    </>
+                  )}
+                  <span className="text-sm text-muted-foreground">this month</span>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -263,41 +245,78 @@ export function WalletPage() {
             <CardDescription>Your recent wallet activity</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {transactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className="flex items-center justify-between p-4 rounded-lg glass-morphism border border-border/30 hover-elevate transition-all"
-                  data-testid={`transaction-${transaction.id}`}
-                >
-                  <div className="flex items-center gap-4 flex-1">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      transaction.amount > 0 ? 'bg-green-500/20 neon-glow-success' : 'bg-red-500/20'
-                    }`}>
-                      {getTransactionIcon(transaction.type)}
-                    </div>
-                    
-                    <div className="flex-1">
-                      <p className="font-medium text-foreground">{transaction.description}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Clock className="w-3 h-3 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">{transaction.date}</p>
+            {isLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex items-center justify-between p-4 rounded-lg glass-morphism border border-border/30">
+                    <div className="flex items-center gap-4 flex-1">
+                      <Skeleton className="w-10 h-10 rounded-full" data-testid={`skeleton-transaction-icon-${i}`} />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-48" data-testid={`skeleton-transaction-desc-${i}`} />
+                        <Skeleton className="h-3 w-32" data-testid={`skeleton-transaction-date-${i}`} />
                       </div>
                     </div>
+                    <div className="flex items-center gap-4">
+                      <Skeleton className="h-6 w-20" data-testid={`skeleton-transaction-status-${i}`} />
+                      <Skeleton className="h-6 w-16" data-testid={`skeleton-transaction-amount-${i}`} />
+                    </div>
                   </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {transactions.map((transaction) => {
+                  const amount = parseFloat(transaction.amount);
+                  const formattedDate = transaction.createdAt 
+                    ? new Date(transaction.createdAt).toLocaleString('en-US', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })
+                    : '';
+                  
+                  return (
+                    <div
+                      key={transaction.id}
+                      className="flex items-center justify-between p-4 rounded-lg glass-morphism border border-border/30 hover-elevate transition-all"
+                      data-testid={`transaction-${transaction.id}`}
+                    >
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                          amount > 0 ? 'bg-green-500/20 neon-glow-success' : 'bg-red-500/20'
+                        }`}>
+                          {getTransactionIcon(transaction.type)}
+                        </div>
+                        
+                        <div className="flex-1">
+                          <p className="font-medium text-foreground" data-testid={`text-transaction-description-${transaction.id}`}>
+                            {transaction.description || 'No description'}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Clock className="w-3 h-3 text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground" data-testid={`text-transaction-date-${transaction.id}`}>
+                              {formattedDate}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
 
-                  <div className="flex items-center gap-4">
-                    {getStatusBadge(transaction.status)}
-                    <p className={`text-lg font-bold ${
-                      transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
-                    }`}>
-                      {transaction.amount > 0 ? '+' : ''}{transaction.amount > 0 ? '$' : '-$'}
-                      {Math.abs(transaction.amount).toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                      <div className="flex items-center gap-4">
+                        {getStatusBadge(transaction.status)}
+                        <p className={`text-lg font-bold ${
+                          amount > 0 ? 'text-green-500' : 'text-red-500'
+                        }`} data-testid={`text-transaction-amount-${transaction.id}`}>
+                          {amount > 0 ? '+' : ''}{amount > 0 ? '$' : '-$'}
+                          {Math.abs(amount).toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             <div className="mt-6 text-center">
               <Button variant="outline" className="border-border/50" data-testid="button-view-all-transactions">

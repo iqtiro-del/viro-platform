@@ -1,10 +1,14 @@
 import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Plus, 
   Edit, 
@@ -21,7 +25,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -41,108 +44,266 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useAuth } from "@/lib/auth-context";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { type Product, type InsertProduct, insertProductSchema } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
 
 export function MyProductsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
-  // Mock products data
-  const products = [
-    {
-      id: "1",
-      title: "Professional Logo Design",
-      description: "Custom logo design with 3 revisions",
-      price: 50,
-      category: "Design",
-      isActive: true,
-      views: 234,
-      sales: 12,
+  // Fetch user's products
+  const { data: products = [], isLoading } = useQuery<Product[]>({
+    queryKey: ['/api/users', user?.id, 'products'],
+    enabled: !!user,
+  });
+
+  // Create product mutation
+  const createMutation = useMutation({
+    mutationFn: async (data: InsertProduct) => {
+      const res = await apiRequest('POST', '/api/products', data);
+      return res.json();
     },
-    {
-      id: "2",
-      title: "SEO Optimization Package",
-      description: "Complete SEO optimization for your website",
-      price: 120,
-      category: "Marketing",
-      isActive: true,
-      views: 567,
-      sales: 8,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'products'] });
+      toast({
+        title: "Success",
+        description: "Service created successfully",
+      });
+      setIsAddDialogOpen(false);
     },
-    {
-      id: "3",
-      title: "React Web Development",
-      description: "Modern web application development",
-      price: 200,
-      category: "Development",
-      isActive: false,
-      views: 123,
-      sales: 5,
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     },
-  ];
+  });
+
+  // Update product mutation
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<InsertProduct> }) => {
+      const res = await apiRequest('PATCH', `/api/products/${id}`, data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'products'] });
+      toast({
+        title: "Success",
+        description: "Service updated successfully",
+      });
+      setEditingProduct(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete product mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest('DELETE', `/api/products/${id}`, undefined);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'products'] });
+      toast({
+        title: "Success",
+        description: "Service deleted successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const categories = ["Design", "Development", "Marketing", "Writing", "Video & Animation", "Music & Audio"];
 
-  const ProductForm = ({ product, onClose }: { product?: any; onClose: () => void }) => (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="title">Service Title</Label>
-        <Input 
-          id="title" 
-          placeholder="Professional Logo Design" 
-          defaultValue={product?.title}
-          className="glass-morphism border-border/50 mt-2"
-          data-testid="input-product-title"
-        />
-      </div>
+  const ProductForm = ({ product, onClose }: { product?: Product; onClose: () => void }) => {
+    const form = useForm<InsertProduct>({
+      resolver: zodResolver(insertProductSchema),
+      defaultValues: product ? {
+        sellerId: product.sellerId,
+        title: product.title,
+        description: product.description,
+        price: product.price.toString(),
+        category: product.category,
+        imageUrl: product.imageUrl,
+        isActive: product.isActive,
+      } : {
+        sellerId: user?.id || "",
+        title: "",
+        description: "",
+        price: "",
+        category: "",
+        imageUrl: "",
+        isActive: true,
+      },
+    });
 
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea 
-          id="description" 
-          placeholder="Describe your service in detail..." 
-          defaultValue={product?.description}
-          className="glass-morphism border-border/50 mt-2 min-h-[100px]"
-          data-testid="input-product-description"
-        />
-      </div>
+    const onSubmit = (data: InsertProduct) => {
+      if (product) {
+        updateMutation.mutate({ id: product.id, data });
+      } else {
+        createMutation.mutate(data);
+      }
+    };
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="price">Price (USD)</Label>
-          <Input 
-            id="price" 
-            type="number" 
-            placeholder="50.00" 
-            defaultValue={product?.price}
-            className="glass-morphism border-border/50 mt-2"
-            data-testid="input-product-price"
+    return (
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Service Title</FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field}
+                    placeholder="Professional Logo Design" 
+                    className="glass-morphism border-border/50"
+                    data-testid="input-product-title"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div>
-          <Label htmlFor="category">Category</Label>
-          <Select defaultValue={product?.category}>
-            <SelectTrigger className="glass-morphism border-border/50 mt-2" data-testid="select-product-category">
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent className="glass-morphism-strong border-border/50">
-              {categories.map((cat) => (
-                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    {...field}
+                    placeholder="Describe your service in detail..." 
+                    className="glass-morphism border-border/50 min-h-[100px]"
+                    data-testid="input-product-description"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Price (USD)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field}
+                      type="number" 
+                      placeholder="50.00" 
+                      className="glass-morphism border-border/50"
+                      data-testid="input-product-price"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="glass-morphism border-border/50" data-testid="select-product-category">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="glass-morphism-strong border-border/50">
+                      {categories.map((cat) => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <Button 
+            type="submit"
+            className="w-full neon-glow-primary" 
+            disabled={createMutation.isPending || updateMutation.isPending}
+            data-testid={product ? "button-update-product" : "button-create-product"}
+          >
+            {(createMutation.isPending || updateMutation.isPending) ? "Saving..." : product ? "Update Service" : "Create Service"}
+          </Button>
+        </form>
+      </Form>
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen pb-20 md:pb-8">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <Skeleton className="h-10 w-64 mb-2" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+            <Skeleton className="h-10 w-40" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="glass-morphism border-border/30">
+                <CardHeader className="pb-3">
+                  <Skeleton className="h-4 w-32 mb-2" />
+                  <Skeleton className="h-8 w-16" />
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="glass-morphism border-border/30">
+                <CardContent className="p-6">
+                  <Skeleton className="h-20 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
-
-      <Button 
-        className="w-full neon-glow-primary" 
-        onClick={onClose}
-        data-testid={product ? "button-update-product" : "button-create-product"}
-      >
-        {product ? "Update Service" : "Create Service"}
-      </Button>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="min-h-screen pb-20 md:pb-8">
@@ -181,7 +342,7 @@ export function MyProductsPage() {
                 <Package className="w-4 h-4" />
                 Total Services
               </CardDescription>
-              <CardTitle className="text-3xl">{products.length}</CardTitle>
+              <CardTitle className="text-3xl" data-testid="text-total-services">{products.length}</CardTitle>
             </CardHeader>
           </Card>
 
@@ -191,7 +352,7 @@ export function MyProductsPage() {
                 <Eye className="w-4 h-4" />
                 Total Views
               </CardDescription>
-              <CardTitle className="text-3xl">
+              <CardTitle className="text-3xl" data-testid="text-total-views">
                 {products.reduce((sum, p) => sum + p.views, 0)}
               </CardTitle>
             </CardHeader>
@@ -203,7 +364,7 @@ export function MyProductsPage() {
                 <DollarSign className="w-4 h-4" />
                 Total Sales
               </CardDescription>
-              <CardTitle className="text-3xl">
+              <CardTitle className="text-3xl" data-testid="text-total-sales">
                 {products.reduce((sum, p) => sum + p.sales, 0)}
               </CardTitle>
             </CardHeader>
@@ -227,7 +388,7 @@ export function MyProductsPage() {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-lg font-semibold text-foreground">{product.title}</h3>
+                          <h3 className="text-lg font-semibold text-foreground" data-testid={`text-product-title-${product.id}`}>{product.title}</h3>
                           <Badge className={product.isActive ? "bg-green-500/20 text-green-500 border-green-500/30" : "bg-gray-500/20 text-gray-500 border-gray-500/30"}>
                             {product.isActive ? "Active" : "Inactive"}
                           </Badge>
@@ -241,22 +402,22 @@ export function MyProductsPage() {
                       <div className="flex items-center gap-2">
                         <DollarSign className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm text-foreground">
-                          <span className="font-semibold text-primary">${product.price}</span>
+                          <span className="font-semibold text-primary" data-testid={`text-product-price-${product.id}`}>${product.price}</span>
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Eye className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">{product.views} views</span>
+                        <span className="text-sm text-muted-foreground" data-testid={`text-product-views-${product.id}`}>{product.views} views</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <ShoppingBag className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">{product.sales} sales</span>
+                        <span className="text-sm text-muted-foreground" data-testid={`text-product-sales-${product.id}`}>{product.sales} sales</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Dialog>
+                    <Dialog open={editingProduct?.id === product.id} onOpenChange={(open) => !open && setEditingProduct(null)}>
                       <DialogTrigger asChild>
                         <Button 
                           variant="outline" 
@@ -299,8 +460,13 @@ export function MyProductsPage() {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel className="glass-morphism border-border/50">Cancel</AlertDialogCancel>
-                          <AlertDialogAction className="bg-red-500 hover:bg-red-600" data-testid={`button-confirm-delete-${product.id}`}>
-                            Delete
+                          <AlertDialogAction 
+                            className="bg-red-500 hover:bg-red-600" 
+                            onClick={() => deleteMutation.mutate(product.id)}
+                            disabled={deleteMutation.isPending}
+                            data-testid={`button-confirm-delete-${product.id}`}
+                          >
+                            {deleteMutation.isPending ? "Deleting..." : "Delete"}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -318,7 +484,7 @@ export function MyProductsPage() {
               <Package className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-xl font-semibold mb-2">No services yet</h3>
               <p className="text-muted-foreground mb-6">Create your first service to start selling on Tiro</p>
-              <Button className="neon-glow-primary" onClick={() => setIsAddDialogOpen(true)}>
+              <Button className="neon-glow-primary" onClick={() => setIsAddDialogOpen(true)} data-testid="button-add-first-product">
                 <Plus className="w-4 h-4 mr-2" />
                 Add Your First Service
               </Button>

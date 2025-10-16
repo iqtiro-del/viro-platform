@@ -4,50 +4,22 @@ import { Input } from "@/components/ui/input";
 import { Search, TrendingUp, Users, ShoppingBag, Star, ArrowRight, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/lib/auth-context";
+import type { ProductWithSeller } from "@shared/schema";
 import heroImage from "@assets/generated_images/Digital_marketplace_neon_hero_background_e0f69832.png";
 
 export function Dashboard() {
-  // Mock data - will be replaced with real data in integration phase
+  const { user } = useAuth();
+  const { data: products = [], isLoading } = useQuery<ProductWithSeller[]>({ 
+    queryKey: ['/api/products'] 
+  });
+
   const stats = [
     { label: "Active Services", value: "1,234", icon: ShoppingBag, trend: "+12%" },
     { label: "Verified Sellers", value: "567", icon: Users, trend: "+8%" },
     { label: "Total Sales", value: "$45.2K", icon: TrendingUp, trend: "+23%" },
-  ];
-
-  const featuredServices = [
-    {
-      id: "1",
-      title: "Professional Logo Design",
-      price: "$50",
-      seller: "Ahmad Hassan",
-      sellerAvatar: "",
-      rating: 4.9,
-      reviews: 124,
-      isVerified: true,
-      category: "Design"
-    },
-    {
-      id: "2",
-      title: "SEO Optimization Package",
-      price: "$120",
-      seller: "Sara Mohamed",
-      sellerAvatar: "",
-      rating: 5.0,
-      reviews: 89,
-      isVerified: true,
-      category: "Marketing"
-    },
-    {
-      id: "3",
-      title: "React Web Development",
-      price: "$200",
-      seller: "Omar Ali",
-      sellerAvatar: "",
-      rating: 4.8,
-      reviews: 156,
-      isVerified: true,
-      category: "Development"
-    },
   ];
 
   return (
@@ -135,63 +107,85 @@ export function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredServices.map((service) => (
-            <Card 
-              key={service.id} 
-              className="glass-morphism border-border/30 hover:border-primary/50 transition-all hover-elevate group overflow-hidden"
-              data-testid={`card-service-${service.id}`}
-            >
-              {/* Service Image Placeholder */}
-              <div className="h-48 bg-gradient-to-br from-primary/20 to-secondary/20 relative overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <ShoppingBag className="w-16 h-16 text-primary/40" />
-                </div>
-                <Badge className="absolute top-3 right-3 bg-primary/90 border-primary neon-glow-primary">
-                  {service.category}
-                </Badge>
-              </div>
-
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg line-clamp-1">{service.title}</CardTitle>
-                <CardDescription className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Avatar className="w-6 h-6 border border-primary/30">
-                      <AvatarImage src={service.sellerAvatar} />
-                      <AvatarFallback className="text-xs bg-primary/20">
-                        {service.seller.substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm">{service.seller}</span>
-                    {service.isVerified && (
-                      <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center neon-glow-success">
-                        <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                    )}
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, index) => (
+              <Card key={index} className="glass-morphism border-border/30 overflow-hidden">
+                <Skeleton className="h-48 rounded-none" />
+                <CardHeader className="pb-3">
+                  <Skeleton className="h-6 w-3/4" />
+                  <div className="flex items-center space-x-2 mt-2">
+                    <Skeleton className="w-6 h-6 rounded-full" />
+                    <Skeleton className="h-4 w-24" />
                   </div>
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1">
-                    <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                    <span className="font-semibold">{service.rating}</span>
-                    <span className="text-muted-foreground text-sm">({service.reviews})</span>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between mb-4">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-6 w-16" />
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-muted-foreground">Starting at</p>
-                    <p className="text-xl font-bold text-primary neon-text-glow">{service.price}</p>
+                  <Skeleton className="h-10 w-full" />
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            products.map((product) => (
+              <Card 
+                key={product.id} 
+                className="glass-morphism border-border/30 hover:border-primary/50 transition-all hover-elevate group overflow-hidden"
+                data-testid={`card-service-${product.id}`}
+              >
+                {/* Service Image Placeholder */}
+                <div className="h-48 bg-gradient-to-br from-primary/20 to-secondary/20 relative overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <ShoppingBag className="w-16 h-16 text-primary/40" />
                   </div>
+                  <Badge className="absolute top-3 right-3 bg-primary/90 border-primary neon-glow-primary">
+                    {product.category}
+                  </Badge>
                 </div>
 
-                <Button className="w-full mt-4 neon-glow-secondary" data-testid={`button-view-service-${service.id}`}>
-                  View Details
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg line-clamp-1">{product.title}</CardTitle>
+                  <CardDescription className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Avatar className="w-6 h-6 border border-primary/30">
+                        <AvatarImage src={product.seller.avatarUrl} />
+                        <AvatarFallback className="text-xs bg-primary/20">
+                          {product.seller.fullName.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm">{product.seller.fullName}</span>
+                      {product.seller.isVerified && (
+                        <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center neon-glow-success">
+                          <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-1">
+                      <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
+                      <span className="font-semibold">{product.seller.rating || "0.0"}</span>
+                      <span className="text-muted-foreground text-sm">({product.seller.totalReviews || 0})</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">Starting at</p>
+                      <p className="text-xl font-bold text-primary neon-text-glow">${product.price}</p>
+                    </div>
+                  </div>
+
+                  <Button className="w-full mt-4 neon-glow-secondary" data-testid={`button-view-service-${product.id}`}>
+                    View Details
+                  </Button>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
       </section>
 

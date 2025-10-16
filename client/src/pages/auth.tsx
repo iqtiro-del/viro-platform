@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth-context";
 import { Loader2 } from "lucide-react";
 
 const loginSchema = z.object({
@@ -23,12 +24,12 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 interface AuthPageProps {
   mode: "login" | "register";
-  onSuccess?: (user: any) => void;
 }
 
-export function AuthPage({ mode, onSuccess }: AuthPageProps) {
+export function AuthPage({ mode }: AuthPageProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { login, register } = useAuth();
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -52,18 +53,29 @@ export function AuthPage({ mode, onSuccess }: AuthPageProps) {
   const onSubmit = async (data: LoginFormData | RegisterFormData) => {
     setIsLoading(true);
     try {
-      // This will be connected to backend in integration phase
-      console.log("Auth data:", data);
-      toast({
-        title: mode === "login" ? "Login successful!" : "Account created!",
-        description: mode === "login" ? "Welcome back to Tiro" : "Welcome to Tiro platform",
-      });
-      onSuccess?.(data);
-    } catch (error) {
+      if (mode === "login") {
+        await login(data.username, data.password);
+        toast({
+          title: "Login successful!",
+          description: "Welcome back to Tiro",
+        });
+      } else {
+        const registerData = data as RegisterFormData;
+        await register({
+          username: registerData.username,
+          password: registerData.password,
+          fullName: registerData.fullName,
+        });
+        toast({
+          title: "Account created!",
+          description: "Welcome to Tiro platform",
+        });
+      }
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: error.message || "Something went wrong. Please try again.",
       });
     } finally {
       setIsLoading(false);

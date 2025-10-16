@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Search, 
   Star, 
@@ -27,11 +29,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import type { ProductWithSeller } from "@shared/schema";
 
 export function ServicesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [priceRange, setPriceRange] = useState<string>("all");
+
+  const { data: products = [], isLoading } = useQuery<ProductWithSeller[]>({ 
+    queryKey: ['/api/products'] 
+  });
 
   const categories = [
     "All Categories",
@@ -50,20 +57,6 @@ export function ServicesPage() {
     { label: "$100 - $200", value: "100-200" },
     { label: "Over $200", value: "200+" },
   ];
-
-  // Mock services data
-  const services = Array.from({ length: 9 }, (_, i) => ({
-    id: `${i + 1}`,
-    title: `Professional Service ${i + 1}`,
-    description: "High-quality service with quick delivery and excellent support",
-    price: `$${(i + 1) * 25}`,
-    seller: `Seller ${i + 1}`,
-    sellerAvatar: "",
-    rating: (4 + Math.random()).toFixed(1),
-    reviews: Math.floor(Math.random() * 200) + 20,
-    isVerified: i % 2 === 0,
-    category: categories[Math.floor(Math.random() * (categories.length - 1)) + 1],
-  }));
 
   const FilterContent = () => (
     <div className="space-y-6">
@@ -202,75 +195,103 @@ export function ServicesPage() {
 
           {/* Services Grid */}
           <div className="lg:col-span-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {services.map((service) => (
-                <Card 
-                  key={service.id}
-                  className="glass-morphism border-border/30 hover:border-primary/50 transition-all hover-elevate group"
-                  data-testid={`card-service-${service.id}`}
-                >
-                  {/* Service Image */}
-                  <div className="h-40 bg-gradient-to-br from-primary/20 to-secondary/20 relative overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <ShoppingBag className="w-12 h-12 text-primary/40" />
-                    </div>
-                    <Badge className="absolute top-2 right-2 bg-primary/90 neon-glow-primary">
-                      {service.category}
-                    </Badge>
-                  </div>
-
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base line-clamp-1">{service.title}</CardTitle>
-                    <CardDescription className="flex items-center space-x-2 text-sm">
-                      <Avatar className="w-5 h-5 border border-primary/30">
-                        <AvatarImage src={service.sellerAvatar} />
-                        <AvatarFallback className="text-xs bg-primary/20">
-                          {service.seller.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span>{service.seller}</span>
-                      {service.isVerified && (
-                        <div className="w-3.5 h-3.5 bg-green-500 rounded-full flex items-center justify-center neon-glow-success">
-                          <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                      )}
-                    </CardDescription>
-                  </CardHeader>
-
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                      {service.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-1">
-                        <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
-                        <span className="text-sm font-semibold">{service.rating}</span>
-                        <span className="text-xs text-muted-foreground">({service.reviews})</span>
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Card key={i} className="glass-morphism border-border/30">
+                    <Skeleton className="h-40 w-full" />
+                    <CardHeader className="pb-3">
+                      <Skeleton className="h-5 w-3/4" />
+                      <div className="flex items-center space-x-2 mt-2">
+                        <Skeleton className="h-5 w-5 rounded-full" />
+                        <Skeleton className="h-4 w-20" />
                       </div>
-                      <p className="text-lg font-bold text-primary neon-text-glow">{service.price}</p>
+                    </CardHeader>
+                    <CardContent>
+                      <Skeleton className="h-4 w-full mb-2" />
+                      <Skeleton className="h-4 w-2/3 mb-4" />
+                      <div className="flex items-center justify-between mb-3">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-6 w-16" />
+                      </div>
+                      <Skeleton className="h-9 w-full" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map((product) => (
+                  <Card 
+                    key={product.id}
+                    className="glass-morphism border-border/30 hover:border-primary/50 transition-all hover-elevate group"
+                    data-testid={`card-product-${product.id}`}
+                  >
+                    {/* Service Image */}
+                    <div className="h-40 bg-gradient-to-br from-primary/20 to-secondary/20 relative overflow-hidden">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <ShoppingBag className="w-12 h-12 text-primary/40" />
+                      </div>
+                      <Badge className="absolute top-2 right-2 bg-primary/90 neon-glow-primary">
+                        {product.category}
+                      </Badge>
                     </div>
 
-                    <Button 
-                      className="w-full neon-glow-secondary" 
-                      size="sm"
-                      data-testid={`button-view-${service.id}`}
-                    >
-                      View Details
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base line-clamp-1">{product.title}</CardTitle>
+                      <CardDescription className="flex items-center space-x-2 text-sm">
+                        <Avatar className="w-5 h-5 border border-primary/30">
+                          <AvatarImage src={product.seller.avatarUrl} />
+                          <AvatarFallback className="text-xs bg-primary/20">
+                            {product.seller.username.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span>{product.seller.username}</span>
+                        {product.seller.isVerified && (
+                          <div className="w-3.5 h-3.5 bg-green-500 rounded-full flex items-center justify-center neon-glow-success">
+                            <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                      </CardDescription>
+                    </CardHeader>
+
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                        {product.description}
+                      </p>
+                      
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-1">
+                          <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
+                          <span className="text-sm font-semibold">{product.seller.rating || "0.00"}</span>
+                          <span className="text-xs text-muted-foreground">({product.seller.totalReviews || 0})</span>
+                        </div>
+                        <p className="text-lg font-bold text-primary neon-text-glow">${product.price}</p>
+                      </div>
+
+                      <Button 
+                        className="w-full neon-glow-secondary" 
+                        size="sm"
+                        data-testid={`button-view-${product.id}`}
+                      >
+                        View Details
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
 
             {/* Load More */}
-            <div className="mt-8 text-center">
-              <Button variant="outline" size="lg" className="border-primary/30 hover:border-primary neon-glow-primary" data-testid="button-load-more">
-                Load More Services
-              </Button>
-            </div>
+            {!isLoading && products.length > 0 && (
+              <div className="mt-8 text-center">
+                <Button variant="outline" size="lg" className="border-primary/30 hover:border-primary neon-glow-primary" data-testid="button-load-more">
+                  Load More Services
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
