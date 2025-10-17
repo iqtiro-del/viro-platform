@@ -9,9 +9,11 @@ import {
   User,
   LogOut,
   Sun,
-  Moon
+  Moon,
+  Languages
 } from "lucide-react";
 import { useTheme } from "./theme-provider";
+import { useLanguage } from "@/lib/language-context";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +27,7 @@ interface NavbarProps {
     id: string;
     username: string;
     fullName: string;
-    avatarUrl: string;
+    avatarUrl: string | null;
     isVerified: boolean;
   } | null;
   onLogout?: () => void;
@@ -34,12 +36,13 @@ interface NavbarProps {
 export function Navbar({ user, onLogout }: NavbarProps) {
   const [location] = useLocation();
   const { theme, setTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
 
   const navItems = user ? [
-    { icon: ShoppingBag, label: "Services", path: "/services" },
-    { icon: Wallet, label: "Wallet", path: "/wallet" },
-    { icon: Package, label: "My Products", path: "/my-products" },
-    { icon: Megaphone, label: "Promote", path: "/promote" },
+    { icon: ShoppingBag, label: t("nav.services"), path: "/services" },
+    { icon: Wallet, label: t("nav.wallet"), path: "/wallet" },
+    { icon: Package, label: t("nav.myProducts"), path: "/my-products" },
+    { icon: Megaphone, label: t("nav.promote"), path: "/promote" },
   ] : [];
 
   return (
@@ -47,11 +50,11 @@ export function Navbar({ user, onLogout }: NavbarProps) {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/">
-          <a className="flex items-center space-x-2 hover-elevate rounded-lg px-3 py-2 transition-all" data-testid="link-home">
+          <div className="flex items-center space-x-2 hover-elevate rounded-lg px-3 py-2 transition-all cursor-pointer" data-testid="link-home">
             <h1 className="text-2xl font-accent font-bold neon-text-glow tracking-tight">
               TIRO
             </h1>
-          </a>
+          </div>
         </Link>
 
         {/* Navigation Links - Desktop */}
@@ -62,16 +65,14 @@ export function Navbar({ user, onLogout }: NavbarProps) {
               const isActive = location === item.path;
               return (
                 <Link key={item.path} href={item.path}>
-                  <a>
-                    <Button
-                      variant={isActive ? "default" : "ghost"}
-                      className={isActive ? "neon-glow-primary" : ""}
-                      data-testid={`link-${item.label.toLowerCase().replace(' ', '-')}`}
-                    >
-                      <Icon className="w-4 h-4 mr-2" />
-                      {item.label}
-                    </Button>
-                  </a>
+                  <Button
+                    variant={isActive ? "default" : "ghost"}
+                    className={isActive ? "neon-glow-primary" : ""}
+                    data-testid={`link-${item.label.toLowerCase().replace(' ', '-')}`}
+                  >
+                    <Icon className="w-4 h-4 mr-2" />
+                    {item.label}
+                  </Button>
                 </Link>
               );
             })}
@@ -79,7 +80,21 @@ export function Navbar({ user, onLogout }: NavbarProps) {
         )}
 
         {/* Right Side - User Menu or Auth Buttons */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-2">
+          {/* Language Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setLanguage(language === "en" ? "ar" : "en")}
+            data-testid="button-language-toggle"
+            className="relative"
+          >
+            <Languages className="w-5 h-5" />
+            <span className="absolute -bottom-0.5 text-[10px] font-bold text-primary">
+              {language.toUpperCase()}
+            </span>
+          </Button>
+
           {/* Theme Toggle */}
           <Button
             variant="ghost"
@@ -99,7 +114,7 @@ export function Navbar({ user, onLogout }: NavbarProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full" data-testid="button-user-menu">
                   <Avatar className="h-10 w-10 border-2 border-primary neon-glow-primary">
-                    <AvatarImage src={user.avatarUrl} alt={user.fullName} />
+                    <AvatarImage src={user.avatarUrl || undefined} alt={user.fullName} />
                     <AvatarFallback className="bg-primary/20 text-primary font-semibold">
                       {user.fullName.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
@@ -122,31 +137,27 @@ export function Navbar({ user, onLogout }: NavbarProps) {
                 <Link href="/profile">
                   <DropdownMenuItem data-testid="link-profile">
                     <User className="w-4 h-4 mr-2" />
-                    Profile
+                    {t("nav.profile")}
                   </DropdownMenuItem>
                 </Link>
                 <DropdownMenuSeparator className="bg-border/50" />
                 <DropdownMenuItem onClick={onLogout} data-testid="button-logout">
                   <LogOut className="w-4 h-4 mr-2" />
-                  Logout
+                  {t("nav.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <Link href="/login">
-                <a>
-                  <Button variant="ghost" data-testid="button-login">
-                    Login
-                  </Button>
-                </a>
+                <Button variant="ghost" data-testid="button-login">
+                  {t("nav.login")}
+                </Button>
               </Link>
               <Link href="/register">
-                <a>
-                  <Button variant="default" className="neon-glow-primary" data-testid="button-register">
-                    Sign Up
-                  </Button>
-                </a>
+                <Button variant="default" className="neon-glow-primary" data-testid="button-register">
+                  {t("nav.signup")}
+                </Button>
               </Link>
             </div>
           )}
@@ -162,12 +173,12 @@ export function Navbar({ user, onLogout }: NavbarProps) {
               const isActive = location === item.path;
               return (
                 <Link key={item.path} href={item.path}>
-                  <a className="flex flex-col items-center justify-center flex-1 h-full hover-elevate transition-all">
+                  <div className="flex flex-col items-center justify-center flex-1 h-full hover-elevate transition-all cursor-pointer">
                     <Icon className={`w-5 h-5 ${isActive ? 'text-primary neon-glow-primary' : 'text-muted-foreground'}`} />
                     <span className={`text-xs mt-1 ${isActive ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
                       {item.label}
                     </span>
-                  </a>
+                  </div>
                 </Link>
               );
             })}

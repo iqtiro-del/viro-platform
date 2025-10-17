@@ -7,11 +7,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
+import { useLanguage } from "@/lib/language-context";
 import type { ProductWithSeller } from "@shared/schema";
 import heroImage from "@assets/generated_images/Digital_marketplace_neon_hero_background_e0f69832.png";
 
 export function Dashboard() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { data: products = [], isLoading } = useQuery<ProductWithSeller[]>({ 
     queryKey: ['/api/products'] 
   });
@@ -21,9 +23,9 @@ export function Dashboard() {
   });
 
   const stats = [
-    { label: "Active Services", value: statsData?.activeServices.toString() || "0", icon: ShoppingBag, trend: "+12%" },
-    { label: "Verified Sellers", value: statsData?.verifiedSellers.toString() || "0", icon: Users, trend: "+8%" },
-    { label: "Total Sales", value: `$${statsData?.totalSales || "0"}`, icon: TrendingUp, trend: "+23%" },
+    { label: t("home.stats.activeServices"), value: statsData?.activeServices.toString() || "0", icon: ShoppingBag, trend: "+12%" },
+    { label: t("home.stats.verifiedSellers"), value: statsData?.verifiedSellers.toString() || "0", icon: Users, trend: "+8%" },
+    { label: t("home.stats.totalSales"), value: `$${statsData?.totalSales || "0"}`, icon: TrendingUp, trend: "+23%" },
   ];
 
   return (
@@ -45,13 +47,13 @@ export function Dashboard() {
         {/* Hero Content */}
         <div className="relative z-10 container mx-auto px-4 text-center">
           <h1 className="text-5xl md:text-7xl font-accent font-bold mb-6 neon-text-glow tracking-tight">
-            TIRO
+            {t("home.title")}
           </h1>
           <p className="text-xl md:text-2xl text-foreground/90 mb-8 max-w-3xl mx-auto">
-            Iraq's Premier Digital Services Marketplace
+            {t("home.subtitle")}
           </p>
           <p className="text-base md:text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
-            Connect with verified sellers, discover quality services, and grow your digital business
+            {t("home.description")}
           </p>
 
           {/* Search Bar */}
@@ -59,7 +61,7 @@ export function Dashboard() {
             <div className="relative glass-morphism-strong border border-primary/30 rounded-lg overflow-hidden neon-glow-primary">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input 
-                placeholder="Search for services..." 
+                placeholder={t("home.search.placeholder")} 
                 className="pl-12 pr-4 h-14 bg-transparent border-0 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
                 data-testid="input-search"
               />
@@ -68,7 +70,7 @@ export function Dashboard() {
                 data-testid="button-search"
               >
                 <Zap className="w-4 h-4 mr-2" />
-                Search
+                {t("home.search.button")}
               </Button>
             </div>
           </div>
@@ -101,11 +103,11 @@ export function Dashboard() {
       <section className="container mx-auto px-4 py-16">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-foreground mb-2">Featured Services</h2>
-            <p className="text-muted-foreground">Top-rated services from verified sellers</p>
+            <h2 className="text-3xl font-bold text-foreground mb-2">{t("home.featuredServices")}</h2>
+            <p className="text-muted-foreground">{t("home.featuredServices.subtitle")}</p>
           </div>
           <Button variant="outline" className="border-primary/30 hover:border-primary neon-glow-primary" data-testid="button-view-all">
-            View All
+            {t("home.viewAll")}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
@@ -153,7 +155,7 @@ export function Dashboard() {
                   <CardDescription className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Avatar className="w-6 h-6 border border-primary/30">
-                        <AvatarImage src={product.seller.avatarUrl} />
+                        <AvatarImage src={product.seller.avatarUrl || undefined} />
                         <AvatarFallback className="text-xs bg-primary/20">
                           {product.seller.fullName.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
@@ -178,13 +180,13 @@ export function Dashboard() {
                       <span className="text-muted-foreground text-sm">({product.seller.totalReviews || 0})</span>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-muted-foreground">Starting at</p>
+                      <p className="text-sm text-muted-foreground">{t("home.startingAt")}</p>
                       <p className="text-xl font-bold text-primary neon-text-glow">${product.price}</p>
                     </div>
                   </div>
 
                   <Button className="w-full mt-4 neon-glow-secondary" data-testid={`button-view-service-${product.id}`}>
-                    View Details
+                    {t("home.viewDetails")}
                   </Button>
                 </CardContent>
               </Card>
@@ -200,14 +202,14 @@ export function Dashboard() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
             <div className="relative z-10 text-center max-w-2xl mx-auto">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Start Selling Your Services Today
+                {t("home.cta.title")}
               </h2>
               <p className="text-muted-foreground mb-8">
-                Join thousands of sellers on Tiro and reach customers across Iraq
+                {t("home.cta.description")}
               </p>
               <Button size="lg" className="neon-glow-primary" data-testid="button-start-selling">
                 <Zap className="w-5 h-5 mr-2" />
-                Start Selling Now
+                {t("home.cta.getStarted")}
               </Button>
             </div>
           </div>
