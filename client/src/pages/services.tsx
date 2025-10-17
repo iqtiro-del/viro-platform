@@ -289,7 +289,7 @@ export function ServicesPage() {
                       <CardTitle className="text-base line-clamp-1">{product.title}</CardTitle>
                       <CardDescription className="flex items-center space-x-2 text-sm">
                         <Avatar className="w-5 h-5 border border-primary/30">
-                          <AvatarImage src={product.seller.avatarUrl} />
+                          <AvatarImage src={product.seller.avatarUrl || undefined} />
                           <AvatarFallback className="text-xs bg-primary/20">
                             {product.seller.username.substring(0, 2).toUpperCase()}
                           </AvatarFallback>
