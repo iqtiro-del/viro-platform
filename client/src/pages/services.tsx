@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/dialog";
 import type { ProductWithSeller } from "@shared/schema";
 import { useAuth } from "@/lib/auth-context";
+import { useLanguage } from "@/lib/language-context";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -49,10 +50,35 @@ export function ServicesPage() {
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
 
   const { user, setUser } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
 
   const { data: products = [], isLoading } = useQuery<ProductWithSeller[]>({ 
     queryKey: ['/api/products'] 
+  });
+
+  // Filter products based on search, category, and price range
+  const filteredProducts = products.filter((product) => {
+    // Search filter
+    if (searchQuery && !product.title.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
+    }
+    
+    // Category filter
+    if (selectedCategory !== "all" && product.category !== selectedCategory) {
+      return false;
+    }
+    
+    // Price filter
+    if (priceRange !== "all") {
+      const price = parseFloat(product.price);
+      if (priceRange === "0-50" && price >= 50) return false;
+      if (priceRange === "50-100" && (price < 50 || price >= 100)) return false;
+      if (priceRange === "100-200" && (price < 100 || price >= 200)) return false;
+      if (priceRange === "200+" && price < 200) return false;
+    }
+    
+    return true;
   });
 
   const purchaseMutation = useMutation({
@@ -64,7 +90,7 @@ export function ServicesPage() {
       });
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || "Purchase failed");
+        throw new Error(error.error || t("services.purchaseError"));
       }
       return response.json();
     },
@@ -73,8 +99,8 @@ export function ServicesPage() {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
       queryClient.invalidateQueries({ queryKey: ['/api/transactions', user?.id] });
       toast({
-        title: "Purchase Successful!",
-        description: `You have successfully purchased "${selectedProduct?.title}"`,
+        title: t("services.purchaseSuccess"),
+        description: `${t("services.purchasedProduct")} "${selectedProduct?.title}"`,
       });
       setPurchaseDialogOpen(false);
       setSelectedProduct(null);
@@ -82,42 +108,42 @@ export function ServicesPage() {
     onError: (error: any) => {
       toast({
         variant: "destructive",
-        title: "Purchase Failed",
-        description: error.message || "Failed to complete purchase",
+        title: t("services.purchaseFailed"),
+        description: error.message || t("services.purchaseError"),
       });
     }
   });
 
   const categories = [
-    "All Categories",
-    "Design",
-    "Development",
-    "Marketing",
-    "Writing",
-    "Video & Animation",
-    "Music & Audio"
+    { value: "all", label: t("services.allCategories") },
+    { value: "Design", label: t("services.design") },
+    { value: "Development", label: t("services.development") },
+    { value: "Marketing", label: t("services.marketing") },
+    { value: "Writing", label: t("services.writing") },
+    { value: "Video & Animation", label: t("services.videoAnimation") },
+    { value: "Music & Audio", label: t("services.musicAudio") },
   ];
 
   const priceRanges = [
-    { label: "All Prices", value: "all" },
-    { label: "Under $50", value: "0-50" },
-    { label: "$50 - $100", value: "50-100" },
-    { label: "$100 - $200", value: "100-200" },
-    { label: "Over $200", value: "200+" },
+    { label: t("services.allPrices"), value: "all" },
+    { label: t("services.under50"), value: "0-50" },
+    { label: t("services.50to100"), value: "50-100" },
+    { label: t("services.100to200"), value: "100-200" },
+    { label: t("services.over200"), value: "200+" },
   ];
 
   const FilterContent = () => (
     <div className="space-y-6">
       <div>
-        <label className="text-sm font-medium mb-3 block">Category</label>
+        <label className="text-sm font-medium mb-3 block">{t("services.category")}</label>
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
           <SelectTrigger className="glass-morphism border-border/50" data-testid="select-category">
-            <SelectValue placeholder="Select category" />
+            <SelectValue placeholder={t("services.selectCategory")} />
           </SelectTrigger>
           <SelectContent className="glass-morphism-strong border-border/50">
-            {categories.map((cat, index) => (
-              <SelectItem key={index} value={cat.toLowerCase().replace(' ', '-')}>
-                {cat}
+            {categories.map((cat) => (
+              <SelectItem key={cat.value} value={cat.value}>
+                {cat.label}
               </SelectItem>
             ))}
           </SelectContent>
@@ -125,10 +151,10 @@ export function ServicesPage() {
       </div>
 
       <div>
-        <label className="text-sm font-medium mb-3 block">Price Range</label>
+        <label className="text-sm font-medium mb-3 block">{t("services.priceRange")}</label>
         <Select value={priceRange} onValueChange={setPriceRange}>
           <SelectTrigger className="glass-morphism border-border/50" data-testid="select-price">
-            <SelectValue placeholder="Select price range" />
+            <SelectValue placeholder={t("services.selectPriceRange")} />
           </SelectTrigger>
           <SelectContent className="glass-morphism-strong border-border/50">
             {priceRanges.map((range) => (
@@ -151,7 +177,7 @@ export function ServicesPage() {
         data-testid="button-clear-filters"
       >
         <X className="w-4 h-4 mr-2" />
-        Clear Filters
+        {t("services.clearFilters")}
       </Button>
     </div>
   );
@@ -161,8 +187,8 @@ export function ServicesPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Discover Services</h1>
-          <p className="text-muted-foreground">Browse and find the perfect service for your needs</p>
+          <h1 className="text-4xl font-bold text-foreground mb-2">{t("services.title")}</h1>
+          <p className="text-muted-foreground">{t("services.subtitle")}</p>
         </div>
 
         {/* Search and Filter Bar */}
@@ -171,7 +197,7 @@ export function ServicesPage() {
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
-                placeholder="Search services..."
+                placeholder={t("services.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-12 glass-morphism border-border/50 focus:border-primary"
@@ -188,9 +214,9 @@ export function ServicesPage() {
               </SheetTrigger>
               <SheetContent className="glass-morphism-strong border-l border-border/50">
                 <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
+                  <SheetTitle>{t("services.filters")}</SheetTitle>
                   <SheetDescription>
-                    Filter services by category and price
+                    {t("services.filterDescription")}
                   </SheetDescription>
                 </SheetHeader>
                 <div className="mt-6">
@@ -205,19 +231,19 @@ export function ServicesPage() {
             <div className="flex flex-wrap gap-2">
               {searchQuery && (
                 <Badge variant="secondary" className="gap-1">
-                  Search: {searchQuery}
+                  {t("services.search")}: {searchQuery}
                   <X className="w-3 h-3 cursor-pointer" onClick={() => setSearchQuery("")} />
                 </Badge>
               )}
               {selectedCategory !== "all" && (
                 <Badge variant="secondary" className="gap-1">
-                  Category: {selectedCategory}
+                  {t("services.category")}: {categories.find(c => c.value === selectedCategory)?.label || selectedCategory}
                   <X className="w-3 h-3 cursor-pointer" onClick={() => setSelectedCategory("all")} />
                 </Badge>
               )}
               {priceRange !== "all" && (
                 <Badge variant="secondary" className="gap-1">
-                  Price: {priceRanges.find(r => r.value === priceRange)?.label}
+                  {t("services.priceLabel")}: {priceRanges.find(r => r.value === priceRange)?.label}
                   <X className="w-3 h-3 cursor-pointer" onClick={() => setPriceRange("all")} />
                 </Badge>
               )}
@@ -232,7 +258,7 @@ export function ServicesPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Filter className="w-5 h-5" />
-                  Filters
+                  {t("services.filters")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -267,9 +293,15 @@ export function ServicesPage() {
                   </Card>
                 ))}
               </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <ShoppingBag className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-xl font-semibold text-foreground mb-2">{t("services.noResults")}</h3>
+                <p className="text-muted-foreground">{t("services.tryDifferent")}</p>
+              </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                   <Card 
                     key={product.id}
                     className="glass-morphism border-border/30 hover:border-primary/50 transition-all hover-elevate group"
@@ -329,7 +361,7 @@ export function ServicesPage() {
                         disabled={!user || user.id === product.sellerId}
                         data-testid={`button-buy-${product.id}`}
                       >
-                        {!user ? "Login to Buy" : (user.id === product.sellerId) ? "Your Product" : "Buy Now"}
+                        {!user ? t("services.loginToBuy") : (user.id === product.sellerId) ? t("services.yourProduct") : t("services.buyNow")}
                       </Button>
                     </CardContent>
                   </Card>
@@ -341,7 +373,7 @@ export function ServicesPage() {
             {!isLoading && products.length > 0 && (
               <div className="mt-8 text-center">
                 <Button variant="outline" size="lg" className="border-primary/30 hover:border-primary neon-glow-primary" data-testid="button-load-more">
-                  Load More Services
+                  {t("services.loadMore")}
                 </Button>
               </div>
             )}
@@ -353,9 +385,9 @@ export function ServicesPage() {
       <Dialog open={purchaseDialogOpen} onOpenChange={setPurchaseDialogOpen}>
         <DialogContent className="glass-morphism-strong border-border/50">
           <DialogHeader>
-            <DialogTitle>Confirm Purchase</DialogTitle>
+            <DialogTitle>{t("services.confirmPurchase")}</DialogTitle>
             <DialogDescription>
-              Review your purchase details before confirming
+              {t("services.reviewDetails")}
             </DialogDescription>
           </DialogHeader>
           
@@ -363,23 +395,23 @@ export function ServicesPage() {
             <div className="space-y-4 pt-4">
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Service:</span>
+                  <span className="text-muted-foreground">{t("services.service")}:</span>
                   <span className="font-medium">{selectedProduct.title}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Seller:</span>
+                  <span className="text-muted-foreground">{t("services.seller")}:</span>
                   <span className="font-medium">{selectedProduct.seller.username}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Price:</span>
+                  <span className="text-muted-foreground">{t("services.price")}:</span>
                   <span className="font-bold text-primary">${selectedProduct.price}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Your Balance:</span>
+                  <span className="text-muted-foreground">{t("services.yourBalance")}:</span>
                   <span className="font-medium">${user?.balance}</span>
                 </div>
                 <div className="flex justify-between pt-2 border-t border-border/50">
-                  <span className="text-muted-foreground">Balance After Purchase:</span>
+                  <span className="text-muted-foreground">{t("services.balanceAfter")}:</span>
                   <span className="font-bold">
                     ${(parseFloat(user?.balance || "0") - parseFloat(selectedProduct.price)).toFixed(2)}
                   </span>
@@ -394,7 +426,7 @@ export function ServicesPage() {
                   disabled={purchaseMutation.isPending}
                   data-testid="button-cancel-purchase"
                 >
-                  Cancel
+                  {t("services.cancel")}
                 </Button>
                 <Button 
                   className="flex-1 neon-glow-primary" 
@@ -402,7 +434,7 @@ export function ServicesPage() {
                   disabled={purchaseMutation.isPending}
                   data-testid="button-confirm-purchase"
                 >
-                  {purchaseMutation.isPending ? "Processing..." : "Confirm Purchase"}
+                  {purchaseMutation.isPending ? t("services.processing") : t("services.confirm")}
                 </Button>
               </div>
             </div>

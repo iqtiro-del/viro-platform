@@ -53,6 +53,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useAuth } from "@/lib/auth-context";
+import { useLanguage } from "@/lib/language-context";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { type Product, type InsertProduct, insertProductSchema } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
@@ -61,6 +62,7 @@ export function MyProductsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
 
   // Fetch user's products

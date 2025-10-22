@@ -20,12 +20,14 @@ import {
   TrendingUp
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { useLanguage } from "@/lib/language-context";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
 
 export function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const { data: userData, isLoading } = useQuery<User>({ 
     queryKey: ['/api/users', user?.id], 

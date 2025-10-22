@@ -30,6 +30,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
+import { useLanguage } from "@/lib/language-context";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Transaction } from "@shared/schema";
@@ -37,6 +38,7 @@ import { useState } from "react";
 
 export function WalletPage() {
   const { user, setUser } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [depositAmount, setDepositAmount] = useState("");
   const [depositMethod, setDepositMethod] = useState("");
@@ -90,8 +92,8 @@ export function WalletPage() {
       }
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
       toast({
-        title: "Deposit Successful",
-        description: `$${depositAmount} has been added to your wallet.`
+        title: t("wallet.depositSuccess"),
+        description: `$${depositAmount} ${t("wallet.addedToWallet")}`
       });
       setDepositAmount("");
       setDepositMethod("");
@@ -99,8 +101,8 @@ export function WalletPage() {
     },
     onError: (error: any) => {
       toast({
-        title: "Deposit Failed",
-        description: error.message || "Could not complete deposit",
+        title: t("wallet.depositFailed"),
+        description: error.message || t("wallet.depositError"),
         variant: "destructive"
       });
     }
@@ -121,8 +123,8 @@ export function WalletPage() {
       }
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
       toast({
-        title: "Withdrawal Successful",
-        description: `$${withdrawAmount} has been withdrawn from your wallet.`
+        title: t("wallet.withdrawSuccess"),
+        description: `$${withdrawAmount} ${t("wallet.withdrawnFrom")}`
       });
       setWithdrawAmount("");
       setWithdrawMethod("");
@@ -130,8 +132,8 @@ export function WalletPage() {
     },
     onError: (error: any) => {
       toast({
-        title: "Withdrawal Failed",
-        description: error.message || "Could not complete withdrawal",
+        title: t("wallet.withdrawFailed"),
+        description: error.message || t("wallet.withdrawError"),
         variant: "destructive"
       });
     }
@@ -151,6 +153,11 @@ export function WalletPage() {
   };
 
   const getStatusBadge = (status: string) => {
+    const statusLabels: Record<string, string> = {
+      completed: t("wallet.completed"),
+      pending: t("wallet.pending"),
+      failed: t("wallet.failed")
+    };
     const variants: Record<string, { variant: "default" | "secondary" | "outline", className: string }> = {
       completed: { variant: "default", className: "bg-green-500/20 text-green-500 border-green-500/30" },
       pending: { variant: "secondary", className: "bg-yellow-500/20 text-yellow-500 border-yellow-500/30" },
@@ -158,9 +165,10 @@ export function WalletPage() {
     };
 
     const config = variants[status] || variants.pending;
+    const label = statusLabels[status] || status;
     return (
       <Badge variant={config.variant} className={config.className}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+        {label}
       </Badge>
     );
   };
@@ -170,8 +178,8 @@ export function WalletPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">My Wallet</h1>
-          <p className="text-muted-foreground">Manage your balance and transactions</p>
+          <h1 className="text-4xl font-bold text-foreground mb-2">{t("wallet.title")}</h1>
+          <p className="text-muted-foreground">{t("wallet.subtitle")}</p>
         </div>
 
         {/* Balance Cards */}
@@ -181,7 +189,7 @@ export function WalletPage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardDescription className="text-muted-foreground">Current Balance</CardDescription>
+                  <CardDescription className="text-muted-foreground">{t("wallet.balance")}</CardDescription>
                   {isLoading ? (
                     <Skeleton className="h-14 w-48 mt-2" data-testid="skeleton-balance" />
                   ) : (
@@ -201,23 +209,23 @@ export function WalletPage() {
                   <DialogTrigger asChild>
                     <Button className="flex-1 neon-glow-secondary" data-testid="button-deposit">
                       <ArrowDownRight className="w-4 h-4 mr-2" />
-                      Deposit
+                      {t("wallet.deposit")}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="glass-morphism-strong border-border/50">
                     <DialogHeader>
-                      <DialogTitle>Deposit Funds</DialogTitle>
+                      <DialogTitle>{t("wallet.depositFunds")}</DialogTitle>
                       <DialogDescription>
-                        Add money to your Tiro wallet
+                        {t("wallet.depositDescription")}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 pt-4">
                       <div>
-                        <Label htmlFor="deposit-amount">Amount (USD)</Label>
+                        <Label htmlFor="deposit-amount">{t("wallet.amount")}</Label>
                         <Input 
                           id="deposit-amount" 
                           type="number" 
-                          placeholder="0.00"
+                          placeholder={t("wallet.amountPlaceholder")}
                           value={depositAmount}
                           onChange={(e) => setDepositAmount(e.target.value)}
                           className="glass-morphism border-border/50 mt-2"
@@ -225,15 +233,15 @@ export function WalletPage() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="payment-method">Payment Method</Label>
+                        <Label htmlFor="payment-method">{t("wallet.paymentMethod")}</Label>
                         <Select value={depositMethod} onValueChange={setDepositMethod}>
                           <SelectTrigger className="glass-morphism border-border/50 mt-2" data-testid="select-payment-method">
-                            <SelectValue placeholder="Select payment method" />
+                            <SelectValue placeholder={t("wallet.selectMethod")} />
                           </SelectTrigger>
                           <SelectContent className="glass-morphism-strong border-border/50">
-                            <SelectItem value="Zain Cash">Zain Cash</SelectItem>
-                            <SelectItem value="Al-Rafidain QiServices">Al-Rafidain QiServices</SelectItem>
-                            <SelectItem value="FIB">FIB</SelectItem>
+                            <SelectItem value="Zain Cash">{t("wallet.zainCash")}</SelectItem>
+                            <SelectItem value="Al-Rafidain QiServices">{t("wallet.alRafidain")}</SelectItem>
+                            <SelectItem value="FIB">{t("wallet.fib")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -243,7 +251,7 @@ export function WalletPage() {
                         onClick={() => depositMutation.mutate()}
                         disabled={!depositAmount || !depositMethod || depositMutation.isPending}
                       >
-                        {depositMutation.isPending ? "Processing..." : "Confirm Deposit"}
+                        {depositMutation.isPending ? t("wallet.processing") : t("wallet.confirmDeposit")}
                       </Button>
                     </div>
                   </DialogContent>
@@ -253,23 +261,23 @@ export function WalletPage() {
                   <DialogTrigger asChild>
                     <Button variant="outline" className="flex-1 border-border/50" data-testid="button-withdraw">
                       <ArrowUpRight className="w-4 h-4 mr-2" />
-                      Withdraw
+                      {t("wallet.withdraw")}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="glass-morphism-strong border-border/50">
                     <DialogHeader>
-                      <DialogTitle>Withdraw Funds</DialogTitle>
+                      <DialogTitle>{t("wallet.withdrawFunds")}</DialogTitle>
                       <DialogDescription>
-                        Withdraw money from your Tiro wallet
+                        {t("wallet.withdrawDescription")}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 pt-4">
                       <div>
-                        <Label htmlFor="withdraw-amount">Amount (USD)</Label>
+                        <Label htmlFor="withdraw-amount">{t("wallet.amount")}</Label>
                         <Input 
                           id="withdraw-amount" 
                           type="number" 
-                          placeholder="0.00"
+                          placeholder={t("wallet.amountPlaceholder")}
                           value={withdrawAmount}
                           onChange={(e) => setWithdrawAmount(e.target.value)}
                           className="glass-morphism border-border/50 mt-2"
@@ -277,15 +285,15 @@ export function WalletPage() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="withdraw-method">Withdraw To</Label>
+                        <Label htmlFor="withdraw-method">{t("wallet.withdrawTo")}</Label>
                         <Select value={withdrawMethod} onValueChange={setWithdrawMethod}>
                           <SelectTrigger className="glass-morphism border-border/50 mt-2" data-testid="select-withdraw-method">
-                            <SelectValue placeholder="Select withdrawal method" />
+                            <SelectValue placeholder={t("wallet.selectWithdrawMethod")} />
                           </SelectTrigger>
                           <SelectContent className="glass-morphism-strong border-border/50">
-                            <SelectItem value="Zain Cash">Zain Cash</SelectItem>
-                            <SelectItem value="Al-Rafidain QiServices">Al-Rafidain QiServices</SelectItem>
-                            <SelectItem value="FIB">FIB</SelectItem>
+                            <SelectItem value="Zain Cash">{t("wallet.zainCash")}</SelectItem>
+                            <SelectItem value="Al-Rafidain QiServices">{t("wallet.alRafidain")}</SelectItem>
+                            <SelectItem value="FIB">{t("wallet.fib")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -295,7 +303,7 @@ export function WalletPage() {
                         onClick={() => withdrawMutation.mutate()}
                         disabled={!withdrawAmount || !withdrawMethod || withdrawMutation.isPending}
                       >
-                        {withdrawMutation.isPending ? "Processing..." : "Confirm Withdrawal"}
+                        {withdrawMutation.isPending ? t("wallet.processing") : t("wallet.confirmWithdrawal")}
                       </Button>
                     </div>
                   </DialogContent>
@@ -307,7 +315,7 @@ export function WalletPage() {
           {/* Total Earnings */}
           <Card className="glass-morphism border-border/30">
             <CardHeader>
-              <CardDescription>Total Earnings</CardDescription>
+              <CardDescription>{t("wallet.totalEarnings")}</CardDescription>
               {isLoading ? (
                 <Skeleton className="h-9 w-36 mt-2" data-testid="skeleton-earnings" />
               ) : (
@@ -332,7 +340,7 @@ export function WalletPage() {
                       <span className="text-red-500 font-medium" data-testid="text-profit-percentage">-{walletData.profitPercentage}%</span>
                     </>
                   )}
-                  <span className="text-sm text-muted-foreground">this month</span>
+                  <span className="text-sm text-muted-foreground">{t("wallet.thisMonth")}</span>
                 </div>
               )}
             </CardContent>
@@ -342,8 +350,8 @@ export function WalletPage() {
         {/* Transaction History */}
         <Card className="glass-morphism border-border/30">
           <CardHeader>
-            <CardTitle>Transaction History</CardTitle>
-            <CardDescription>Your recent wallet activity</CardDescription>
+            <CardTitle>{t("wallet.transactions")}</CardTitle>
+            <CardDescription>{t("wallet.transactionsSubtitle")}</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -393,7 +401,7 @@ export function WalletPage() {
                         
                         <div className="flex-1">
                           <p className="font-medium text-foreground" data-testid={`text-transaction-description-${transaction.id}`}>
-                            {transaction.description || 'No description'}
+                            {transaction.description || t("wallet.noDescription")}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
                             <Clock className="w-3 h-3 text-muted-foreground" />
@@ -421,7 +429,7 @@ export function WalletPage() {
 
             <div className="mt-6 text-center">
               <Button variant="outline" className="border-border/50" data-testid="button-view-all-transactions">
-                View All Transactions
+                {t("wallet.viewAll")}
               </Button>
             </div>
           </CardContent>

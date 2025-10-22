@@ -30,12 +30,14 @@ import {
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth-context";
+import { useLanguage } from "@/lib/language-context";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Product, Promotion, InsertPromotion } from "@shared/schema";
 
 export function PromotePage() {
   const { user, setUser } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [openDialogTier, setOpenDialogTier] = useState<string | null>(null);
