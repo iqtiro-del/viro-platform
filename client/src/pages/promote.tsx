@@ -75,16 +75,16 @@ export function PromotePage() {
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'products'] });
       queryClient.invalidateQueries({ queryKey: ['/api/transactions', user?.id] });
       toast({
-        title: "Promotion Activated!",
-        description: "Your promotion has been created and is now active.",
+        title: t("promote.activationSuccess"),
+        description: t("promote.activationSuccessMessage"),
       });
       setOpenDialogTier(null);
       setSelectedProductId("");
     },
     onError: (error: Error) => {
       toast({
-        title: "Promotion Failed",
-        description: error.message || "Failed to create promotion",
+        title: t("promote.activationFailed"),
+        description: error.message || t("promote.activationError"),
         variant: "destructive",
       });
     },
@@ -93,65 +93,65 @@ export function PromotePage() {
   const promotionTiers = [
     {
       tier: "top_3" as const,
-      name: "Premium Spotlight",
+      name: t("promote.premiumSpotlight"),
       price: 5,
-      position: "Top 3",
+      position: t("promote.top3"),
       icon: Crown,
       color: "text-yellow-500",
       glowClass: "neon-glow-primary",
       duration: 7,
       benefits: [
-        "Featured in top 3 products",
-        "Maximum visibility",
-        "Highlighted with gold badge",
-        "7 days promotion",
-        "Priority in search results"
+        t("promote.benefit1Top3"),
+        t("promote.benefit2Top3"),
+        t("promote.benefit3Top3"),
+        t("promote.benefit4Top3"),
+        t("promote.benefit5Top3")
       ],
-      description: "Get maximum exposure with premium placement"
+      description: t("promote.top3Description")
     },
     {
       tier: "top_5" as const,
-      name: "Featured Position",
+      name: t("promote.featuredPosition"),
       price: 3,
-      position: "Top 5",
+      position: t("promote.top5"),
       icon: Star,
       color: "text-primary",
       glowClass: "neon-glow-secondary",
       duration: 5,
       benefits: [
-        "Featured in top 5 products",
-        "High visibility",
-        "Featured badge",
-        "5 days promotion",
-        "Boosted in search"
+        t("promote.benefit1Top5"),
+        t("promote.benefit2Top5"),
+        t("promote.benefit3Top5"),
+        t("promote.benefit4Top5"),
+        t("promote.benefit5Top5")
       ],
-      description: "Stand out with featured positioning"
+      description: t("promote.top5Description")
     },
     {
       tier: "top_10" as const,
-      name: "Visibility Boost",
+      name: t("promote.visibilityBoost"),
       price: 2,
-      position: "Top 10",
+      position: t("promote.top10"),
       icon: TrendingUp,
       color: "text-secondary",
       glowClass: "border-secondary/30",
       duration: 3,
       benefits: [
-        "Featured in top 10 products",
-        "Good visibility",
-        "Promoted badge",
-        "3 days promotion",
-        "Search ranking boost"
+        t("promote.benefit1Top10"),
+        t("promote.benefit2Top10"),
+        t("promote.benefit3Top10"),
+        t("promote.benefit4Top10"),
+        t("promote.benefit5Top10")
       ],
-      description: "Get your service noticed"
+      description: t("promote.top10Description")
     },
   ];
 
   const handleCreatePromotion = (tier: typeof promotionTiers[number]) => {
     if (!selectedProductId) {
       toast({
-        title: "Error",
-        description: "Please select a product to promote",
+        title: t("common.error"),
+        description: t("promote.selectProductError"),
         variant: "destructive",
       });
       return;
@@ -159,8 +159,8 @@ export function PromotePage() {
 
     if (!user) {
       toast({
-        title: "Error",
-        description: "You must be logged in to create a promotion",
+        title: t("common.error"),
+        description: t("promote.loginRequired"),
         variant: "destructive",
       });
       return;
@@ -197,11 +197,11 @@ export function PromotePage() {
   // Get tier display info
   const getTierInfo = (tier: string) => {
     const tierMap: Record<string, { name: string; position: string }> = {
-      top_3: { name: "Premium Spotlight", position: "Top 3" },
-      top_5: { name: "Featured Position", position: "Top 5" },
-      top_10: { name: "Visibility Boost", position: "Top 10" },
+      top_3: { name: t("promote.premiumSpotlight"), position: t("promote.top3") },
+      top_5: { name: t("promote.featuredPosition"), position: t("promote.top5") },
+      top_10: { name: t("promote.visibilityBoost"), position: t("promote.top10") },
     };
-    return tierMap[tier] || { name: "Unknown", position: "N/A" };
+    return tierMap[tier] || { name: t("common.error"), position: "N/A" };
   };
 
   return (
@@ -211,10 +211,10 @@ export function PromotePage() {
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2 flex items-center gap-3" data-testid="heading-promote">
             <Megaphone className="w-10 h-10 text-primary" />
-            Promote Your Services
+            {t("promote.title")}
           </h1>
           <p className="text-muted-foreground" data-testid="text-description">
-            Boost your visibility and reach more customers with our promotion packages
+            {t("promote.subtitle")}
           </p>
         </div>
 
@@ -246,7 +246,7 @@ export function PromotePage() {
                   <div className="mb-6">
                     <div className="flex items-baseline gap-1">
                       <span className="text-4xl font-bold text-primary neon-text-glow" data-testid={`text-price-${tier.tier}`}>${tier.price}</span>
-                      <span className="text-muted-foreground">/promotion</span>
+                      <span className="text-muted-foreground">{t("promote.perPromotion")}</span>
                     </div>
                   </div>
 
@@ -267,7 +267,7 @@ export function PromotePage() {
                         disabled={productsLoading || products.length === 0}
                       >
                         <Zap className="w-4 h-4 mr-2" />
-                        Select Plan
+                        {t("promote.selectPlan")}
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="glass-morphism-strong border-border/50">
@@ -277,16 +277,16 @@ export function PromotePage() {
                           {tier.name} - ${tier.price}
                         </DialogTitle>
                         <DialogDescription data-testid={`text-dialog-description-${tier.tier}`}>
-                          Select a product to promote with {tier.name} package
+                          {t("promote.selectPromote")} {tier.name} {t("promote.package")}
                         </DialogDescription>
                       </DialogHeader>
 
                       <div className="space-y-4 py-4">
                         <div>
-                          <Label htmlFor="product-select">Select Product</Label>
+                          <Label htmlFor="product-select">{t("promote.selectProduct")}</Label>
                           <Select value={selectedProductId} onValueChange={setSelectedProductId}>
                             <SelectTrigger className="glass-morphism border-border/50 mt-2" data-testid={`select-product-${tier.tier}`}>
-                              <SelectValue placeholder="Choose a product to promote" />
+                              <SelectValue placeholder={t("promote.chooseProduct")} />
                             </SelectTrigger>
                             <SelectContent className="glass-morphism-strong border-border/50">
                               {products.map((product) => (
@@ -300,24 +300,24 @@ export function PromotePage() {
 
                         <Card className="glass-morphism border-primary/20">
                           <CardContent className="pt-6">
-                            <h4 className="font-semibold mb-3">Promotion Summary</h4>
+                            <h4 className="font-semibold mb-3">{t("promote.promotionSummary")}</h4>
                             <div className="space-y-2 text-sm">
                               <div className="flex justify-between">
-                                <span className="text-muted-foreground">Package:</span>
+                                <span className="text-muted-foreground">{t("promote.packageLabel")}:</span>
                                 <span className="font-medium" data-testid={`text-summary-package-${tier.tier}`}>{tier.name}</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-muted-foreground">Position:</span>
+                                <span className="text-muted-foreground">{t("promote.position")}:</span>
                                 <span className="font-medium" data-testid={`text-summary-position-${tier.tier}`}>{tier.position}</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-muted-foreground">Duration:</span>
+                                <span className="text-muted-foreground">{t("promote.duration")}:</span>
                                 <span className="font-medium" data-testid={`text-summary-duration-${tier.tier}`}>
-                                  {tier.duration} days
+                                  {tier.duration} {t("promote.daysCount")}
                                 </span>
                               </div>
                               <div className="border-t border-border/50 pt-2 mt-2 flex justify-between">
-                                <span className="font-semibold">Total:</span>
+                                <span className="font-semibold">{t("promote.total")}:</span>
                                 <span className="text-xl font-bold text-primary neon-text-glow" data-testid={`text-summary-total-${tier.tier}`}>${tier.price}</span>
                               </div>
                             </div>
@@ -333,7 +333,7 @@ export function PromotePage() {
                           disabled={createPromotionMutation.isPending || !selectedProductId}
                         >
                           <Zap className="w-4 h-4 mr-2" />
-                          {createPromotionMutation.isPending ? "Creating..." : "Start Promotion"}
+                          {createPromotionMutation.isPending ? t("promote.creating") : t("promote.startPromotion")}
                         </Button>
                       </DialogFooter>
                     </DialogContent>
@@ -347,8 +347,8 @@ export function PromotePage() {
         {/* Active Promotions */}
         <Card className="glass-morphism border-border/30">
           <CardHeader>
-            <CardTitle data-testid="heading-active-promotions">Active Promotions</CardTitle>
-            <CardDescription data-testid="text-active-promotions-description">Your currently running promotion campaigns</CardDescription>
+            <CardTitle data-testid="heading-active-promotions">{t("promote.activePromotions")}</CardTitle>
+            <CardDescription data-testid="text-active-promotions-description">{t("promote.activePromotionsDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             {promotionsLoading ? (
@@ -387,10 +387,10 @@ export function PromotePage() {
                           className="bg-green-500/20 text-green-500 border-green-500/30 mb-2"
                           data-testid={`badge-status-${promotion.id}`}
                         >
-                          Active
+                          {t("promote.active")}
                         </Badge>
                         <p className="text-sm text-muted-foreground" data-testid={`text-days-remaining-${promotion.id}`}>
-                          {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} remaining
+                          {daysRemaining} {daysRemaining === 1 ? t("promote.day") : t("promote.daysRemaining")}
                         </p>
                       </div>
                     </div>
@@ -400,9 +400,9 @@ export function PromotePage() {
             ) : (
               <div className="text-center py-12" data-testid="empty-promotions">
                 <Megaphone className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <p className="text-muted-foreground" data-testid="text-no-promotions">No active promotions</p>
+                <p className="text-muted-foreground" data-testid="text-no-promotions">{t("promote.noPromotions")}</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Start promoting your services to increase visibility
+                  {t("promote.noPromotionsDescription")}
                 </p>
               </div>
             )}

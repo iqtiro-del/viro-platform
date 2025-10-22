@@ -80,14 +80,14 @@ export function MyProductsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'products'] });
       toast({
-        title: "Success",
-        description: "Service created successfully",
+        title: t("common.success"),
+        description: t("myProducts.createSuccess"),
       });
       setIsAddDialogOpen(false);
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -103,14 +103,14 @@ export function MyProductsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'products'] });
       toast({
-        title: "Success",
-        description: "Service updated successfully",
+        title: t("common.success"),
+        description: t("myProducts.updateSuccess"),
       });
       setEditingProduct(null);
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -126,20 +126,28 @@ export function MyProductsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'products'] });
       toast({
-        title: "Success",
-        description: "Service deleted successfully",
+        title: t("common.success"),
+        description: t("myProducts.deleteSuccess"),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
     },
   });
 
-  const categories = ["Design", "Development", "Marketing", "Writing", "Video & Animation", "Music & Audio"];
+  // Category mappings - value is what's stored in DB, label is translation key
+  const categories = [
+    { value: "Design", label: t("services.categories.design") },
+    { value: "Development", label: t("services.categories.development") },
+    { value: "Marketing", label: t("services.categories.marketing") },
+    { value: "Writing", label: t("services.categories.writing") },
+    { value: "Video & Animation", label: t("services.categories.videoAnimation") },
+    { value: "Music & Audio", label: t("services.categories.musicAudio") },
+  ];
 
   const ProductForm = ({ product, onClose }: { product?: Product; onClose: () => void }) => {
     const form = useForm<InsertProduct>({
@@ -179,11 +187,11 @@ export function MyProductsPage() {
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Service Title</FormLabel>
+                <FormLabel>{t("myProducts.serviceTitle")}</FormLabel>
                 <FormControl>
                   <Input 
                     {...field}
-                    placeholder="Professional Logo Design" 
+                    placeholder={t("myProducts.titlePlaceholder")}
                     className="glass-morphism border-border/50"
                     data-testid="input-product-title"
                   />
@@ -198,11 +206,11 @@ export function MyProductsPage() {
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>{t("myProducts.description")}</FormLabel>
                 <FormControl>
                   <Textarea 
                     {...field}
-                    placeholder="Describe your service in detail..." 
+                    placeholder={t("myProducts.descriptionPlaceholder")}
                     className="glass-morphism border-border/50 min-h-[100px]"
                     data-testid="input-product-description"
                   />
@@ -218,12 +226,12 @@ export function MyProductsPage() {
               name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Price (USD)</FormLabel>
+                  <FormLabel>{t("myProducts.priceUSD")}</FormLabel>
                   <FormControl>
                     <Input 
                       {...field}
                       type="number" 
-                      placeholder="50.00" 
+                      placeholder={t("myProducts.pricePlaceholder")}
                       className="glass-morphism border-border/50"
                       data-testid="input-product-price"
                     />
@@ -236,24 +244,29 @@ export function MyProductsPage() {
             <FormField
               control={form.control}
               name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="glass-morphism border-border/50" data-testid="select-product-category">
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="glass-morphism-strong border-border/50">
-                      {categories.map((cat) => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const selectedCategory = categories.find(c => c.value === field.value);
+                return (
+                  <FormItem>
+                    <FormLabel>{t("myProducts.category")}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="glass-morphism border-border/50" data-testid="select-product-category">
+                          <SelectValue placeholder={t("myProducts.selectCategory")}>
+                            {selectedCategory?.label || t("myProducts.selectCategory")}
+                          </SelectValue>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="glass-morphism-strong border-border/50">
+                        {categories.map((cat) => (
+                          <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
           </div>
 
@@ -263,7 +276,7 @@ export function MyProductsPage() {
             disabled={createMutation.isPending || updateMutation.isPending}
             data-testid={product ? "button-update-product" : "button-create-product"}
           >
-            {(createMutation.isPending || updateMutation.isPending) ? "Saving..." : product ? "Update Service" : "Create Service"}
+            {(createMutation.isPending || updateMutation.isPending) ? t("myProducts.saving") : product ? t("myProducts.updateService") : t("myProducts.createServiceBtn")}
           </Button>
         </form>
       </Form>
@@ -313,22 +326,22 @@ export function MyProductsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">My Products</h1>
-            <p className="text-muted-foreground">Manage your services and offerings</p>
+            <h1 className="text-4xl font-bold text-foreground mb-2">{t("myProducts.title")}</h1>
+            <p className="text-muted-foreground">{t("myProducts.subtitle")}</p>
           </div>
 
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="neon-glow-primary" data-testid="button-add-product">
                 <Plus className="w-4 h-4 mr-2" />
-                Add New Service
+                {t("myProducts.addNewService")}
               </Button>
             </DialogTrigger>
             <DialogContent className="glass-morphism-strong border-border/50 max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Add New Service</DialogTitle>
+                <DialogTitle>{t("myProducts.addNewService")}</DialogTitle>
                 <DialogDescription>
-                  Create a new service to offer on Tiro marketplace
+                  {t("myProducts.createService")}
                 </DialogDescription>
               </DialogHeader>
               <ProductForm onClose={() => setIsAddDialogOpen(false)} />
@@ -342,7 +355,7 @@ export function MyProductsPage() {
             <CardHeader className="pb-3">
               <CardDescription className="flex items-center gap-2">
                 <Package className="w-4 h-4" />
-                Total Services
+                {t("myProducts.totalServices")}
               </CardDescription>
               <CardTitle className="text-3xl" data-testid="text-total-services">{products.length}</CardTitle>
             </CardHeader>
@@ -352,7 +365,7 @@ export function MyProductsPage() {
             <CardHeader className="pb-3">
               <CardDescription className="flex items-center gap-2">
                 <Eye className="w-4 h-4" />
-                Total Views
+                {t("myProducts.totalViews")}
               </CardDescription>
               <CardTitle className="text-3xl" data-testid="text-total-views">
                 {products.reduce((sum, p) => sum + p.views, 0)}
@@ -364,7 +377,7 @@ export function MyProductsPage() {
             <CardHeader className="pb-3">
               <CardDescription className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
-                Total Sales
+                {t("myProducts.totalSales")}
               </CardDescription>
               <CardTitle className="text-3xl" data-testid="text-total-sales">
                 {products.reduce((sum, p) => sum + p.sales, 0)}
@@ -392,9 +405,9 @@ export function MyProductsPage() {
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="text-lg font-semibold text-foreground" data-testid={`text-product-title-${product.id}`}>{product.title}</h3>
                           <Badge className={product.isActive ? "bg-green-500/20 text-green-500 border-green-500/30" : "bg-gray-500/20 text-gray-500 border-gray-500/30"}>
-                            {product.isActive ? "Active" : "Inactive"}
+                            {product.isActive ? t("myProducts.active") : t("myProducts.inactive")}
                           </Badge>
-                          <Badge variant="secondary">{product.category}</Badge>
+                          <Badge variant="secondary">{categories.find(c => c.value === product.category)?.label || product.category}</Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">{product.description}</p>
                       </div>
@@ -409,11 +422,11 @@ export function MyProductsPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Eye className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground" data-testid={`text-product-views-${product.id}`}>{product.views} views</span>
+                        <span className="text-sm text-muted-foreground" data-testid={`text-product-views-${product.id}`}>{product.views} {t("myProducts.views")}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <ShoppingBag className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground" data-testid={`text-product-sales-${product.id}`}>{product.sales} sales</span>
+                        <span className="text-sm text-muted-foreground" data-testid={`text-product-sales-${product.id}`}>{product.sales} {t("myProducts.sales")}</span>
                       </div>
                     </div>
                   </div>
@@ -433,9 +446,9 @@ export function MyProductsPage() {
                       </DialogTrigger>
                       <DialogContent className="glass-morphism-strong border-border/50 max-w-2xl">
                         <DialogHeader>
-                          <DialogTitle>Edit Service</DialogTitle>
+                          <DialogTitle>{t("myProducts.editService")}</DialogTitle>
                           <DialogDescription>
-                            Update your service details
+                            {t("myProducts.updateDetails")}
                           </DialogDescription>
                         </DialogHeader>
                         <ProductForm product={product} onClose={() => setEditingProduct(null)} />
@@ -455,20 +468,20 @@ export function MyProductsPage() {
                       </AlertDialogTrigger>
                       <AlertDialogContent className="glass-morphism-strong border-border/50">
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Service</AlertDialogTitle>
+                          <AlertDialogTitle>{t("myProducts.deleteService")}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete "{product.title}"? This action cannot be undone.
+                            {t("myProducts.deleteConfirm")} "{product.title}"? {t("myProducts.deleteWarning")}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel className="glass-morphism border-border/50">Cancel</AlertDialogCancel>
+                          <AlertDialogCancel className="glass-morphism border-border/50">{t("common.cancel")}</AlertDialogCancel>
                           <AlertDialogAction 
                             className="bg-red-500 hover:bg-red-600" 
                             onClick={() => deleteMutation.mutate(product.id)}
                             disabled={deleteMutation.isPending}
                             data-testid={`button-confirm-delete-${product.id}`}
                           >
-                            {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                            {deleteMutation.isPending ? t("myProducts.deleting") : t("common.delete")}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -484,11 +497,11 @@ export function MyProductsPage() {
           <Card className="glass-morphism border-border/30">
             <CardContent className="py-16 text-center">
               <Package className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-xl font-semibold mb-2">No services yet</h3>
-              <p className="text-muted-foreground mb-6">Create your first service to start selling on Tiro</p>
+              <h3 className="text-xl font-semibold mb-2">{t("myProducts.noProducts")}</h3>
+              <p className="text-muted-foreground mb-6">{t("myProducts.noProductsDescription")}</p>
               <Button className="neon-glow-primary" onClick={() => setIsAddDialogOpen(true)} data-testid="button-add-first-product">
                 <Plus className="w-4 h-4 mr-2" />
-                Add Your First Service
+                {t("myProducts.addFirstService")}
               </Button>
             </CardContent>
           </Card>
