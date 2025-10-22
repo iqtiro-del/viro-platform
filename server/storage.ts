@@ -19,7 +19,7 @@ import {
   type ReviewWithBuyer
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, or, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -68,7 +68,10 @@ export class DatabaseStorage implements IStorage {
   async getUserByUsername(username: string): Promise<User | undefined> {
     // Support login with username or email
     const [user] = await db.select().from(users).where(
-      sql`${users.username} = ${username} OR ${users.email} = ${username}`
+      or(
+        eq(users.username, username),
+        eq(users.email, username)
+      )
     );
     return user || undefined;
   }
