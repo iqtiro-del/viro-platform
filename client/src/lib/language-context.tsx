@@ -66,6 +66,54 @@ const translations = {
     "wallet.noTransactions": "No transactions yet",
     "wallet.startUsing": "Start using your wallet to see transactions",
     
+    // Auth
+    "auth.welcomeBack": "Welcome Back",
+    "auth.createAccount": "Create Account",
+    "auth.enterCredentials": "Enter your credentials to access your account",
+    "auth.joinTiro": "Join Tiro and start selling digital services",
+    "auth.fullName": "Full Name",
+    "auth.username": "Username",
+    "auth.password": "Password",
+    "auth.login": "Login",
+    "auth.dontHaveAccount": "Don't have an account?",
+    "auth.signUp": "Sign up",
+    "auth.alreadyHaveAccount": "Already have an account?",
+    "auth.loginSuccess": "Login successful!",
+    "auth.welcomeTo": "Welcome back to Tiro",
+    "auth.accountCreated": "Account created!",
+    "auth.welcomeToPlatform": "Welcome to Tiro platform",
+    
+    // My Products
+    "myProducts.title": "My Products",
+    "myProducts.addNew": "Add New Product",
+    "myProducts.noProducts": "No products yet",
+    "myProducts.startCreating": "Create your first product to start selling",
+    "myProducts.active": "Active",
+    "myProducts.inactive": "Inactive",
+    
+    // Promote
+    "promote.title": "Promote Your Products",
+    "promote.selectProduct": "Select Product",
+    "promote.selectTier": "Select Promotion Tier",
+    "promote.top3": "Top 3",
+    "promote.top5": "Top 5",
+    "promote.top10": "Top 10",
+    "promote.duration": "Duration",
+    "promote.cost": "Cost",
+    "promote.days": "days",
+    "promote.startPromotion": "Start Promotion",
+    
+    // Profile
+    "profile.title": "Profile",
+    "profile.personalInfo": "Personal Information",
+    "profile.accountSettings": "Account Settings",
+    
+    // Not Found
+    "notFound.title": "Page Not Found",
+    "notFound.message": "The page you're looking for doesn't exist or has been moved",
+    "notFound.goHome": "Go Home",
+    "notFound.goBack": "Go Back",
+    
     // Common
     "common.loading": "Loading...",
     "common.error": "Error",
@@ -130,6 +178,54 @@ const translations = {
     "wallet.transactions": "المعاملات",
     "wallet.noTransactions": "لا توجد معاملات بعد",
     "wallet.startUsing": "ابدأ باستخدام محفظتك لرؤية المعاملات",
+    
+    // Auth
+    "auth.welcomeBack": "مرحباً بعودتك",
+    "auth.createAccount": "إنشاء حساب",
+    "auth.enterCredentials": "أدخل بيانات الدخول للوصول إلى حسابك",
+    "auth.joinTiro": "انضم إلى تيرو وابدأ ببيع الخدمات الرقمية",
+    "auth.fullName": "الاسم الكامل",
+    "auth.username": "اسم المستخدم",
+    "auth.password": "كلمة المرور",
+    "auth.login": "تسجيل الدخول",
+    "auth.dontHaveAccount": "ليس لديك حساب؟",
+    "auth.signUp": "إنشاء حساب",
+    "auth.alreadyHaveAccount": "لديك حساب بالفعل؟",
+    "auth.loginSuccess": "تم تسجيل الدخول بنجاح!",
+    "auth.welcomeTo": "مرحباً بعودتك إلى تيرو",
+    "auth.accountCreated": "تم إنشاء الحساب!",
+    "auth.welcomeToPlatform": "مرحباً بك في منصة تيرو",
+    
+    // My Products
+    "myProducts.title": "منتجاتي",
+    "myProducts.addNew": "إضافة منتج جديد",
+    "myProducts.noProducts": "لا توجد منتجات بعد",
+    "myProducts.startCreating": "أنشئ منتجك الأول للبدء بالبيع",
+    "myProducts.active": "نشط",
+    "myProducts.inactive": "غير نشط",
+    
+    // Promote
+    "promote.title": "روّج لمنتجاتك",
+    "promote.selectProduct": "اختر المنتج",
+    "promote.selectTier": "اختر مستوى الترويج",
+    "promote.top3": "الأفضل 3",
+    "promote.top5": "الأفضل 5",
+    "promote.top10": "الأفضل 10",
+    "promote.duration": "المدة",
+    "promote.cost": "التكلفة",
+    "promote.days": "أيام",
+    "promote.startPromotion": "ابدأ الترويج",
+    
+    // Profile
+    "profile.title": "الملف الشخصي",
+    "profile.personalInfo": "المعلومات الشخصية",
+    "profile.accountSettings": "إعدادات الحساب",
+    
+    // Not Found
+    "notFound.title": "الصفحة غير موجودة",
+    "notFound.message": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها",
+    "notFound.goHome": "الصفحة الرئيسية",
+    "notFound.goBack": "رجوع",
     
     // Common
     "common.loading": "جاري التحميل...",

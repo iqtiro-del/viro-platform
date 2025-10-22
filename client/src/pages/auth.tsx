@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth-context";
+import { useLanguage } from "@/lib/language-context";
 import { Loader2 } from "lucide-react";
 
 const loginSchema = z.object({
@@ -30,6 +31,7 @@ export function AuthPage({ mode }: AuthPageProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { login, register } = useAuth();
+  const { t } = useLanguage();
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -56,8 +58,8 @@ export function AuthPage({ mode }: AuthPageProps) {
       if (mode === "login") {
         await login(data.username, data.password);
         toast({
-          title: "Login successful!",
-          description: "Welcome back to Tiro",
+          title: t("auth.loginSuccess"),
+          description: t("auth.welcomeTo"),
         });
       } else {
         const registerData = data as RegisterFormData;
@@ -67,8 +69,8 @@ export function AuthPage({ mode }: AuthPageProps) {
           fullName: registerData.fullName,
         });
         toast({
-          title: "Account created!",
-          description: "Welcome to Tiro platform",
+          title: t("auth.accountCreated"),
+          description: t("auth.welcomeToPlatform"),
         });
       }
     } catch (error: any) {
@@ -88,16 +90,16 @@ export function AuthPage({ mode }: AuthPageProps) {
         <CardHeader className="space-y-2">
           <div className="flex justify-center mb-4">
             <h1 className="text-4xl font-accent font-bold neon-text-glow tracking-tight">
-              TIRO
+              {t("home.title")}
             </h1>
           </div>
           <CardTitle className="text-2xl text-center">
-            {mode === "login" ? "Welcome Back" : "Create Account"}
+            {mode === "login" ? t("auth.welcomeBack") : t("auth.createAccount")}
           </CardTitle>
           <CardDescription className="text-center">
             {mode === "login" 
-              ? "Enter your credentials to access your account" 
-              : "Join Tiro and start selling digital services"}
+              ? t("auth.enterCredentials")
+              : t("auth.joinTiro")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -109,10 +111,9 @@ export function AuthPage({ mode }: AuthPageProps) {
                   name="fullName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel>{t("auth.fullName")}</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="John Doe" 
                           {...field} 
                           className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
                           data-testid="input-fullname"
@@ -129,10 +130,9 @@ export function AuthPage({ mode }: AuthPageProps) {
                 name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Username</FormLabel>
+                    <FormLabel>{t("auth.username")}</FormLabel>
                     <FormControl>
                       <Input 
-                        placeholder="johndoe" 
                         {...field} 
                         className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
                         data-testid="input-username"
@@ -148,7 +148,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>{t("auth.password")}</FormLabel>
                     <FormControl>
                       <Input 
                         type="password" 
@@ -170,14 +170,14 @@ export function AuthPage({ mode }: AuthPageProps) {
                 data-testid="button-submit"
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {mode === "login" ? "Login" : "Create Account"}
+                {mode === "login" ? t("auth.login") : t("auth.createAccount")}
               </Button>
             </form>
           </Form>
 
           <div className="mt-6 text-center text-sm">
             <span className="text-muted-foreground">
-              {mode === "login" ? "Don't have an account?" : "Already have an account?"}
+              {mode === "login" ? t("auth.dontHaveAccount") : t("auth.alreadyHaveAccount")}
             </span>
             {" "}
             <a 
@@ -185,7 +185,7 @@ export function AuthPage({ mode }: AuthPageProps) {
               className="text-primary hover:text-primary/80 font-medium hover-elevate inline-block px-2 py-1 rounded transition-all"
               data-testid={mode === "login" ? "link-register" : "link-login"}
             >
-              {mode === "login" ? "Sign up" : "Login"}
+              {mode === "login" ? t("auth.signUp") : t("auth.login")}
             </a>
           </div>
         </CardContent>
