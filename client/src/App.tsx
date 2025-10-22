@@ -7,7 +7,10 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { LanguageProvider } from "@/lib/language-context";
 import { NeonBackground } from "@/components/neon-background";
-import { Navbar } from "@/components/navbar";
+import { AppSidebar } from "@/components/app-sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import NotFound from "@/pages/not-found";
 import { Dashboard } from "@/pages/dashboard";
 import { AuthPage } from "@/pages/auth";
@@ -55,17 +58,47 @@ function Router() {
 
   return (
     <ProtectedRoute>
-      <NeonBackground />
-      <Navbar user={user} onLogout={logout} />
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/services" component={ServicesPage} />
-        <Route path="/wallet" component={WalletPage} />
-        <Route path="/my-products" component={MyProductsPage} />
-        <Route path="/promote" component={PromotePage} />
-        <Route path="/profile" component={ProfilePage} />
-        <Route component={NotFound} />
-      </Switch>
+      <SidebarProvider defaultOpen={false}>
+        <div className="flex min-h-screen w-full">
+          <NeonBackground />
+          
+          {/* Main Content Area */}
+          <div className="flex-1 flex flex-col relative">
+            {/* Top Header with Hamburger Menu */}
+            <header className="sticky top-0 z-40 w-full border-b border-border/50 glass-morphism">
+              <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+                {/* Logo on the left */}
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-accent font-bold neon-text-glow tracking-tight">
+                    TIRO
+                  </h1>
+                </div>
+                
+                {/* Hamburger Menu on the right */}
+                <SidebarTrigger className="ml-auto" data-testid="button-sidebar-toggle">
+                  <Menu className="h-6 w-6" />
+                </SidebarTrigger>
+              </div>
+            </header>
+
+            {/* Page Content */}
+            <main className="flex-1 pb-16 md:pb-0">
+              <Switch>
+                <Route path="/" component={Dashboard} />
+                <Route path="/services" component={ServicesPage} />
+                <Route path="/wallet" component={WalletPage} />
+                <Route path="/my-products" component={MyProductsPage} />
+                <Route path="/promote" component={PromotePage} />
+                <Route path="/profile" component={ProfilePage} />
+                <Route component={NotFound} />
+              </Switch>
+            </main>
+          </div>
+
+          {/* Right Sidebar */}
+          <AppSidebar user={user} onLogout={logout} />
+        </div>
+      </SidebarProvider>
     </ProtectedRoute>
   );
 }

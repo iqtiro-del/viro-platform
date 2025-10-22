@@ -13,6 +13,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 const translations = {
   en: {
     // Navigation
+    "nav.dashboard": "Dashboard",
     "nav.services": "Services",
     "nav.wallet": "Wallet",
     "nav.myProducts": "My Products",
@@ -21,6 +22,12 @@ const translations = {
     "nav.logout": "Logout",
     "nav.login": "Login",
     "nav.signup": "Sign Up",
+    "nav.account": "Account",
+    "nav.navigation": "Navigation",
+    "nav.settings": "Settings",
+    "nav.language": "Language",
+    "nav.lightMode": "Light Mode",
+    "nav.darkMode": "Dark Mode",
     
     // Dashboard/Home
     "home.title": "TIRO",
@@ -300,6 +307,7 @@ const translations = {
   },
   ar: {
     // Navigation
+    "nav.dashboard": "لوحة التحكم",
     "nav.services": "الخدمات",
     "nav.wallet": "المحفظة",
     "nav.myProducts": "منتجاتي",
@@ -308,6 +316,12 @@ const translations = {
     "nav.logout": "تسجيل الخروج",
     "nav.login": "تسجيل الدخول",
     "nav.signup": "إنشاء حساب",
+    "nav.account": "الحساب",
+    "nav.navigation": "التنقل",
+    "nav.settings": "الإعدادات",
+    "nav.language": "اللغة",
+    "nav.lightMode": "الوضع الفاتح",
+    "nav.darkMode": "الوضع الداكن",
     
     // Dashboard/Home
     "home.title": "تيرو",
