@@ -22,6 +22,19 @@ export function Dashboard() {
     queryKey: ['/api/stats']
   });
 
+  // Category translation mapping
+  const getCategoryLabel = (category: string) => {
+    const categoryMap: Record<string, string> = {
+      "Design": t("services.categories.design"),
+      "Development": t("services.categories.development"),
+      "Marketing": t("services.categories.marketing"),
+      "Writing": t("services.categories.writing"),
+      "Video & Animation": t("services.categories.videoAnimation"),
+      "Music & Audio": t("services.categories.musicAudio"),
+    };
+    return categoryMap[category] || category;
+  };
+
   const stats = [
     { label: t("home.stats.activeServices"), value: statsData?.activeServices.toString() || "0", icon: ShoppingBag, trend: "+12%" },
     { label: t("home.stats.verifiedSellers"), value: statsData?.verifiedSellers.toString() || "0", icon: Users, trend: "+8%" },
@@ -49,47 +62,50 @@ export function Dashboard() {
           <h1 className="text-5xl md:text-7xl font-accent font-bold mb-6 neon-text-glow tracking-tight">
             {t("home.title")}
           </h1>
-          <p className="text-xl md:text-2xl text-foreground/90 mb-8 max-w-3xl mx-auto">
+          <p className="text-xl md:text-2xl text-foreground/90 mb-4 max-w-3xl mx-auto">
             {t("home.subtitle")}
           </p>
-          <p className="text-base md:text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
             {t("home.description")}
           </p>
 
           {/* Search Bar */}
-          <div className="max-w-2xl mx-auto relative">
+          <div className="max-w-2xl mx-auto mb-12">
             <div className="relative glass-morphism-strong border border-primary/30 rounded-lg overflow-hidden neon-glow-primary">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input 
                 placeholder={t("home.search.placeholder")} 
-                className="pl-12 pr-4 h-14 bg-transparent border-0 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="pl-12 pr-36 h-14 bg-transparent border-0 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
                 data-testid="input-search"
               />
               <Button 
                 className="absolute right-2 top-1/2 -translate-y-1/2 neon-glow-secondary"
                 data-testid="button-search"
               >
-                <Zap className="w-4 h-4 mr-2" />
+                <Zap className="w-4 h-4 ml-2" />
                 {t("home.search.button")}
               </Button>
             </div>
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-12 max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {stats.map((stat, index) => {
               const Icon = stat.icon;
               return (
                 <div 
                   key={index}
-                  className="glass-morphism p-4 rounded-lg border border-border/30 hover-elevate transition-all"
+                  className="glass-morphism p-6 rounded-lg border border-border/30 hover-elevate transition-all"
                 >
-                  <div className="flex items-center justify-center mb-2">
-                    <Icon className="w-6 h-6 text-primary" />
+                  <div className="flex items-center justify-center mb-3">
+                    <div className="p-3 rounded-lg bg-primary/10">
+                      <Icon className="w-6 h-6 text-primary" />
+                    </div>
                   </div>
-                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
-                  <Badge variant="secondary" className="mt-2 text-xs bg-green-500/10 text-green-500 border-green-500/20">
+                  <p className="text-3xl font-bold text-foreground mb-1">{stat.value}</p>
+                  <p className="text-sm text-muted-foreground mb-2">{stat.label}</p>
+                  <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/20">
+                    <TrendingUp className="w-3 h-3 ml-1" />
                     {stat.trend}
                   </Badge>
                 </div>
@@ -100,13 +116,17 @@ export function Dashboard() {
       </section>
 
       {/* Featured Services */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="flex items-center justify-between mb-8">
+      <section className="container mx-auto px-4 py-20">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
           <div>
-            <h2 className="text-3xl font-bold text-foreground mb-2">{t("home.featuredServices")}</h2>
-            <p className="text-muted-foreground">{t("home.featuredServices.subtitle")}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-2">{t("home.featuredServices")}</h2>
+            <p className="text-base text-muted-foreground">{t("home.featuredServices.subtitle")}</p>
           </div>
-          <Button variant="outline" className="border-primary/30 hover:border-primary neon-glow-primary" data-testid="button-view-all">
+          <Button 
+            variant="outline" 
+            className="border-primary/30 hover:border-primary neon-glow-primary w-full md:w-auto" 
+            data-testid="button-view-all"
+          >
             {t("home.viewAll")}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
@@ -114,12 +134,12 @@ export function Dashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
-            Array.from({ length: 3 }).map((_, index) => (
+            Array.from({ length: 6 }).map((_, index) => (
               <Card key={index} className="glass-morphism border-border/30 overflow-hidden">
                 <Skeleton className="h-48 rounded-none" />
                 <CardHeader className="pb-3">
-                  <Skeleton className="h-6 w-3/4" />
-                  <div className="flex items-center space-x-2 mt-2">
+                  <Skeleton className="h-6 w-3/4 mb-3" />
+                  <div className="flex items-center gap-2">
                     <Skeleton className="w-6 h-6 rounded-full" />
                     <Skeleton className="h-4 w-24" />
                   </div>
@@ -133,8 +153,13 @@ export function Dashboard() {
                 </CardContent>
               </Card>
             ))
+          ) : products.length === 0 ? (
+            <div className="col-span-full text-center py-16">
+              <ShoppingBag className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
+              <p className="text-xl text-muted-foreground">{t("home.noServices")}</p>
+            </div>
           ) : (
-            products.map((product) => (
+            products.slice(0, 6).map((product) => (
               <Card 
                 key={product.id} 
                 className="glass-morphism border-border/30 hover:border-primary/50 transition-all hover-elevate group overflow-hidden"
@@ -145,47 +170,48 @@ export function Dashboard() {
                   <div className="absolute inset-0 flex items-center justify-center">
                     <ShoppingBag className="w-16 h-16 text-primary/40" />
                   </div>
-                  <Badge className="absolute top-3 right-3 bg-primary/90 border-primary neon-glow-primary">
-                    {product.category}
+                  <Badge className="absolute top-3 left-3 bg-primary/90 border-primary neon-glow-primary">
+                    {getCategoryLabel(product.category)}
                   </Badge>
                 </div>
 
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg line-clamp-1">{product.title}</CardTitle>
-                  <CardDescription className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Avatar className="w-6 h-6 border border-primary/30">
-                        <AvatarImage src={product.seller.avatarUrl || undefined} />
-                        <AvatarFallback className="text-xs bg-primary/20">
-                          {product.seller.fullName.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm">{product.seller.fullName}</span>
-                      {product.seller.isVerified && (
-                        <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center neon-glow-success">
-                          <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
+                  <CardTitle className="text-lg line-clamp-1 mb-2">{product.title}</CardTitle>
+                  <CardDescription className="flex items-center gap-2">
+                    <Avatar className="w-6 h-6 border border-primary/30">
+                      <AvatarImage src={product.seller.avatarUrl || undefined} />
+                      <AvatarFallback className="text-xs bg-primary/20">
+                        {product.seller.fullName.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm truncate">{product.seller.fullName}</span>
+                    {product.seller.isVerified && (
+                      <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center neon-glow-success flex-shrink-0">
+                        <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
                   </CardDescription>
                 </CardHeader>
 
                 <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-1">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                      <span className="font-semibold">{product.seller.rating || "0.0"}</span>
-                      <span className="text-muted-foreground text-sm">({product.seller.totalReviews || 0})</span>
+                      <span className="font-semibold text-sm">{product.seller.rating || "0.0"}</span>
+                      <span className="text-muted-foreground text-xs">({product.seller.totalReviews || 0})</span>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-muted-foreground">{t("home.startingAt")}</p>
+                    <div className="text-left">
+                      <p className="text-xs text-muted-foreground mb-0.5">{t("home.startingAt")}</p>
                       <p className="text-xl font-bold text-primary neon-text-glow">${product.price}</p>
                     </div>
                   </div>
 
-                  <Button className="w-full mt-4 neon-glow-secondary" data-testid={`button-view-service-${product.id}`}>
+                  <Button 
+                    className="w-full neon-glow-secondary" 
+                    data-testid={`button-view-service-${product.id}`}
+                  >
                     {t("home.viewDetails")}
                   </Button>
                 </CardContent>
@@ -198,17 +224,19 @@ export function Dashboard() {
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-16">
         <Card className="glass-morphism-strong border-primary/30 neon-glow-primary overflow-hidden">
-          <div className="relative p-8 md:p-12">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
+          <div className="relative p-10 md:p-16">
+            <div className="absolute top-0 right-0 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-72 h-72 bg-secondary/10 rounded-full blur-3xl" />
             <div className="relative z-10 text-center max-w-2xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <Zap className="w-12 h-12 text-primary mx-auto mb-6" />
+              <h2 className="text-3xl md:text-5xl font-bold mb-4">
                 {t("home.cta.title")}
               </h2>
-              <p className="text-muted-foreground mb-8">
+              <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
                 {t("home.cta.description")}
               </p>
               <Button size="lg" className="neon-glow-primary" data-testid="button-start-selling">
-                <Zap className="w-5 h-5 mr-2" />
+                <Zap className="w-5 h-5 ml-2" />
                 {t("home.cta.getStarted")}
               </Button>
             </div>

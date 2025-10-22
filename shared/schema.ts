@@ -173,7 +173,6 @@ export const insertPromotionSchema = createInsertSchema(promotions).omit({
 export const insertTransactionSchema = createInsertSchema(transactions).omit({
   id: true,
   createdAt: true,
-  status: true,
 });
 
 // Types
