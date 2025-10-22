@@ -602,33 +602,25 @@ const translations = {
 };
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(() => {
-    if (typeof window === "undefined") return "en";
-    const saved = localStorage.getItem("language");
-    return (saved === "ar" || saved === "en") ? saved : "en";
-  });
+  // Fixed to Arabic only - no language switching
+  const language: Language = "ar";
 
   useEffect(() => {
-    localStorage.setItem("language", language);
+    // Always set Arabic RTL direction
+    document.documentElement.dir = "rtl";
+    document.documentElement.lang = "ar";
     
-    // Update document direction and lang attribute
-    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
-    document.documentElement.lang = language;
-    
-    // Update font family for Arabic
-    if (language === "ar") {
-      document.documentElement.style.fontFamily = "'Tajawal', 'Inter', sans-serif";
-    } else {
-      document.documentElement.style.fontFamily = "'Inter', 'Tajawal', sans-serif";
-    }
-  }, [language]);
+    // Set Arabic font family
+    document.documentElement.style.fontFamily = "'Tajawal', 'Inter', sans-serif";
+  }, []);
 
   const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
+    // Language switching disabled - always Arabic
+    console.log("Language is fixed to Arabic");
   };
 
   const t = (key: string): string => {
-    return translations[language][key as keyof typeof translations.en] || key;
+    return translations.ar[key as keyof typeof translations.ar] || key;
   };
 
   return (

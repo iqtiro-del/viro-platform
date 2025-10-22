@@ -9,7 +9,6 @@ import {
   LogOut,
   Sun,
   Moon,
-  Languages,
   CheckCircle
 } from "lucide-react";
 import { useTheme } from "./theme-provider";
@@ -61,7 +60,7 @@ export function AppSidebar({ user, onLogout }: AppSidebarProps) {
         <Link href="/">
           <div className="flex items-center justify-center hover-elevate rounded-lg p-3 transition-all cursor-pointer" data-testid="link-home">
             <h1 className="text-2xl font-accent font-bold neon-text-glow tracking-tight">
-              TIRO
+              تيرو
             </h1>
           </div>
         </Link>
@@ -134,20 +133,6 @@ export function AppSidebar({ user, onLogout }: AppSidebarProps) {
               <SidebarGroupLabel className="text-muted-foreground">{t("nav.settings")}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <div className="space-y-2 px-2">
-                  {/* Language Toggle */}
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => setLanguage(language === "en" ? "ar" : "en")}
-                    data-testid="button-language-toggle"
-                  >
-                    <Languages className="w-5 h-5 mr-3" />
-                    <span className="flex-1 text-left">{t("nav.language")}</span>
-                    <span className="text-xs font-bold text-primary ml-2">
-                      {language.toUpperCase()}
-                    </span>
-                  </Button>
-
                   {/* Theme Toggle */}
                   <Button
                     variant="ghost"

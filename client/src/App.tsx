@@ -64,13 +64,16 @@ function Router() {
           
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col relative">
-            {/* Top Header with Hamburger Menu */}
+            {/* Top Header with Centered Logo and Hamburger Menu */}
             <header className="sticky top-0 z-40 w-full border-b border-border/50 glass-morphism">
-              <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                {/* Logo on the left */}
-                <div className="flex items-center gap-2">
+              <div className="container mx-auto px-4 h-16 flex items-center justify-between relative">
+                {/* Spacer for balance */}
+                <div className="w-10"></div>
+                
+                {/* Centered Logo */}
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                   <h1 className="text-2xl font-accent font-bold neon-text-glow tracking-tight">
-                    TIRO
+                    تيرو
                   </h1>
                 </div>
                 
