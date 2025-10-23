@@ -8,7 +8,26 @@ The application is built as a full-stack web platform with a React-based fronten
 
 ## Recent Changes
 
-**Dashboard as Public Homepage (Latest Update)**
+**Fee System for Deposits and Withdrawals (Latest Update)**
+- Implemented 10% fee on all deposits and withdrawals
+- Deposit fee: User deposits $100, receives $90 in wallet (10% deducted)
+- Withdrawal fee: User withdraws $50, $55 deducted from balance (10% fee added)
+- Fee notices displayed in wallet UI without showing exact percentage
+- Generic messages: "A processing fee will be applied to this deposit/withdrawal"
+- Transaction records show original amounts (before fee adjustment)
+- Yellow-themed notice boxes in both deposit and withdrawal dialogs
+- Full English and Arabic translation support for fee messages
+
+**Instagram and TikTok Account Sales**
+- Added Instagram and TikTok as new service categories
+- Extended product schema with account credential fields (username, password, email, email password)
+- Conditional form fields appear only when Instagram/TikTok category is selected
+- Credential delivery system shows account details to buyer after purchase
+- Credentials displayed in dedicated dialog with glass-morphism design
+- Full English and Arabic translation support for account-related UI
+- **Security Note**: Credentials currently stored in plain text - encryption required before production
+
+**Dashboard as Public Homepage**
 - Dashboard (/) is now the main public homepage accessible without authentication
 - Non-authenticated users see Login and Sign Up buttons in the hero section
 - Authenticated users see a search bar in the hero section instead
