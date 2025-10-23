@@ -162,6 +162,10 @@ export function MyProductsPage() {
         category: product.category,
         imageUrl: product.imageUrl,
         isActive: product.isActive,
+        accountUsername: product.accountUsername || "",
+        accountPassword: product.accountPassword || "",
+        accountEmail: product.accountEmail || "",
+        accountEmailPassword: product.accountEmailPassword || "",
       } : {
         sellerId: user?.id || "",
         title: "",
@@ -170,8 +174,15 @@ export function MyProductsPage() {
         category: "",
         imageUrl: "",
         isActive: true,
+        accountUsername: "",
+        accountPassword: "",
+        accountEmail: "",
+        accountEmailPassword: "",
       },
     });
+
+    const selectedCategory = form.watch("category");
+    const showAccountFields = selectedCategory === "Instagram" || selectedCategory === "TikTok";
 
     const onSubmit = (data: InsertProduct) => {
       if (product) {
@@ -271,6 +282,95 @@ export function MyProductsPage() {
               }}
             />
           </div>
+
+          {showAccountFields && (
+            <div className="space-y-4 pt-4 border-t border-border/50">
+              <h3 className="text-sm font-medium text-foreground">{t("myProducts.accountDetails")}</h3>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="accountUsername"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("myProducts.accountUsername")}</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field}
+                          placeholder={t("myProducts.usernamePlaceholder")}
+                          className="glass-morphism border-border/50"
+                          data-testid="input-account-username"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="accountPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("myProducts.accountPassword")}</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field}
+                          type="password"
+                          placeholder={t("myProducts.passwordPlaceholder")}
+                          className="glass-morphism border-border/50"
+                          data-testid="input-account-password"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="accountEmail"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("myProducts.accountEmail")}</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field}
+                          type="email"
+                          placeholder={t("myProducts.emailPlaceholder")}
+                          className="glass-morphism border-border/50"
+                          data-testid="input-account-email"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="accountEmailPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("myProducts.accountEmailPassword")}</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field}
+                          type="password"
+                          placeholder={t("myProducts.emailPasswordPlaceholder")}
+                          className="glass-morphism border-border/50"
+                          data-testid="input-account-email-password"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          )}
 
           <Button 
             type="submit"

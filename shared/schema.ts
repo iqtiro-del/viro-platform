@@ -154,6 +154,10 @@ export const insertProductSchema = createInsertSchema(products).omit({
   description: z.string().min(20, "Description must be at least 20 characters"),
   price: z.string().refine((val) => parseFloat(val) > 0, "Price must be greater than 0"),
   category: z.string().min(1, "Category is required"),
+  accountUsername: z.string().optional(),
+  accountPassword: z.string().optional(),
+  accountEmail: z.string().optional(),
+  accountEmailPassword: z.string().optional(),
 });
 
 export const insertReviewSchema = createInsertSchema(reviews).omit({
