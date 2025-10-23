@@ -247,9 +247,23 @@ export function WalletPage() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-md" data-testid="notice-deposit-fee">
-                        <p className="text-sm text-yellow-500">{t("wallet.depositFeeNotice")}</p>
-                      </div>
+                      {depositAmount && parseFloat(depositAmount) > 0 && (
+                        <div className="p-4 bg-primary/5 border border-primary/20 rounded-md space-y-2" data-testid="breakdown-deposit-fee">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">{t("wallet.depositAmount")}</span>
+                            <span className="font-medium">${parseFloat(depositAmount).toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">{t("wallet.processingFee")}</span>
+                            <span className="font-medium text-yellow-500">-${(parseFloat(depositAmount) * 0.10).toFixed(2)}</span>
+                          </div>
+                          <div className="h-px bg-border/50 my-2"></div>
+                          <div className="flex justify-between">
+                            <span className="font-semibold text-foreground">{t("wallet.youWillReceive")}</span>
+                            <span className="font-bold text-primary text-lg">${(parseFloat(depositAmount) * 0.90).toFixed(2)}</span>
+                          </div>
+                        </div>
+                      )}
                       <Button 
                         className="w-full neon-glow-primary" 
                         data-testid="button-confirm-deposit"
@@ -302,9 +316,23 @@ export function WalletPage() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-md" data-testid="notice-withdraw-fee">
-                        <p className="text-sm text-yellow-500">{t("wallet.withdrawFeeNotice")}</p>
-                      </div>
+                      {withdrawAmount && parseFloat(withdrawAmount) > 0 && (
+                        <div className="p-4 bg-primary/5 border border-primary/20 rounded-md space-y-2" data-testid="breakdown-withdraw-fee">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">{t("wallet.withdrawalAmount")}</span>
+                            <span className="font-medium">${parseFloat(withdrawAmount).toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">{t("wallet.processingFee")}</span>
+                            <span className="font-medium text-yellow-500">-${(parseFloat(withdrawAmount) * 0.10).toFixed(2)}</span>
+                          </div>
+                          <div className="h-px bg-border/50 my-2"></div>
+                          <div className="flex justify-between">
+                            <span className="font-semibold text-foreground">{t("wallet.youWillReceive")}</span>
+                            <span className="font-bold text-primary text-lg">${(parseFloat(withdrawAmount) * 0.90).toFixed(2)}</span>
+                          </div>
+                        </div>
+                      )}
                       <Button 
                         className="w-full neon-glow-primary" 
                         data-testid="button-confirm-withdraw"
