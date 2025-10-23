@@ -100,6 +100,10 @@ const translations = {
     "services.categories.writing": "Writing",
     "services.categories.videoAnimation": "Video & Animation",
     "services.categories.musicAudio": "Music & Audio",
+    "services.categories.instagram": "Instagram",
+    "services.categories.tiktok": "TikTok",
+    "services.instagram": "Instagram",
+    "services.tiktok": "TikTok",
     
     // Wallet
     "wallet.title": "My Wallet",
@@ -394,6 +398,10 @@ const translations = {
     "services.categories.writing": "كتابة",
     "services.categories.videoAnimation": "فيديو وأنيميشن",
     "services.categories.musicAudio": "موسيقى وصوتيات",
+    "services.categories.instagram": "إنستغرام",
+    "services.categories.tiktok": "تيك توك",
+    "services.instagram": "إنستغرام",
+    "services.tiktok": "تيك توك",
     
     // Wallet
     "wallet.title": "محفظتي",

@@ -147,6 +147,8 @@ export function MyProductsPage() {
     { value: "Writing", label: t("services.categories.writing") },
     { value: "Video & Animation", label: t("services.categories.videoAnimation") },
     { value: "Music & Audio", label: t("services.categories.musicAudio") },
+    { value: "Instagram", label: t("services.categories.instagram") },
+    { value: "TikTok", label: t("services.categories.tiktok") },
   ];
 
   const ProductForm = ({ product, onClose }: { product?: Product; onClose: () => void }) => {
