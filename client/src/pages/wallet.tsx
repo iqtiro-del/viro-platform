@@ -70,10 +70,12 @@ export function WalletPage() {
     ? ((recentEarnings - previousEarnings) / previousEarnings) * 100 
     : recentEarnings > 0 ? 100 : 0;
   
+  const profitTrend: "up" | "down" = profitPercentage >= 0 ? "up" : "down";
+  
   const walletData = {
     balance,
     totalEarnings,
-    profitTrend: (profitPercentage >= 0 ? "up" : "down") as const,
+    profitTrend,
     profitPercentage: Math.abs(profitPercentage),
   };
 
@@ -245,6 +247,9 @@ export function WalletPage() {
                           </SelectContent>
                         </Select>
                       </div>
+                      <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-md" data-testid="notice-deposit-fee">
+                        <p className="text-sm text-yellow-500">{t("wallet.depositFeeNotice")}</p>
+                      </div>
                       <Button 
                         className="w-full neon-glow-primary" 
                         data-testid="button-confirm-deposit"
@@ -296,6 +301,9 @@ export function WalletPage() {
                             <SelectItem value="FIB">{t("wallet.fib")}</SelectItem>
                           </SelectContent>
                         </Select>
+                      </div>
+                      <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-md" data-testid="notice-withdraw-fee">
+                        <p className="text-sm text-yellow-500">{t("wallet.withdrawFeeNotice")}</p>
                       </div>
                       <Button 
                         className="w-full neon-glow-primary" 
