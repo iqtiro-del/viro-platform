@@ -48,6 +48,10 @@ export const products = pgTable("products", {
   isActive: boolean("is_active").default(true).notNull(),
   views: integer("views").default(0).notNull(),
   sales: integer("sales").default(0).notNull(),
+  accountUsername: text("account_username").default(''),
+  accountPassword: text("account_password").default(''),
+  accountEmail: text("account_email").default(''),
+  accountEmailPassword: text("account_email_password").default(''),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
