@@ -298,7 +298,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await storage.updateTransaction(transaction.id, 'completed');
       
-      res.json({ success: true, newBalance: newBalance.toFixed(2), transaction });
+      res.json({ 
+        success: true, 
+        newBalance: newBalance.toFixed(2), 
+        transaction,
+        feeDetails: {
+          depositAmount: depositAmount.toFixed(2),
+          feeAmount: feeAmount.toFixed(2),
+          amountCredited: amountAfterFee.toFixed(2)
+        }
+      });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
@@ -318,17 +327,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Amount must be greater than 0" });
       }
 
-      // Apply 10% fee on withdrawal (deduct 10% more from balance)
+      // Apply 10% fee on withdrawal (user receives 90% of requested amount)
       const feeRate = 0.10;
       const feeAmount = withdrawAmount * feeRate;
-      const totalDeduction = withdrawAmount + feeAmount;
+      const amountToReceive = withdrawAmount - feeAmount;
       
       const currentBalance = parseFloat(user.balance);
-      if (totalDeduction > currentBalance) {
+      if (withdrawAmount > currentBalance) {
         return res.status(400).json({ error: "Insufficient balance" });
       }
 
-      const newBalance = currentBalance - totalDeduction;
+      const newBalance = currentBalance - withdrawAmount;
       
       await storage.updateUser(userId, { balance: newBalance.toFixed(2) });
       
@@ -341,7 +350,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await storage.updateTransaction(transaction.id, 'completed');
       
-      res.json({ success: true, newBalance: newBalance.toFixed(2), transaction });
+      res.json({ 
+        success: true, 
+        newBalance: newBalance.toFixed(2), 
+        transaction,
+        feeDetails: {
+          requestedAmount: withdrawAmount.toFixed(2),
+          feeAmount: feeAmount.toFixed(2),
+          amountToReceive: amountToReceive.toFixed(2)
+        }
+      });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
