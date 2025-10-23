@@ -280,7 +280,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Amount must be greater than 0" });
       }
 
-      const newBalance = parseFloat(user.balance) + depositAmount;
+      // Apply 10% fee on deposit (user receives 90% of deposited amount)
+      const feeRate = 0.10;
+      const feeAmount = depositAmount * feeRate;
+      const amountAfterFee = depositAmount - feeAmount;
+      
+      const newBalance = parseFloat(user.balance) + amountAfterFee;
       
       await storage.updateUser(userId, { balance: newBalance.toFixed(2) });
       
@@ -313,12 +318,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Amount must be greater than 0" });
       }
 
+      // Apply 10% fee on withdrawal (deduct 10% more from balance)
+      const feeRate = 0.10;
+      const feeAmount = withdrawAmount * feeRate;
+      const totalDeduction = withdrawAmount + feeAmount;
+      
       const currentBalance = parseFloat(user.balance);
-      if (withdrawAmount > currentBalance) {
+      if (totalDeduction > currentBalance) {
         return res.status(400).json({ error: "Insufficient balance" });
       }
 
-      const newBalance = currentBalance - withdrawAmount;
+      const newBalance = currentBalance - totalDeduction;
       
       await storage.updateUser(userId, { balance: newBalance.toFixed(2) });
       
