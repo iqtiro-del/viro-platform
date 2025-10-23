@@ -6,6 +6,19 @@ Tiro is a digital services marketplace platform designed specifically for the Ir
 
 The application is built as a full-stack web platform with a React-based frontend and Express backend, using PostgreSQL for data persistence.
 
+## Recent Changes
+
+**Dashboard as Public Homepage (Latest Update)**
+- Dashboard (/) is now the main public homepage accessible without authentication
+- Non-authenticated users see Login and Sign Up buttons in the hero section
+- Authenticated users see a search bar in the hero section instead
+- Login and Sign Up dialogs integrated directly into Dashboard page
+- Modal dialogs use glass-morphism design matching the platform aesthetic
+- Forms include proper validation, loading states, and toast notifications
+- Users can seamlessly switch between Login and Sign Up dialogs
+- All other routes (services, wallet, my-products, promote, profile) remain protected
+- Separate /login and /register routes maintained for backward compatibility
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
