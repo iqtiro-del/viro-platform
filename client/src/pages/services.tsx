@@ -48,6 +48,8 @@ export function ServicesPage() {
   const [priceRange, setPriceRange] = useState<string>("all");
   const [selectedProduct, setSelectedProduct] = useState<ProductWithSeller | null>(null);
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+  const [credentialsDialogOpen, setCredentialsDialogOpen] = useState(false);
+  const [purchasedProductData, setPurchasedProductData] = useState<any>(null);
 
   const { user, setUser } = useAuth();
   const { t } = useLanguage();
@@ -98,11 +100,20 @@ export function ServicesPage() {
       setUser(data.buyer);
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
       queryClient.invalidateQueries({ queryKey: ['/api/transactions', user?.id] });
-      toast({
-        title: t("services.purchaseSuccess"),
-        description: `${t("services.purchasedProduct")} "${selectedProduct?.title}"`,
-      });
+      
       setPurchaseDialogOpen(false);
+      
+      // If the product is Instagram or TikTok, show credentials dialog
+      if (selectedProduct && (selectedProduct.category === "Instagram" || selectedProduct.category === "TikTok")) {
+        setPurchasedProductData(data.product);
+        setCredentialsDialogOpen(true);
+      } else {
+        toast({
+          title: t("services.purchaseSuccess"),
+          description: `${t("services.purchasedProduct")} "${selectedProduct?.title}"`,
+        });
+      }
+      
       setSelectedProduct(null);
     },
     onError: (error: any) => {
@@ -439,6 +450,58 @@ export function ServicesPage() {
                   {purchaseMutation.isPending ? t("services.processing") : t("services.confirm")}
                 </Button>
               </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Account Credentials Dialog */}
+      <Dialog open={credentialsDialogOpen} onOpenChange={setCredentialsDialogOpen}>
+        <DialogContent className="glass-morphism-strong border-border/50">
+          <DialogHeader>
+            <DialogTitle>{t("services.accountCredentials")}</DialogTitle>
+            <DialogDescription>
+              {t("services.saveCredentials")}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {purchasedProductData && (
+            <div className="space-y-4 pt-4">
+              <div className="p-4 bg-primary/10 border border-primary/30 rounded-md space-y-3">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">{t("myProducts.accountUsername")}:</span>
+                    <span className="font-medium text-foreground">{purchasedProductData.accountUsername || "N/A"}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">{t("myProducts.accountPassword")}:</span>
+                    <span className="font-medium text-foreground">{purchasedProductData.accountPassword || "N/A"}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">{t("myProducts.accountEmail")}:</span>
+                    <span className="font-medium text-foreground">{purchasedProductData.accountEmail || "N/A"}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">{t("myProducts.accountEmailPassword")}:</span>
+                    <span className="font-medium text-foreground">{purchasedProductData.accountEmailPassword || "N/A"}</span>
+                  </div>
+                </div>
+              </div>
+
+              <Button 
+                className="w-full neon-glow-primary" 
+                onClick={() => {
+                  setCredentialsDialogOpen(false);
+                  setPurchasedProductData(null);
+                  toast({
+                    title: t("services.purchaseSuccess"),
+                    description: t("services.credentialsDelivered"),
+                  });
+                }}
+                data-testid="button-close-credentials"
+              >
+                {t("common.confirm")}
+              </Button>
             </div>
           )}
         </DialogContent>
