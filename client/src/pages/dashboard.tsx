@@ -1,26 +1,110 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, TrendingUp, Users, ShoppingBag, Star, ArrowRight, Zap, Sparkles, BadgeCheck } from "lucide-react";
+import { Search, TrendingUp, Users, ShoppingBag, Star, ArrowRight, Zap, Sparkles, BadgeCheck, Loader2, UserPlus, LogIn } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useQuery } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
+import { useToast } from "@/hooks/use-toast";
 import type { ProductWithSeller } from "@shared/schema";
 import heroImage from "@assets/generated_images/Digital_marketplace_neon_hero_background_e0f69832.png";
 
+const loginSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+const registerSchema = loginSchema.extend({
+  fullName: z.string().min(2, "Full name is required"),
+});
+
 export function Dashboard() {
-  const { user } = useAuth();
+  const { user, login, register: registerUser } = useAuth();
   const { t } = useLanguage();
-  const { data: products = [], isLoading } = useQuery<ProductWithSeller[]>({ 
+  const { toast } = useToast();
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { data: products = [], isLoading: productsLoading } = useQuery<ProductWithSeller[]>({ 
     queryKey: ['/api/products'] 
   });
 
   const { data: statsData } = useQuery<{ activeServices: number; verifiedSellers: number; totalSales: string }>({
     queryKey: ['/api/stats']
   });
+
+  const loginForm = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+  });
+
+  const registerForm = useForm<z.infer<typeof registerSchema>>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+      fullName: "",
+    },
+  });
+
+  const onLoginSubmit = async (data: z.infer<typeof loginSchema>) => {
+    setIsLoading(true);
+    try {
+      await login(data.username, data.password);
+      toast({
+        title: t("auth.loginSuccess"),
+        description: t("auth.welcomeTo"),
+      });
+      setLoginDialogOpen(false);
+      loginForm.reset();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Something went wrong. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onRegisterSubmit = async (data: z.infer<typeof registerSchema>) => {
+    setIsLoading(true);
+    try {
+      await registerUser({
+        username: data.username,
+        password: data.password,
+        fullName: data.fullName,
+      });
+      toast({
+        title: t("auth.accountCreated"),
+        description: t("auth.welcomeToPlatform"),
+      });
+      setRegisterDialogOpen(false);
+      registerForm.reset();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Something went wrong. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Category translation mapping
   const getCategoryLabel = (category: string) => {
@@ -100,28 +184,53 @@ export function Dashboard() {
               {t("home.description")}
             </p>
 
-            {/* Enhanced Search Bar */}
-            <div className="max-w-2xl mx-auto">
-              <div className="relative glass-morphism-strong border-2 border-primary/40 rounded-xl shadow-2xl neon-glow-primary">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl" />
-                <div className="relative flex items-center">
-                  <Search className="absolute left-6 w-5 h-5 text-muted-foreground" />
-                  <Input 
-                    placeholder={t("home.search.placeholder")} 
-                    className="pl-14 pr-40 h-16 bg-transparent border-0 text-lg focus-visible:ring-0 focus-visible:ring-offset-0"
-                    data-testid="input-search"
-                  />
-                  <Button 
-                    size="lg"
-                    className="absolute right-3 neon-glow-secondary h-12"
-                    data-testid="button-search"
-                  >
-                    <Zap className="w-4 h-4 ml-2" />
-                    {t("home.search.button")}
-                  </Button>
+            {/* Auth Buttons for non-logged in users */}
+            {!user ? (
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Button 
+                  size="lg" 
+                  onClick={() => setLoginDialogOpen(true)}
+                  className="neon-glow-primary text-lg px-10 h-14 gap-2" 
+                  data-testid="button-hero-login"
+                >
+                  <LogIn className="w-5 h-5" />
+                  {t("auth.login")}
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  onClick={() => setRegisterDialogOpen(true)}
+                  className="border-primary/30 hover:border-primary text-lg px-10 h-14 gap-2"
+                  data-testid="button-hero-signup"
+                >
+                  <UserPlus className="w-5 h-5" />
+                  {t("auth.signUp")}
+                </Button>
+              </div>
+            ) : (
+              /* Enhanced Search Bar for logged in users */
+              <div className="max-w-2xl mx-auto">
+                <div className="relative glass-morphism-strong border-2 border-primary/40 rounded-xl shadow-2xl neon-glow-primary">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl" />
+                  <div className="relative flex items-center">
+                    <Search className="absolute left-6 w-5 h-5 text-muted-foreground" />
+                    <Input 
+                      placeholder={t("home.search.placeholder")} 
+                      className="pl-14 pr-40 h-16 bg-transparent border-0 text-lg focus-visible:ring-0 focus-visible:ring-offset-0"
+                      data-testid="input-search"
+                    />
+                    <Button 
+                      size="lg"
+                      className="absolute right-3 neon-glow-secondary h-12"
+                      data-testid="button-search"
+                    >
+                      <Zap className="w-4 h-4 ml-2" />
+                      {t("home.search.button")}
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -173,7 +282,7 @@ export function Dashboard() {
 
         {/* Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {isLoading ? (
+          {productsLoading ? (
             Array.from({ length: 6 }).map((_, index) => (
               <Card key={index} className="glass-morphism border-border/30 overflow-hidden">
                 <Skeleton className="h-56 rounded-t-lg" />
@@ -327,6 +436,177 @@ export function Dashboard() {
           </Card>
         </div>
       </section>
+
+      {/* Login Dialog */}
+      <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
+        <DialogContent className="glass-morphism-strong border-primary/20 neon-glow-primary max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-center neon-text-glow">
+              {t("auth.welcomeBack")}
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              {t("auth.enterCredentials")}
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...loginForm}>
+            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+              <FormField
+                control={loginForm.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("auth.username")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
+                        data-testid="input-login-username"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={loginForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("auth.password")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password" 
+                        placeholder="••••••••" 
+                        {...field} 
+                        className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
+                        data-testid="input-login-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button 
+                type="submit" 
+                className="w-full neon-glow-primary" 
+                disabled={isLoading}
+                data-testid="button-login-submit"
+              >
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t("auth.login")}
+              </Button>
+            </form>
+          </Form>
+          <div className="text-center text-sm mt-4">
+            <span className="text-muted-foreground">{t("auth.dontHaveAccount")}</span>
+            {" "}
+            <button 
+              onClick={() => {
+                setLoginDialogOpen(false);
+                setRegisterDialogOpen(true);
+              }}
+              className="text-primary hover:text-primary/80 font-medium"
+              data-testid="link-to-signup"
+            >
+              {t("auth.signUp")}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Register Dialog */}
+      <Dialog open={registerDialogOpen} onOpenChange={setRegisterDialogOpen}>
+        <DialogContent className="glass-morphism-strong border-primary/20 neon-glow-primary max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-center neon-text-glow">
+              {t("auth.createAccount")}
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              {t("auth.joinTiro")}
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...registerForm}>
+            <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+              <FormField
+                control={registerForm.control}
+                name="fullName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("auth.fullName")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
+                        data-testid="input-register-fullname"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={registerForm.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("auth.username")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
+                        data-testid="input-register-username"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={registerForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("auth.password")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password" 
+                        placeholder="••••••••" 
+                        {...field} 
+                        className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
+                        data-testid="input-register-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button 
+                type="submit" 
+                className="w-full neon-glow-primary" 
+                disabled={isLoading}
+                data-testid="button-register-submit"
+              >
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t("auth.createAccount")}
+              </Button>
+            </form>
+          </Form>
+          <div className="text-center text-sm mt-4">
+            <span className="text-muted-foreground">{t("auth.alreadyHaveAccount")}</span>
+            {" "}
+            <button 
+              onClick={() => {
+                setRegisterDialogOpen(false);
+                setLoginDialogOpen(true);
+              }}
+              className="text-primary hover:text-primary/80 font-medium"
+              data-testid="link-to-login"
+            >
+              {t("auth.login")}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
