@@ -9,14 +9,18 @@ The application is built as a full-stack web platform with a React-based fronten
 ## Recent Changes
 
 **Fee System for Deposits and Withdrawals (Latest Update)**
-- Implemented 10% fee on all deposits and withdrawals
-- Deposit fee: User deposits $100, receives $90 in wallet (10% deducted)
-- Withdrawal fee: User withdraws $50, $55 deducted from balance (10% fee added)
-- Fee notices displayed in wallet UI without showing exact percentage
-- Generic messages: "A processing fee will be applied to this deposit/withdrawal"
-- Transaction records show original amounts (before fee adjustment)
-- Yellow-themed notice boxes in both deposit and withdrawal dialogs
-- Full English and Arabic translation support for fee messages
+- Implemented 10% fee on all deposits and withdrawals with clear UI breakdown
+- **Deposit logic:** User deposits $100 → 10% fee deducted ($10) → receives $90 in wallet
+- **Withdrawal logic:** User withdraws $50 → 10% fee deducted ($5) → receives $45, balance reduced by $50
+- Fee breakdown displayed dynamically when user enters amount:
+  - Shows original amount, processing fee (10%), and final amount to receive
+  - Uses glassmorphism card design with clear visual hierarchy
+  - Fee amount shown in yellow with minus sign
+  - Final amount shown in bold primary color
+- Backend returns feeDetails object with complete breakdown
+- Transaction records store original amounts (before fee adjustment)
+- Full English and Arabic translation support for all fee-related UI
+- Successfully tested end-to-end: deposits, withdrawals, and transaction history
 
 **Instagram and TikTok Account Sales**
 - Added Instagram and TikTok as new service categories
