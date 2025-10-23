@@ -160,6 +160,10 @@ const translations = {
     "wallet.feeNotice": "A fee will be deducted",
     "wallet.depositFeeNotice": "A processing fee will be applied to this deposit",
     "wallet.withdrawFeeNotice": "A processing fee will be applied to this withdrawal",
+    "wallet.depositAmount": "Deposit Amount",
+    "wallet.withdrawalAmount": "Withdrawal Amount",
+    "wallet.processingFee": "Processing Fee (10%)",
+    "wallet.youWillReceive": "You Will Receive",
     
     // Auth
     "auth.welcomeBack": "Welcome Back",
@@ -473,6 +477,10 @@ const translations = {
     "wallet.feeNotice": "سيتم خصم رسوم",
     "wallet.depositFeeNotice": "سيتم تطبيق رسوم معالجة على هذا الإيداع",
     "wallet.withdrawFeeNotice": "سيتم تطبيق رسوم معالجة على هذا السحب",
+    "wallet.depositAmount": "مبلغ الإيداع",
+    "wallet.withdrawalAmount": "مبلغ السحب",
+    "wallet.processingFee": "رسوم المعالجة (10%)",
+    "wallet.youWillReceive": "سوف تحصل على",
     
     // Auth
     "auth.welcomeBack": "مرحباً بعودتك",
