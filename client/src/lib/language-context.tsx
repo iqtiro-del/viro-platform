@@ -157,6 +157,9 @@ const translations = {
     "wallet.completed": "Completed",
     "wallet.pending": "Pending",
     "wallet.failed": "Failed",
+    "wallet.feeNotice": "A fee will be deducted",
+    "wallet.depositFeeNotice": "A processing fee will be applied to this deposit",
+    "wallet.withdrawFeeNotice": "A processing fee will be applied to this withdrawal",
     
     // Auth
     "auth.welcomeBack": "Welcome Back",
@@ -467,6 +470,9 @@ const translations = {
     "wallet.completed": "مكتمل",
     "wallet.pending": "قيد الانتظار",
     "wallet.failed": "فشل",
+    "wallet.feeNotice": "سيتم خصم رسوم",
+    "wallet.depositFeeNotice": "سيتم تطبيق رسوم معالجة على هذا الإيداع",
+    "wallet.withdrawFeeNotice": "سيتم تطبيق رسوم معالجة على هذا السحب",
     
     // Auth
     "auth.welcomeBack": "مرحباً بعودتك",
