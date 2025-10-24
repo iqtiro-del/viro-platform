@@ -283,7 +283,7 @@ export function ServicesPage() {
           {/* Services Grid */}
           <div className="lg:col-span-3">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <Card key={i} className="glass-morphism border-border/30">
                     <Skeleton className="h-40 w-full" />
@@ -313,7 +313,7 @@ export function ServicesPage() {
                 <p className="text-muted-foreground">{t("services.tryDifferent")}</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProducts.map((product) => (
                   <Card 
                     key={product.id}

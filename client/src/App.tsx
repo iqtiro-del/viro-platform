@@ -58,16 +58,19 @@ function Router() {
     );
   }
 
-  // Dashboard is public, other routes are protected
+  // Dashboard and Services are public, other routes are protected
   const renderContent = () => {
     if (location === "/") {
       return <Dashboard />;
     }
     
+    if (location === "/services") {
+      return <ServicesPage />;
+    }
+    
     return (
       <ProtectedRoute>
         <Switch>
-          <Route path="/services" component={ServicesPage} />
           <Route path="/wallet" component={WalletPage} />
           <Route path="/my-products" component={MyProductsPage} />
           <Route path="/promote" component={PromotePage} />
