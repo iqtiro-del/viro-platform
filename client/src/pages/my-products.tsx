@@ -489,15 +489,115 @@ export function MyProductsPage() {
         </div>
 
         {/* Products List */}
-        <div className="space-y-4">
+        <div className="grid grid-cols-2 md:grid-cols-1 gap-3 md:gap-4">
           {products.map((product) => (
             <Card 
               key={product.id} 
               className="glass-morphism border-border/30 hover:border-primary/50 transition-all"
               data-testid={`card-product-${product.id}`}
             >
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between gap-4">
+              <CardContent className="p-3 md:p-6">
+                {/* Mobile Layout (2 columns) */}
+                <div className="md:hidden flex flex-col gap-2">
+                  {/* Icon and Title */}
+                  <div className="flex items-start gap-2">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center flex-shrink-0">
+                      <ShoppingBag className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-semibold text-foreground line-clamp-2 mb-1" data-testid={`text-product-title-${product.id}`}>
+                        {product.title}
+                      </h3>
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5">
+                        {categories.find(c => c.value === product.category)?.label || product.category}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Price */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-bold text-primary" data-testid={`text-product-price-${product.id}`}>
+                      ${product.price}
+                    </span>
+                    <Badge className={product.isActive ? "bg-green-500/20 text-green-500 border-green-500/30 text-[10px] px-1.5 py-0 h-5" : "bg-gray-500/20 text-gray-500 border-gray-500/30 text-[10px] px-1.5 py-0 h-5"}>
+                      {product.isActive ? t("myProducts.active") : t("myProducts.inactive")}
+                    </Badge>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Eye className="w-3 h-3" />
+                      <span data-testid={`text-product-views-${product.id}`}>{product.views}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <ShoppingBag className="w-3 h-3" />
+                      <span data-testid={`text-product-sales-${product.id}`}>{product.sales}</span>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-1.5 pt-2 border-t border-border/30">
+                    <Dialog open={editingProduct?.id === product.id} onOpenChange={(open) => !open && setEditingProduct(null)}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1 border-border/50 h-7 text-xs"
+                          onClick={() => setEditingProduct(product)}
+                          data-testid={`button-edit-${product.id}`}
+                        >
+                          <Edit className="w-3 h-3 mr-1" />
+                          {t("common.edit")}
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="glass-morphism-strong border-border/50 max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>{t("myProducts.editService")}</DialogTitle>
+                          <DialogDescription>
+                            {t("myProducts.updateDetails")}
+                          </DialogDescription>
+                        </DialogHeader>
+                        <ProductForm product={product} onClose={() => setEditingProduct(null)} />
+                      </DialogContent>
+                    </Dialog>
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="border-red-500/30 text-red-500 hover:bg-red-500/10 h-7 px-2"
+                          data-testid={`button-delete-${product.id}`}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="glass-morphism-strong border-border/50">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>{t("myProducts.deleteService")}</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {t("myProducts.deleteConfirm")} "{product.title}"? {t("myProducts.deleteWarning")}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="glass-morphism border-border/50">{t("common.cancel")}</AlertDialogCancel>
+                          <AlertDialogAction 
+                            className="bg-red-500 hover:bg-red-600" 
+                            onClick={() => deleteMutation.mutate(product.id)}
+                            disabled={deleteMutation.isPending}
+                            data-testid={`button-confirm-delete-${product.id}`}
+                          >
+                            {deleteMutation.isPending ? t("myProducts.deleting") : t("common.delete")}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+
+                {/* Desktop Layout (full width) */}
+                <div className="hidden md:flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
