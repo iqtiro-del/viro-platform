@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "./theme-provider";
 import { useLanguage } from "@/lib/language-context";
+import { getUserAvatar } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -95,7 +96,7 @@ export function AppNavbar({ user, onLogout }: AppNavbarProps) {
                 data-testid="button-user-menu"
               >
                 <Avatar className="h-8 w-8 border-2 border-primary neon-glow-primary">
-                  <AvatarImage src={user.avatarUrl || undefined} alt={user.fullName} />
+                  <AvatarImage src={getUserAvatar(user.id)} alt={user.fullName} />
                   <AvatarFallback className="bg-primary/20 text-primary font-semibold text-xs">
                     {user.fullName.substring(0, 2).toUpperCase()}
                   </AvatarFallback>

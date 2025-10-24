@@ -22,6 +22,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { getUserAvatar } from "@/lib/utils";
 import type { User } from "@shared/schema";
 
 export function ProfilePage() {
@@ -160,7 +161,7 @@ export function ProfilePage() {
     return null;
   }
 
-  const memberSince = new Date(userData.createdAt).toLocaleDateString('en-US', { 
+  const memberSince = new Date(userData.createdAt).toLocaleDateString('ar-IQ', { 
     month: 'long', 
     year: 'numeric' 
   });
@@ -177,7 +178,7 @@ export function ProfilePage() {
           <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 md:left-8 md:translate-x-0">
             <div className="relative group">
               <Avatar className="w-40 h-40 border-4 border-background neon-glow-primary" data-testid="img-avatar">
-                <AvatarImage src={userData.avatarUrl} alt={userData.fullName} />
+                <AvatarImage src={getUserAvatar(userData.id)} alt={userData.fullName} />
                 <AvatarFallback className="text-3xl bg-primary/20 text-primary font-bold">
                   {userData.fullName.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
@@ -215,7 +216,7 @@ export function ProfilePage() {
                   data-testid="button-cancel-edit"
                 >
                   <X className="w-4 h-4 mr-2" />
-                  Cancel
+                  {t("profile.cancel")}
                 </Button>
                 <Button 
                   size="sm" 
@@ -225,7 +226,7 @@ export function ProfilePage() {
                   data-testid="button-save-profile"
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  {updateProfileMutation.isPending ? 'Saving...' : 'Save'}
+                  {updateProfileMutation.isPending ? t("profile.saving") : t("profile.save")}
                 </Button>
               </div>
             ) : (
@@ -237,7 +238,7 @@ export function ProfilePage() {
                 data-testid="button-edit-profile"
               >
                 <Edit3 className="w-4 h-4 mr-2" />
-                Edit Profile
+                {t("profile.editProfile")}
               </Button>
             )}
           </div>
@@ -249,13 +250,13 @@ export function ProfilePage() {
             {/* Basic Info Card */}
             <Card className="glass-morphism border-border/30">
               <CardHeader>
-                <CardTitle>Profile Information</CardTitle>
-                <CardDescription>Your personal details and bio</CardDescription>
+                <CardTitle>{t("profile.personalInfo")}</CardTitle>
+                <CardDescription>{t("profile.personalInfoDescription")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="fullname">Full Name</Label>
+                    <Label htmlFor="fullname">{t("profile.fullName")}</Label>
                     <Input 
                       id="fullname"
                       defaultValue={userData.fullName}
@@ -265,7 +266,7 @@ export function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="username">Username</Label>
+                    <Label htmlFor="username">{t("profile.username")}</Label>
                     <Input 
                       id="username"
                       defaultValue={userData.username}
@@ -277,11 +278,11 @@ export function ProfilePage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t("profile.email")}</Label>
                   <Input 
                     id="email"
                     type="email"
-                    defaultValue={userData.email}
+                    defaultValue={userData.email || ""}
                     disabled={!isEditing}
                     className={`glass-morphism border-border/50 mt-2 ${isEditing ? 'focus:border-primary' : ''}`}
                     data-testid="input-email"
@@ -289,10 +290,10 @@ export function ProfilePage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="bio">Bio</Label>
+                  <Label htmlFor="bio">{t("profile.bio")}</Label>
                   <Textarea 
                     id="bio"
-                    defaultValue={userData.bio}
+                    defaultValue={userData.bio || ""}
                     disabled={!isEditing}
                     className={`glass-morphism border-border/50 mt-2 min-h-[100px] ${isEditing ? 'focus:border-primary' : ''}`}
                     data-testid="input-bio"
@@ -304,26 +305,26 @@ export function ProfilePage() {
             {/* Stats Card */}
             <Card className="glass-morphism border-border/30">
               <CardHeader>
-                <CardTitle>Performance Stats</CardTitle>
-                <CardDescription>Your achievements on Tiro</CardDescription>
+                <CardTitle>{t("profile.performanceStats")}</CardTitle>
+                <CardDescription>{t("profile.performanceDescription")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center p-4 glass-morphism rounded-lg border border-border/30" data-testid="card-rating">
                     <Star className="w-6 h-6 mx-auto mb-2 text-yellow-500" />
                     <p className="text-2xl font-bold text-foreground" data-testid="text-rating">{userData.rating}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Rating</p>
-                    <p className="text-xs text-muted-foreground" data-testid="text-reviews">({userData.totalReviews} reviews)</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t("profile.rating")}</p>
+                    <p className="text-xs text-muted-foreground" data-testid="text-reviews">({userData.totalReviews} {t("profile.reviews")})</p>
                   </div>
                   <div className="text-center p-4 glass-morphism rounded-lg border border-border/30" data-testid="card-sales">
                     <Package className="w-6 h-6 mx-auto mb-2 text-primary" />
                     <p className="text-2xl font-bold text-foreground" data-testid="text-total-sales">{totalSales}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Total Sales</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t("profile.totalSales")}</p>
                   </div>
                   <div className="text-center p-4 glass-morphism rounded-lg border border-border/30" data-testid="card-rank">
                     <TrendingUp className="w-6 h-6 mx-auto mb-2 text-secondary" />
-                    <p className="text-2xl font-bold text-foreground" data-testid="text-seller-rank">Top {sellerRank}%</p>
-                    <p className="text-xs text-muted-foreground mt-1">Seller Rank</p>
+                    <p className="text-2xl font-bold text-foreground" data-testid="text-seller-rank">{t("profile.top")} {sellerRank}%</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t("profile.sellerRank")}</p>
                   </div>
                 </div>
               </CardContent>
@@ -335,22 +336,22 @@ export function ProfilePage() {
             {/* Account Status */}
             <Card className="glass-morphism border-border/30">
               <CardHeader>
-                <CardTitle className="text-lg">Account Status</CardTitle>
+                <CardTitle className="text-lg">{t("profile.accountStatus")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between" data-testid="text-verification-status">
-                  <span className="text-sm text-muted-foreground">Verification</span>
+                  <span className="text-sm text-muted-foreground">{t("profile.verification")}</span>
                   <Badge className="bg-green-500/20 text-green-500 border-green-500/30 neon-glow-success" data-testid="badge-verified">
-                    {userData.isVerified ? 'Verified' : 'Not Verified'}
+                    {userData.isVerified ? t("profile.verified") : t("profile.notVerified")}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between" data-testid="text-member-since">
-                  <span className="text-sm text-muted-foreground">Member Since</span>
+                  <span className="text-sm text-muted-foreground">{t("profile.memberSince")}</span>
                   <span className="text-sm font-medium">{memberSince}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Account Type</span>
-                  <Badge variant="secondary">Seller</Badge>
+                  <span className="text-sm text-muted-foreground">{t("profile.accountType")}</span>
+                  <Badge variant="secondary">{t("profile.seller")}</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -358,16 +359,16 @@ export function ProfilePage() {
             {/* Quick Actions */}
             <Card className="glass-morphism border-border/30">
               <CardHeader>
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
+                <CardTitle className="text-lg">{t("profile.quickActions")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button variant="outline" className="w-full justify-start border-border/50" data-testid="button-change-password">
                   <UserIcon className="w-4 h-4 mr-2" />
-                  Change Password
+                  {t("profile.changePassword")}
                 </Button>
                 <Button variant="outline" className="w-full justify-start border-border/50" data-testid="button-notification-settings">
                   <Mail className="w-4 h-4 mr-2" />
-                  Notification Settings
+                  {t("profile.notificationSettings")}
                 </Button>
               </CardContent>
             </Card>

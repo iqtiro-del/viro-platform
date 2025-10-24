@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "./theme-provider";
 import { useLanguage } from "@/lib/language-context";
+import { getUserAvatar } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -78,7 +79,7 @@ export function MobileMenu({ user, onLogout, open, onOpenChange }: MobileMenuPro
                     onClick={handleNavClick}
                   >
                     <Avatar className="h-12 w-12 border-2 border-primary neon-glow-primary">
-                      <AvatarImage src={user.avatarUrl || undefined} alt={user.fullName} />
+                      <AvatarImage src={getUserAvatar(user.id)} alt={user.fullName} />
                       <AvatarFallback className="bg-primary/20 text-primary font-semibold">
                         {user.fullName.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
