@@ -8,7 +8,33 @@ The application is built as a full-stack web platform with a React-based fronten
 
 ## Recent Changes
 
-**Fee System for Deposits and Withdrawals (Latest Update)**
+**Responsive Navigation System Redesign (Latest Update)**
+- Redesigned navigation with horizontal navbar for desktop and slide-in drawer for mobile
+- **Desktop Navigation** (≥768px):
+  - Horizontal navigation bar displaying all page links centered in header
+  - Logo "تيرو" on the left side
+  - Navigation items: Dashboard, Services, Wallet, My Products, Promote
+  - Profile avatar dropdown on the right with Profile and Logout options
+  - Theme toggle (sun/moon icon) for switching between light/dark mode
+  - Active page highlighted with neon glow effect and primary background color
+- **Mobile Navigation** (<768px):
+  - Hamburger menu button in top right of header
+  - Slide-in drawer (Sheet component) from right side (RTL support)
+  - User profile section at top with avatar, name, and verification badge
+  - All navigation links in vertical layout
+  - Settings section with theme toggle
+  - Logout button at bottom of drawer
+- **Components**:
+  - `AppNavbar` component for desktop horizontal navigation
+  - `MobileMenu` component for mobile slide-in drawer
+  - Replaced previous SidebarProvider/AppSidebar system
+- **Bug Fixes**:
+  - Fixed logout redirect to go to dashboard (/) instead of /login
+- Maintained all existing neon/cyberpunk colors and theme consistency
+- Full RTL support with right-side menu slide-in
+- Successfully tested end-to-end on desktop (1280x720) and mobile (375x667) viewports
+
+**Fee System for Deposits and Withdrawals**
 - Implemented 10% fee on all deposits and withdrawals with clear UI breakdown
 - **Deposit logic:** User deposits $100 → 10% fee deducted ($10) → receives $90 in wallet
 - **Withdrawal logic:** User withdraws $50 → 10% fee deducted ($5) → receives $45, balance reduced by $50
