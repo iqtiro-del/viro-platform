@@ -17,16 +17,20 @@ import {
   X,
   Star,
   Package,
-  TrendingUp
+  TrendingUp,
+  MessageCircle
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { getUserAvatar } from "@/lib/utils";
-import type { User } from "@shared/schema";
+import type { User, ChatWithDetails } from "@shared/schema";
+import { ChatDialog } from "@/components/chat-dialog";
 
 export function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedChat, setSelectedChat] = useState<ChatWithDetails | null>(null);
+  const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const { user } = useAuth();
   const { t } = useLanguage();
 
@@ -39,6 +43,16 @@ export function ProfilePage() {
     queryKey: ['/api/users', user?.id, 'products'],
     enabled: !!user
   });
+
+  // Fetch active chats for the user
+  const { data: chats = [] } = useQuery<ChatWithDetails[]>({
+    queryKey: ['/api/chats'],
+    enabled: !!user,
+    refetchInterval: 10000, // Refresh every 10 seconds
+  });
+
+  // Filter active chats only
+  const activeChats = chats.filter(chat => chat.status === 'active');
 
   const totalSales = userProducts.reduce((sum, p) => sum + (p.sales || 0), 0);
   
@@ -362,6 +376,25 @@ export function ProfilePage() {
                 <CardTitle className="text-lg">{t("profile.quickActions")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
+                {activeChats.length > 0 && (
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start border-border/50 neon-glow-primary relative" 
+                    data-testid="button-active-chats"
+                    onClick={() => {
+                      setSelectedChat(activeChats[0]);
+                      setChatDialogOpen(true);
+                    }}
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    المحادثات النشطة
+                    {activeChats.length > 0 && (
+                      <Badge className="mr-2 bg-primary/20 text-primary border-primary/30 neon-glow-primary">
+                        {activeChats.length}
+                      </Badge>
+                    )}
+                  </Button>
+                )}
                 <Button variant="outline" className="w-full justify-start border-border/50" data-testid="button-change-password">
                   <UserIcon className="w-4 h-4 mr-2" />
                   {t("profile.changePassword")}
@@ -375,6 +408,20 @@ export function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Chat Dialog */}
+      {selectedChat && (
+        <ChatDialog
+          chat={selectedChat}
+          open={chatDialogOpen}
+          onOpenChange={(open) => {
+            setChatDialogOpen(open);
+            if (!open) {
+              setSelectedChat(null);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
