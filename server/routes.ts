@@ -9,6 +9,7 @@ import {
   insertTransactionSchema
 } from "@shared/schema";
 import bcrypt from "bcryptjs";
+import { encryptCredentials, decryptCredentials } from "./crypto";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
@@ -143,7 +144,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/products", async (req, res) => {
     try {
       const data = insertProductSchema.parse(req.body);
-      const product = await storage.createProduct(data);
+      
+      // Encrypt credentials before storing
+      const encryptedCredentials = encryptCredentials({
+        accountUsername: data.accountUsername,
+        accountPassword: data.accountPassword,
+        accountEmail: data.accountEmail,
+        accountEmailPassword: data.accountEmailPassword,
+      });
+      
+      const product = await storage.createProduct({
+        ...data,
+        ...encryptedCredentials,
+      });
+      
       res.json(product);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
@@ -152,7 +166,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/products/:id", async (req, res) => {
     try {
-      const product = await storage.updateProduct(req.params.id, req.body);
+      const data = req.body;
+      
+      // Encrypt credentials if they are being updated
+      // encryptCredentials now only returns fields that are provided (not empty/undefined)
+      const encryptedCredentials = encryptCredentials({
+        accountUsername: data.accountUsername,
+        accountPassword: data.accountPassword,
+        accountEmail: data.accountEmail,
+        accountEmailPassword: data.accountEmailPassword,
+      });
+      
+      // Merge encrypted credentials into data (only provided fields)
+      Object.assign(data, encryptedCredentials);
+      
+      const product = await storage.updateProduct(req.params.id, data);
       if (!product) {
         return res.status(404).json({ error: "Product not found" });
       }
@@ -384,10 +412,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedBuyer = await storage.getUser(buyerId);
       const { password, ...buyerWithoutPassword } = updatedBuyer!;
 
+      // Get product details and decrypt credentials for the buyer
+      const product = await storage.getProduct(productId);
+      if (!product) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      // Decrypt credentials to deliver to buyer
+      const decryptedCredentials = decryptCredentials({
+        accountUsername: product.accountUsername || undefined,
+        accountPassword: product.accountPassword || undefined,
+        accountEmail: product.accountEmail || undefined,
+        accountEmailPassword: product.accountEmailPassword || undefined,
+      });
+
+      // Prepare product details for buyer (excluding seller's sensitive info)
+      const productDetails = {
+        id: product.id,
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        category: product.category,
+        imageUrl: product.imageUrl,
+        credentials: decryptedCredentials,
+      };
+
       res.json({ 
         success: true, 
         transaction: result.transaction,
-        buyer: buyerWithoutPassword
+        buyer: buyerWithoutPassword,
+        product: productDetails,
       });
     } catch (error: any) {
       res.status(400).json({ error: error.message });

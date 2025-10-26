@@ -12,7 +12,8 @@ import {
   ShoppingBag, 
   Filter,
   SlidersHorizontal,
-  X
+  X,
+  AlertCircle
 } from "lucide-react";
 import {
   Select,
@@ -104,16 +105,9 @@ export function ServicesPage() {
       
       setPurchaseDialogOpen(false);
       
-      // If the product is Instagram or TikTok, show credentials dialog
-      if (selectedProduct && (selectedProduct.category === "Instagram" || selectedProduct.category === "TikTok")) {
-        setPurchasedProductData(data.product);
-        setCredentialsDialogOpen(true);
-      } else {
-        toast({
-          title: t("services.purchaseSuccess"),
-          description: `${t("services.purchasedProduct")} "${selectedProduct?.title}"`,
-        });
-      }
+      // Always show product details dialog after purchase
+      setPurchasedProductData(data.product);
+      setCredentialsDialogOpen(true);
       
       setSelectedProduct(null);
     },
@@ -456,38 +450,77 @@ export function ServicesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Account Credentials Dialog */}
+      {/* Product Details Dialog - Shows after purchase */}
       <Dialog open={credentialsDialogOpen} onOpenChange={setCredentialsDialogOpen}>
-        <DialogContent className="glass-morphism-strong border-border/50">
+        <DialogContent className="glass-morphism-strong border-border/50 max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{t("services.accountCredentials")}</DialogTitle>
+            <DialogTitle>{t("services.purchaseSuccess")}</DialogTitle>
             <DialogDescription>
               {t("services.saveCredentials")}
             </DialogDescription>
           </DialogHeader>
           
           {purchasedProductData && (
-            <div className="space-y-4 pt-4">
-              <div className="p-4 bg-primary/10 border border-primary/30 rounded-md space-y-3">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">{t("myProducts.accountUsername")}:</span>
-                    <span className="font-medium text-foreground">{purchasedProductData.accountUsername || "N/A"}</span>
+            <div className="space-y-6 pt-4">
+              {/* Product Information */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg text-foreground">{purchasedProductData.title}</h3>
+                <p className="text-sm text-muted-foreground">{purchasedProductData.description}</p>
+                <div className="flex gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">{t("services.category")}: </span>
+                    <span className="font-medium text-foreground">{purchasedProductData.category}</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">{t("myProducts.accountPassword")}:</span>
-                    <span className="font-medium text-foreground">{purchasedProductData.accountPassword || "N/A"}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">{t("myProducts.accountEmail")}:</span>
-                    <span className="font-medium text-foreground">{purchasedProductData.accountEmail || "N/A"}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">{t("myProducts.accountEmailPassword")}:</span>
-                    <span className="font-medium text-foreground">{purchasedProductData.accountEmailPassword || "N/A"}</span>
+                  <div>
+                    <span className="text-muted-foreground">{t("services.price")}: </span>
+                    <span className="font-bold text-primary">${purchasedProductData.price}</span>
                   </div>
                 </div>
               </div>
+
+              {/* Product Details/Credentials - Only show if at least one field has a value */}
+              {purchasedProductData.credentials && (
+                purchasedProductData.credentials.accountUsername || 
+                purchasedProductData.credentials.accountPassword || 
+                purchasedProductData.credentials.accountEmail || 
+                purchasedProductData.credentials.accountEmailPassword
+              ) && (
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-foreground">{t("services.accountCredentials")}</h4>
+                  <div className="p-4 bg-primary/10 border border-primary/30 rounded-md space-y-3">
+                    <div className="space-y-2">
+                      {purchasedProductData.credentials.accountUsername && (
+                        <div className="flex justify-between items-center gap-4">
+                          <span className="text-sm text-muted-foreground">{t("myProducts.accountUsername")}:</span>
+                          <span className="font-medium text-foreground break-all text-right">{purchasedProductData.credentials.accountUsername}</span>
+                        </div>
+                      )}
+                      {purchasedProductData.credentials.accountPassword && (
+                        <div className="flex justify-between items-center gap-4">
+                          <span className="text-sm text-muted-foreground">{t("myProducts.accountPassword")}:</span>
+                          <span className="font-medium text-foreground break-all text-right">{purchasedProductData.credentials.accountPassword}</span>
+                        </div>
+                      )}
+                      {purchasedProductData.credentials.accountEmail && (
+                        <div className="flex justify-between items-center gap-4">
+                          <span className="text-sm text-muted-foreground">{t("myProducts.accountEmail")}:</span>
+                          <span className="font-medium text-foreground break-all text-right">{purchasedProductData.credentials.accountEmail}</span>
+                        </div>
+                      )}
+                      {purchasedProductData.credentials.accountEmailPassword && (
+                        <div className="flex justify-between items-center gap-4">
+                          <span className="text-sm text-muted-foreground">{t("myProducts.accountEmailPassword")}:</span>
+                          <span className="font-medium text-foreground break-all text-right">{purchasedProductData.credentials.accountEmailPassword}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-yellow-500 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    {t("services.saveCredentials")}
+                  </p>
+                </div>
+              )}
 
               <Button 
                 className="w-full neon-glow-primary" 
