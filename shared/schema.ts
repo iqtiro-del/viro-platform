@@ -17,6 +17,7 @@ import { z } from "zod";
 export const promotionTierEnum = pgEnum('promotion_tier', ['top_3', 'top_5', 'top_10']);
 export const transactionTypeEnum = pgEnum('transaction_type', ['deposit', 'withdraw', 'sale', 'purchase', 'promotion']);
 export const transactionStatusEnum = pgEnum('transaction_status', ['pending', 'completed', 'failed']);
+export const chatStatusEnum = pgEnum('chat_status', ['active', 'closed_seller', 'closed_buyer', 'under_review', 'resolved_seller', 'resolved_buyer']);
 
 // Users table
 export const users = pgTable("users", {
@@ -88,11 +89,37 @@ export const transactions = pgTable("transactions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Chats table
+export const chats = pgTable("chats", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").notNull().references(() => products.id, { onDelete: 'cascade' }),
+  buyerId: varchar("buyer_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  sellerId: varchar("seller_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  transactionId: varchar("transaction_id").references(() => transactions.id, { onDelete: 'set null' }),
+  status: chatStatusEnum("status").default('active').notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  closedAt: timestamp("closed_at"),
+  closedBy: text("closed_by"),
+});
+
+// Messages table
+export const messages = pgTable("messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  chatId: varchar("chat_id").notNull().references(() => chats.id, { onDelete: 'cascade' }),
+  senderId: varchar("sender_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  message: text("message").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   products: many(products),
   reviews: many(reviews),
   transactions: many(transactions),
+  chatsAsBuyer: many(chats, { relationName: 'buyer' }),
+  chatsAsSeller: many(chats, { relationName: 'seller' }),
+  messages: many(messages),
 }));
 
 export const productsRelations = relations(products, ({ one, many }) => ({
@@ -102,6 +129,7 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   }),
   reviews: many(reviews),
   promotions: many(promotions),
+  chats: many(chats),
 }));
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
@@ -126,9 +154,43 @@ export const promotionsRelations = relations(promotions, ({ one }) => ({
   }),
 }));
 
-export const transactionsRelations = relations(transactions, ({ one }) => ({
+export const transactionsRelations = relations(transactions, ({ one, many }) => ({
   user: one(users, {
     fields: [transactions.userId],
+    references: [users.id],
+  }),
+  chats: many(chats),
+}));
+
+export const chatsRelations = relations(chats, ({ one, many }) => ({
+  product: one(products, {
+    fields: [chats.productId],
+    references: [products.id],
+  }),
+  buyer: one(users, {
+    fields: [chats.buyerId],
+    references: [users.id],
+    relationName: 'buyer',
+  }),
+  seller: one(users, {
+    fields: [chats.sellerId],
+    references: [users.id],
+    relationName: 'seller',
+  }),
+  transaction: one(transactions, {
+    fields: [chats.transactionId],
+    references: [transactions.id],
+  }),
+  messages: many(messages),
+}));
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  chat: one(chats, {
+    fields: [messages.chatId],
+    references: [chats.id],
+  }),
+  sender: one(users, {
+    fields: [messages.senderId],
     references: [users.id],
   }),
 }));
@@ -183,6 +245,19 @@ export const insertTransactionSchema = createInsertSchema(transactions).omit({
   createdAt: true,
 });
 
+export const insertChatSchema = createInsertSchema(chats).omit({
+  id: true,
+  createdAt: true,
+  closedAt: true,
+});
+
+export const insertMessageSchema = createInsertSchema(messages).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  message: z.string().min(1, "Message cannot be empty"),
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -194,6 +269,10 @@ export type InsertPromotion = z.infer<typeof insertPromotionSchema>;
 export type Promotion = typeof promotions.$inferSelect;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type Transaction = typeof transactions.$inferSelect;
+export type InsertChat = z.infer<typeof insertChatSchema>;
+export type Chat = typeof chats.$inferSelect;
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type Message = typeof messages.$inferSelect;
 
 // Extended types with relations
 export type ProductWithSeller = Product & {
@@ -203,4 +282,15 @@ export type ProductWithSeller = Product & {
 
 export type ReviewWithBuyer = Review & {
   buyer: User;
+};
+
+export type ChatWithDetails = Chat & {
+  product: Product;
+  buyer: User;
+  seller: User;
+  messages?: Message[];
+};
+
+export type MessageWithSender = Message & {
+  sender: User;
 };

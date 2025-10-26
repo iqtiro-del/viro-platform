@@ -5,6 +5,8 @@ import {
   reviews, 
   promotions, 
   transactions,
+  chats,
+  messages,
   type User, 
   type InsertUser,
   type Product,
@@ -15,8 +17,14 @@ import {
   type InsertPromotion,
   type Transaction,
   type InsertTransaction,
+  type Chat,
+  type InsertChat,
+  type Message,
+  type InsertMessage,
   type ProductWithSeller,
-  type ReviewWithBuyer
+  type ReviewWithBuyer,
+  type ChatWithDetails,
+  type MessageWithSender
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -56,6 +64,19 @@ export interface IStorage {
   
   // Product Purchase
   purchaseProduct(buyerId: string, productId: string): Promise<{ success: boolean; transaction?: Transaction; error?: string }>;
+  
+  // Chats
+  getChat(id: string): Promise<ChatWithDetails | undefined>;
+  getChatsByUser(userId: string): Promise<ChatWithDetails[]>;
+  getChatByTransaction(transactionId: string): Promise<Chat | undefined>;
+  createChat(chat: InsertChat): Promise<Chat>;
+  closeChat(chatId: string, closedBy: string, status: 'closed_seller' | 'closed_buyer'): Promise<Chat | undefined>;
+  resolveChat(chatId: string, status: 'resolved_seller' | 'resolved_buyer'): Promise<Chat | undefined>;
+  checkExpiredChats(): Promise<void>;
+  
+  // Messages
+  getMessagesByChat(chatId: string): Promise<MessageWithSender[]>;
+  createMessage(message: InsertMessage): Promise<Message>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -329,17 +350,9 @@ export class DatabaseStorage implements IStorage {
       return { success: false, error: "Cannot purchase your own product" };
     }
 
-    // Deduct from buyer balance
+    // Deduct from buyer balance (payment held in escrow until chat closes)
     await this.updateUser(buyerId, {
       balance: (buyerBalance - productPrice).toFixed(2)
-    });
-
-    // Add to seller balance and earnings
-    const sellerBalance = parseFloat(seller.balance);
-    const sellerEarnings = parseFloat(seller.totalEarnings);
-    await this.updateUser(seller.id, {
-      balance: (sellerBalance + productPrice).toFixed(2),
-      totalEarnings: (sellerEarnings + productPrice).toFixed(2)
     });
 
     // Increment product sales count
@@ -347,25 +360,288 @@ export class DatabaseStorage implements IStorage {
       sales: product.sales + 1
     });
 
-    // Create buyer transaction (purchase)
+    // Create buyer transaction (pending until chat closes)
     const buyerTransaction = await this.createTransaction({
       userId: buyerId,
       type: 'purchase',
       amount: product.price,
-      status: 'completed',
+      status: 'pending',
       description: `Purchased "${product.title}"`
     });
 
-    // Create seller transaction (sale)
-    await this.createTransaction({
-      userId: seller.id,
-      type: 'sale',
-      amount: product.price,
-      status: 'completed',
-      description: `Sold "${product.title}"`
+    // Create chat with 72-hour expiration
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 72);
+    
+    await this.createChat({
+      productId,
+      buyerId,
+      sellerId: seller.id,
+      transactionId: buyerTransaction.id,
+      status: 'active',
+      expiresAt,
+      closedBy: null
     });
 
     return { success: true, transaction: buyerTransaction };
+  }
+
+  // Chats
+  async getChat(id: string): Promise<ChatWithDetails | undefined> {
+    const [result] = await db
+      .select()
+      .from(chats)
+      .leftJoin(products, eq(chats.productId, products.id))
+      .leftJoin(users, eq(chats.buyerId, users.id))
+      .where(eq(chats.id, id));
+    
+    if (!result) return undefined;
+
+    // Get seller separately
+    const [seller] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, result.chats.sellerId));
+
+    return {
+      ...result.chats,
+      product: result.products!,
+      buyer: result.users!,
+      seller: seller!,
+    };
+  }
+
+  async getChatsByUser(userId: string): Promise<ChatWithDetails[]> {
+    const results = await db
+      .select()
+      .from(chats)
+      .leftJoin(products, eq(chats.productId, products.id))
+      .leftJoin(users, eq(chats.buyerId, users.id))
+      .where(
+        or(
+          eq(chats.buyerId, userId),
+          eq(chats.sellerId, userId)
+        )
+      )
+      .orderBy(desc(chats.createdAt));
+
+    return Promise.all(results.map(async (result) => {
+      const [seller] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, result.chats.sellerId));
+
+      return {
+        ...result.chats,
+        product: result.products!,
+        buyer: result.users!,
+        seller: seller!,
+      };
+    }));
+  }
+
+  async getChatByTransaction(transactionId: string): Promise<Chat | undefined> {
+    const [chat] = await db
+      .select()
+      .from(chats)
+      .where(eq(chats.transactionId, transactionId));
+    return chat || undefined;
+  }
+
+  async createChat(chat: InsertChat): Promise<Chat> {
+    const [newChat] = await db
+      .insert(chats)
+      .values(chat)
+      .returning();
+    return newChat;
+  }
+
+  async closeChat(chatId: string, closedBy: string, status: 'closed_seller' | 'closed_buyer'): Promise<Chat | undefined> {
+    // Get chat details first
+    const chatDetails = await this.getChat(chatId);
+    if (!chatDetails) return undefined;
+
+    // Close the chat
+    const [chat] = await db
+      .update(chats)
+      .set({ 
+        status,
+        closedAt: new Date(),
+        closedBy
+      })
+      .where(eq(chats.id, chatId))
+      .returning();
+
+    if (!chat) return undefined;
+
+    // Handle payment based on who closed the chat
+    const transaction = chatDetails.transactionId 
+      ? await db.select().from(transactions).where(eq(transactions.id, chatDetails.transactionId)).then(r => r[0])
+      : undefined;
+
+    if (transaction) {
+      const productPrice = parseFloat(transaction.amount);
+
+      if (status === 'closed_seller') {
+        // Payment goes to seller
+        const seller = await this.getUser(chatDetails.sellerId);
+        if (seller) {
+          const sellerBalance = parseFloat(seller.balance);
+          const sellerEarnings = parseFloat(seller.totalEarnings);
+          await this.updateUser(chatDetails.sellerId, {
+            balance: (sellerBalance + productPrice).toFixed(2),
+            totalEarnings: (sellerEarnings + productPrice).toFixed(2)
+          });
+
+          // Update transaction status
+          await this.updateTransaction(transaction.id, 'completed');
+
+          // Create seller transaction
+          await this.createTransaction({
+            userId: chatDetails.sellerId,
+            type: 'sale',
+            amount: transaction.amount,
+            status: 'completed',
+            description: `Sold "${chatDetails.product.title}"`
+          });
+        }
+      } else if (status === 'closed_buyer') {
+        // Refund to buyer
+        const buyer = await this.getUser(chatDetails.buyerId);
+        if (buyer) {
+          const buyerBalance = parseFloat(buyer.balance);
+          await this.updateUser(chatDetails.buyerId, {
+            balance: (buyerBalance + productPrice).toFixed(2)
+          });
+
+          // Update transaction status
+          await this.updateTransaction(transaction.id, 'failed');
+
+          // Decrement product sales since this was a refund
+          await this.updateProduct(chatDetails.productId, {
+            sales: Math.max(0, chatDetails.product.sales - 1)
+          });
+        }
+      }
+    }
+
+    return chat;
+  }
+
+  async resolveChat(chatId: string, status: 'resolved_seller' | 'resolved_buyer'): Promise<Chat | undefined> {
+    // Get chat details first
+    const chatDetails = await this.getChat(chatId);
+    if (!chatDetails) return undefined;
+
+    // Resolve the chat
+    const [chat] = await db
+      .update(chats)
+      .set({ 
+        status,
+        closedAt: new Date(),
+        closedBy: 'admin'
+      })
+      .where(eq(chats.id, chatId))
+      .returning();
+
+    if (!chat) return undefined;
+
+    // Handle payment based on admin decision
+    const transaction = chatDetails.transactionId 
+      ? await db.select().from(transactions).where(eq(transactions.id, chatDetails.transactionId)).then(r => r[0])
+      : undefined;
+
+    if (transaction) {
+      const productPrice = parseFloat(transaction.amount);
+
+      if (status === 'resolved_seller') {
+        // Payment goes to seller
+        const seller = await this.getUser(chatDetails.sellerId);
+        if (seller) {
+          const sellerBalance = parseFloat(seller.balance);
+          const sellerEarnings = parseFloat(seller.totalEarnings);
+          await this.updateUser(chatDetails.sellerId, {
+            balance: (sellerBalance + productPrice).toFixed(2),
+            totalEarnings: (sellerEarnings + productPrice).toFixed(2)
+          });
+
+          // Update transaction status
+          await this.updateTransaction(transaction.id, 'completed');
+
+          // Create seller transaction
+          await this.createTransaction({
+            userId: chatDetails.sellerId,
+            type: 'sale',
+            amount: transaction.amount,
+            status: 'completed',
+            description: `Sold "${chatDetails.product.title}" (Admin resolved)`
+          });
+        }
+      } else if (status === 'resolved_buyer') {
+        // Refund to buyer
+        const buyer = await this.getUser(chatDetails.buyerId);
+        if (buyer) {
+          const buyerBalance = parseFloat(buyer.balance);
+          await this.updateUser(chatDetails.buyerId, {
+            balance: (buyerBalance + productPrice).toFixed(2)
+          });
+
+          // Update transaction status
+          await this.updateTransaction(transaction.id, 'failed');
+
+          // Decrement product sales since this was a refund
+          await this.updateProduct(chatDetails.productId, {
+            sales: Math.max(0, chatDetails.product.sales - 1)
+          });
+        }
+      }
+    }
+
+    return chat;
+  }
+
+  async checkExpiredChats(): Promise<void> {
+    // Find chats that are active but expired
+    const expiredChats = await db
+      .select()
+      .from(chats)
+      .where(
+        and(
+          eq(chats.status, 'active'),
+          sql`${chats.expiresAt} < NOW()`
+        )
+      );
+
+    // Update them to under_review status
+    for (const chat of expiredChats) {
+      await db
+        .update(chats)
+        .set({ status: 'under_review' })
+        .where(eq(chats.id, chat.id));
+    }
+  }
+
+  // Messages
+  async getMessagesByChat(chatId: string): Promise<MessageWithSender[]> {
+    const results = await db
+      .select()
+      .from(messages)
+      .leftJoin(users, eq(messages.senderId, users.id))
+      .where(eq(messages.chatId, chatId))
+      .orderBy(messages.createdAt);
+
+    return results.map(row => ({
+      ...row.messages,
+      sender: row.users!
+    }));
+  }
+
+  async createMessage(message: InsertMessage): Promise<Message> {
+    const [newMessage] = await db
+      .insert(messages)
+      .values(message)
+      .returning();
+    return newMessage;
   }
 }
 
