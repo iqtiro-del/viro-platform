@@ -588,6 +588,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Process scheduled payments (called periodically)
+  app.post("/api/chats/process-payments", async (req, res) => {
+    try {
+      await storage.processScheduledPayments();
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
