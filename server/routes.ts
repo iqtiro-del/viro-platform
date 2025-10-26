@@ -468,6 +468,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Chat routes
+  app.get("/api/chats/active/count", async (req, res) => {
+    try {
+      const { userId } = req.query;
+      if (!userId || typeof userId !== 'string') {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+      
+      const chats = await storage.getChatsByUser(userId);
+      const activeChats = chats.filter(chat => chat.status === 'active');
+      res.json({ count: activeChats.length });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   app.get("/api/chats", async (req, res) => {
     try {
       const { userId } = req.query;

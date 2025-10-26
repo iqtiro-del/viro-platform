@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   ShoppingBag, 
@@ -10,10 +11,12 @@ import {
   LogOut,
   Sun,
   Moon,
-  Languages
+  Languages,
+  MessageCircle
 } from "lucide-react";
 import { useTheme } from "./theme-provider";
 import { useLanguage } from "@/lib/language-context";
+import { useQuery } from "@tanstack/react-query";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +47,14 @@ export function Navbar({ user, onLogout }: NavbarProps) {
     { icon: Package, label: t("nav.myProducts"), path: "/my-products" },
     { icon: Megaphone, label: t("nav.promote"), path: "/promote" },
   ] : [];
+
+  // Fetch active chats count
+  const { data: activeChatsData } = useQuery<{ count: number }>({
+    queryKey: ['/api/chats/active/count', user?.id],
+    enabled: !!user,
+  });
+
+  const activeChatsCount = activeChatsData?.count || 0;
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border/50 glass-morphism">
@@ -81,6 +92,26 @@ export function Navbar({ user, onLogout }: NavbarProps) {
 
         {/* Right Side - User Menu or Auth Buttons */}
         <div className="flex items-center gap-2">
+          {/* Chat Icon - Only show if user has active chats */}
+          {user && activeChatsCount > 0 && (
+            <Link href="/chats">
+              <Button
+                variant="ghost"
+                size="icon"
+                data-testid="button-chats"
+                className="relative"
+              >
+                <MessageCircle className="w-5 h-5" />
+                <Badge 
+                  className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center p-1 bg-primary text-primary-foreground neon-glow-primary text-xs"
+                  data-testid="badge-chat-count"
+                >
+                  {activeChatsCount}
+                </Badge>
+              </Button>
+            </Link>
+          )}
+
           {/* Language Toggle */}
           <Button
             variant="ghost"
@@ -182,6 +213,22 @@ export function Navbar({ user, onLogout }: NavbarProps) {
                 </Link>
               );
             })}
+            {/* Chat icon - Only show if user has active chats */}
+            {activeChatsCount > 0 && (
+              <Link href="/chats">
+                <div className="flex flex-col items-center justify-center flex-1 h-full hover-elevate transition-all cursor-pointer relative">
+                  <MessageCircle className={`w-5 h-5 ${location === '/chats' ? 'text-primary neon-glow-primary' : 'text-muted-foreground'}`} />
+                  <span className={`text-xs mt-1 ${location === '/chats' ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+                    محادثات
+                  </span>
+                  <Badge 
+                    className="absolute top-1 right-2 h-4 min-w-4 flex items-center justify-center p-0.5 bg-primary text-primary-foreground text-[10px]"
+                  >
+                    {activeChatsCount}
+                  </Badge>
+                </div>
+              </Link>
+            )}
           </div>
         </div>
       )}
