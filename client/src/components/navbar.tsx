@@ -50,8 +50,9 @@ export function Navbar({ user, onLogout }: NavbarProps) {
 
   // Fetch active chats count
   const { data: activeChatsData } = useQuery<{ count: number }>({
-    queryKey: ['/api/chats/active/count', user?.id],
-    enabled: !!user,
+    queryKey: [`/api/chats/active/count?userId=${user?.id}`],
+    enabled: !!user?.id,
+    refetchInterval: 10000, // Refetch every 10 seconds
   });
 
   const activeChatsCount = activeChatsData?.count || 0;
