@@ -13,7 +13,8 @@ import {
   Filter,
   SlidersHorizontal,
   X,
-  AlertCircle
+  AlertCircle,
+  MessageCircle
 } from "lucide-react";
 import {
   Select,
@@ -37,7 +38,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { ProductWithSeller } from "@shared/schema";
+import type { ProductWithSeller, Chat } from "@shared/schema";
+import { ChatDialog } from "@/components/chat-dialog";
 import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
 import { useToast } from "@/hooks/use-toast";
@@ -52,6 +54,8 @@ export function ServicesPage() {
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
   const [credentialsDialogOpen, setCredentialsDialogOpen] = useState(false);
   const [purchasedProductData, setPurchasedProductData] = useState<any>(null);
+  const [chatDialogOpen, setChatDialogOpen] = useState(false);
+  const [purchasedChat, setPurchasedChat] = useState<Chat | null>(null);
 
   const { user, setUser } = useAuth();
   const { t } = useLanguage();
@@ -107,6 +111,7 @@ export function ServicesPage() {
       
       // Always show product details dialog after purchase
       setPurchasedProductData(data.product);
+      setPurchasedChat(data.chat);
       setCredentialsDialogOpen(true);
       
       setSelectedProduct(null);
@@ -522,24 +527,51 @@ export function ServicesPage() {
                 </div>
               )}
 
-              <Button 
-                className="w-full neon-glow-primary" 
-                onClick={() => {
-                  setCredentialsDialogOpen(false);
-                  setPurchasedProductData(null);
-                  toast({
-                    title: t("services.purchaseSuccess"),
-                    description: t("services.credentialsDelivered"),
-                  });
-                }}
-                data-testid="button-close-credentials"
-              >
-                {t("common.confirm")}
-              </Button>
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline"
+                  className="flex-1" 
+                  onClick={() => {
+                    setCredentialsDialogOpen(false);
+                    setPurchasedProductData(null);
+                    setPurchasedChat(null);
+                    toast({
+                      title: t("services.purchaseSuccess"),
+                      description: t("services.credentialsDelivered"),
+                    });
+                  }}
+                  data-testid="button-close-credentials"
+                >
+                  {t("common.close")}
+                </Button>
+                {purchasedChat && (
+                  <Button 
+                    className="flex-1 neon-glow-primary gap-2" 
+                    onClick={() => {
+                      setCredentialsDialogOpen(false);
+                      setChatDialogOpen(true);
+                    }}
+                    data-testid="button-open-chat"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    محادثة البائع
+                  </Button>
+                )}
+              </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Chat Dialog */}
+      {purchasedChat && user && (
+        <ChatDialog
+          open={chatDialogOpen}
+          onOpenChange={setChatDialogOpen}
+          chatId={purchasedChat.id}
+          currentUser={user}
+        />
+      )}
     </div>
   );
 }
