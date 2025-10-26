@@ -3,6 +3,18 @@
 ## Overview
 Tiro is a digital services marketplace platform designed for the Iraqi market, connecting service buyers with verified sellers for digital products and services. It features a modern neon/cyberpunk aesthetic, drawing inspiration from platforms like Fiverr and Upwork, while establishing a distinct Iraqi digital marketplace identity. The platform aims to be a full-stack web application with a React-based frontend, Express backend, and PostgreSQL for data persistence. The business vision is to capture a significant share of the digital services market in Iraq, offering a reliable and user-friendly platform for local transactions.
 
+## Recent Updates
+
+**Product Credential Encryption and Purchase Details System**
+- Implemented AES-256-GCM encryption for all product credentials (username, password, email, email password)
+- Created server/crypto.ts module with secure encrypt/decrypt functions using Node.js crypto
+- Credentials encrypted before storage in database, decrypted only when buyer completes purchase
+- Backend API: POST creates products with encrypted credentials, PATCH preserves existing credentials during partial updates, POST purchase decrypts and returns credentials to buyer only
+- Enhanced Product Details Dialog displays complete product information and decrypted credentials after purchase
+- Glassmorphism design with conditional rendering (only shows credential fields with values), warning icon, and secure presentation
+- Environment variable ENCRYPTION_KEY (SHA-256 hashed) for production deployment security
+- E2E tested: product creation → encryption → purchase → decryption → display flow working correctly
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
