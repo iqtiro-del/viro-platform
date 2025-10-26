@@ -373,7 +373,7 @@ export class DatabaseStorage implements IStorage {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 72);
     
-    await this.createChat({
+    const newChat = await this.createChat({
       productId,
       buyerId,
       sellerId: seller.id,
@@ -381,6 +381,39 @@ export class DatabaseStorage implements IStorage {
       status: 'active',
       expiresAt,
       closedBy: null
+    });
+
+    // Auto-send system message with product credentials
+    const { decryptCredentials } = await import('./crypto');
+    const credentials = decryptCredentials({
+      accountUsername: product.accountUsername || undefined,
+      accountPassword: product.accountPassword || undefined,
+      accountEmail: product.accountEmail || undefined,
+      accountEmailPassword: product.accountEmailPassword || undefined
+    });
+
+    // Build credential message
+    let credentialMessage = `📦 معلومات المنتج: ${product.title}\n\n`;
+    if (credentials.accountUsername) {
+      credentialMessage += `👤 اسم المستخدم: ${credentials.accountUsername}\n`;
+    }
+    if (credentials.accountPassword) {
+      credentialMessage += `🔑 كلمة المرور: ${credentials.accountPassword}\n`;
+    }
+    if (credentials.accountEmail) {
+      credentialMessage += `📧 البريد الإلكتروني: ${credentials.accountEmail}\n`;
+    }
+    if (credentials.accountEmailPassword) {
+      credentialMessage += `🔐 كلمة مرور البريد: ${credentials.accountEmailPassword}\n`;
+    }
+    credentialMessage += `\nيرجى حفظ هذه المعلومات في مكان آمن.`;
+
+    // Send system message with credentials
+    await this.createMessage({
+      chatId: newChat.id,
+      senderId: null,
+      senderType: 'system',
+      message: credentialMessage
     });
 
     return { success: true, transaction: buyerTransaction };
@@ -461,13 +494,24 @@ export class DatabaseStorage implements IStorage {
     const chatDetails = await this.getChat(chatId);
     if (!chatDetails) return undefined;
 
+    const now = new Date();
+    let paymentScheduledAt = null;
+
+    // Buyer closes in favor of seller → 10-hour delay for payment
+    // Seller closes in favor of buyer → immediate refund
+    if (status === 'closed_buyer') {
+      paymentScheduledAt = new Date(now.getTime() + 10 * 60 * 60 * 1000); // 10 hours from now
+    }
+
     // Close the chat
     const [chat] = await db
       .update(chats)
       .set({ 
         status,
-        closedAt: new Date(),
-        closedBy
+        closedAt: now,
+        closedBy,
+        closeInitiatedBy: closedBy,
+        paymentScheduledAt
       })
       .where(eq(chats.id, chatId))
       .returning();
@@ -483,30 +527,7 @@ export class DatabaseStorage implements IStorage {
       const productPrice = parseFloat(transaction.amount);
 
       if (status === 'closed_seller') {
-        // Payment goes to seller
-        const seller = await this.getUser(chatDetails.sellerId);
-        if (seller) {
-          const sellerBalance = parseFloat(seller.balance);
-          const sellerEarnings = parseFloat(seller.totalEarnings);
-          await this.updateUser(chatDetails.sellerId, {
-            balance: (sellerBalance + productPrice).toFixed(2),
-            totalEarnings: (sellerEarnings + productPrice).toFixed(2)
-          });
-
-          // Update transaction status
-          await this.updateTransaction(transaction.id, 'completed');
-
-          // Create seller transaction
-          await this.createTransaction({
-            userId: chatDetails.sellerId,
-            type: 'sale',
-            amount: transaction.amount,
-            status: 'completed',
-            description: `Sold "${chatDetails.product.title}"`
-          });
-        }
-      } else if (status === 'closed_buyer') {
-        // Refund to buyer
+        // Seller closed in favor of buyer → Immediate refund
         const buyer = await this.getUser(chatDetails.buyerId);
         if (buyer) {
           const buyerBalance = parseFloat(buyer.balance);
@@ -522,6 +543,10 @@ export class DatabaseStorage implements IStorage {
             sales: Math.max(0, chatDetails.product.sales - 1)
           });
         }
+      } else if (status === 'closed_buyer') {
+        // Buyer closed in favor of seller → Payment scheduled for 10 hours
+        // Payment will be processed by processScheduledPayments()
+        // Transaction remains pending until then
       }
     }
 
@@ -621,6 +646,63 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async processScheduledPayments(): Promise<void> {
+    // Find chats with scheduled payments that are due
+    const duePayments = await db
+      .select()
+      .from(chats)
+      .where(
+        and(
+          eq(chats.status, 'closed_buyer'),
+          sql`${chats.paymentScheduledAt} IS NOT NULL`,
+          sql`${chats.paymentScheduledAt} <= NOW()`
+        )
+      );
+
+    // Process each payment
+    for (const chat of duePayments) {
+      const chatDetails = await this.getChat(chat.id);
+      if (!chatDetails) continue;
+
+      const transaction = chatDetails.transactionId 
+        ? await db.select().from(transactions).where(eq(transactions.id, chatDetails.transactionId)).then(r => r[0])
+        : undefined;
+
+      if (transaction) {
+        const productPrice = parseFloat(transaction.amount);
+        
+        // Payment goes to seller
+        const seller = await this.getUser(chatDetails.sellerId);
+        if (seller) {
+          const sellerBalance = parseFloat(seller.balance);
+          const sellerEarnings = parseFloat(seller.totalEarnings);
+          await this.updateUser(chatDetails.sellerId, {
+            balance: (sellerBalance + productPrice).toFixed(2),
+            totalEarnings: (sellerEarnings + productPrice).toFixed(2)
+          });
+
+          // Update transaction status
+          await this.updateTransaction(transaction.id, 'completed');
+
+          // Create seller transaction
+          await this.createTransaction({
+            userId: chatDetails.sellerId,
+            type: 'sale',
+            amount: transaction.amount,
+            status: 'completed',
+            description: `Sold "${chatDetails.product.title}"`
+          });
+
+          // Clear payment scheduled time
+          await db
+            .update(chats)
+            .set({ paymentScheduledAt: null })
+            .where(eq(chats.id, chat.id));
+        }
+      }
+    }
+  }
+
   // Messages
   async getMessagesByChat(chatId: string): Promise<MessageWithSender[]> {
     const results = await db
@@ -632,7 +714,7 @@ export class DatabaseStorage implements IStorage {
 
     return results.map(row => ({
       ...row.messages,
-      sender: row.users!
+      sender: row.users || null as any
     }));
   }
 

@@ -18,6 +18,7 @@ export const promotionTierEnum = pgEnum('promotion_tier', ['top_3', 'top_5', 'to
 export const transactionTypeEnum = pgEnum('transaction_type', ['deposit', 'withdraw', 'sale', 'purchase', 'promotion']);
 export const transactionStatusEnum = pgEnum('transaction_status', ['pending', 'completed', 'failed']);
 export const chatStatusEnum = pgEnum('chat_status', ['active', 'closed_seller', 'closed_buyer', 'under_review', 'resolved_seller', 'resolved_buyer']);
+export const messageSenderTypeEnum = pgEnum('message_sender_type', ['user', 'system']);
 
 // Users table
 export const users = pgTable("users", {
@@ -101,13 +102,16 @@ export const chats = pgTable("chats", {
   expiresAt: timestamp("expires_at").notNull(),
   closedAt: timestamp("closed_at"),
   closedBy: text("closed_by"),
+  closeInitiatedBy: text("close_initiated_by"),
+  paymentScheduledAt: timestamp("payment_scheduled_at"),
 });
 
 // Messages table
 export const messages = pgTable("messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   chatId: varchar("chat_id").notNull().references(() => chats.id, { onDelete: 'cascade' }),
-  senderId: varchar("sender_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  senderId: varchar("sender_id").references(() => users.id, { onDelete: 'cascade' }),
+  senderType: messageSenderTypeEnum("sender_type").default('user').notNull(),
   message: text("message").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
