@@ -105,7 +105,11 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
 
   const handleCloseChat = () => {
     const role = isSeller ? 'seller' : 'buyer';
-    if (confirm(isSeller ? "هل أنت متأكد من إنهاء المحادثة وإطلاق الدفع؟" : "هل أنت متأكد من إنهاء المحادثة واسترداد المبلغ؟")) {
+    const confirmMessage = isSeller 
+      ? "هل أنت متأكد من إغلاق المحادثة لصالح المشتري؟ سيتم استرداد المبلغ كاملاً للمشتري فوراً." 
+      : "هل أنت متأكد من إغلاق المحادثة لصالح البائع؟ سيتم إطلاق الدفع للبائع بعد 10 ساعات.";
+    
+    if (confirm(confirmMessage)) {
       closeChatMutation.mutate(role);
     }
   };
@@ -173,7 +177,31 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
         <ScrollArea className="flex-1 p-6" ref={scrollRef}>
           <div className="space-y-4">
             {messages.map((msg) => {
+              const isSystemMessage = msg.senderType === 'system';
               const isOwnMessage = msg.senderId === currentUser.id;
+              
+              // System message rendering
+              if (isSystemMessage) {
+                return (
+                  <div
+                    key={msg.id}
+                    className="flex justify-center"
+                    data-testid={`message-system-${msg.id}`}
+                  >
+                    <div className="max-w-[85%] px-4 py-3 rounded-lg bg-blue-500/10 border border-blue-400/30">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-xs font-semibold text-blue-300 mb-1">معلومات النظام</p>
+                          <p className="text-sm text-blue-100 whitespace-pre-line">{msg.message}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              // User message rendering
               return (
                 <div
                   key={msg.id}
@@ -249,21 +277,21 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
                 <Button
                   onClick={handleCloseChat}
                   disabled={closeChatMutation.isPending}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  variant="destructive"
+                  className="flex-1"
                   data-testid="button-close-seller"
                 >
-                  إنهاء المحادثة (إطلاق الدفع)
+                  إغلاق المحادثة لصالح المشتري
                 </Button>
               )}
               {isBuyer && (
                 <Button
                   onClick={handleCloseChat}
                   disabled={closeChatMutation.isPending}
-                  variant="destructive"
-                  className="flex-1"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                   data-testid="button-close-buyer"
                 >
-                  إنهاء المحادثة لصالح المشتري
+                  إغلاق المحادثة لصالح البائع
                 </Button>
               )}
             </div>

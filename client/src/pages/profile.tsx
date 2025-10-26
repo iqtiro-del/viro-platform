@@ -410,9 +410,10 @@ export function ProfilePage() {
       </div>
 
       {/* Chat Dialog */}
-      {selectedChat && (
+      {selectedChat && user && (
         <ChatDialog
-          chat={selectedChat}
+          chatId={selectedChat.id}
+          currentUser={user}
           open={chatDialogOpen}
           onOpenChange={(open) => {
             setChatDialogOpen(open);
