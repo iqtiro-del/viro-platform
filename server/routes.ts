@@ -6,7 +6,9 @@ import {
   insertProductSchema,
   insertReviewSchema,
   insertPromotionSchema,
-  insertTransactionSchema
+  insertTransactionSchema,
+  insertChatSchema,
+  insertMessageSchema
 } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import { encryptCredentials, decryptCredentials } from "./crypto";
@@ -437,11 +439,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         credentials: decryptedCredentials,
       };
 
+      // Get the chat that was created during the purchase
+      const chat = result.transaction ? await storage.getChatByTransaction(result.transaction.id) : undefined;
+
       res.json({ 
         success: true, 
         transaction: result.transaction,
         buyer: buyerWithoutPassword,
         product: productDetails,
+        chat,
       });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
@@ -456,6 +462,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Transaction not found" });
       }
       res.json(transaction);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Chat routes
+  app.get("/api/chats", async (req, res) => {
+    try {
+      const { userId } = req.query;
+      if (!userId || typeof userId !== 'string') {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+      
+      const chats = await storage.getChatsByUser(userId);
+      res.json(chats);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/chats/:id", async (req, res) => {
+    try {
+      const chat = await storage.getChat(req.params.id);
+      if (!chat) {
+        return res.status(404).json({ error: "Chat not found" });
+      }
+      res.json(chat);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/chats/:id/close", async (req, res) => {
+    try {
+      const { userId, role } = req.body;
+      const chatId = req.params.id;
+
+      if (!userId || !role) {
+        return res.status(400).json({ error: "User ID and role are required" });
+      }
+
+      // Determine status based on role
+      const status = role === 'seller' ? 'closed_seller' : 'closed_buyer';
+      
+      const chat = await storage.closeChat(chatId, userId, status);
+      if (!chat) {
+        return res.status(404).json({ error: "Chat not found" });
+      }
+
+      res.json({ success: true, chat });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/chats/:id/resolve", async (req, res) => {
+    try {
+      const { resolution } = req.body;
+      const chatId = req.params.id;
+
+      if (!resolution || (resolution !== 'seller' && resolution !== 'buyer')) {
+        return res.status(400).json({ error: "Valid resolution (seller or buyer) is required" });
+      }
+
+      const status = resolution === 'seller' ? 'resolved_seller' : 'resolved_buyer';
+      
+      const chat = await storage.resolveChat(chatId, status);
+      if (!chat) {
+        return res.status(404).json({ error: "Chat not found" });
+      }
+
+      res.json({ success: true, chat });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Message routes
+  app.get("/api/chats/:chatId/messages", async (req, res) => {
+    try {
+      const messages = await storage.getMessagesByChat(req.params.chatId);
+      res.json(messages);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/chats/:chatId/messages", async (req, res) => {
+    try {
+      const data = insertMessageSchema.parse({
+        ...req.body,
+        chatId: req.params.chatId
+      });
+      
+      const message = await storage.createMessage(data);
+      res.json(message);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Periodic check for expired chats (could be called by a cron job)
+  app.post("/api/chats/check-expired", async (req, res) => {
+    try {
+      await storage.checkExpiredChats();
+      res.json({ success: true });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
