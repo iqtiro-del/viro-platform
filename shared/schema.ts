@@ -87,6 +87,7 @@ export const transactions = pgTable("transactions", {
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   status: transactionStatusEnum("status").default('pending').notNull(),
   description: text("description").default(''),
+  accountNumber: varchar("account_number", { length: 50 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

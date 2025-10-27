@@ -345,11 +345,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/wallet/withdraw", async (req, res) => {
     try {
-      const { userId, amount, withdrawMethod } = req.body;
+      const { userId, amount, withdrawMethod, account_number } = req.body;
       const user = await storage.getUser(userId);
       
       if (!user) {
         return res.status(404).json({ error: "User not found" });
+      }
+
+      // Validate account number
+      if (!account_number || account_number.trim() === "") {
+        return res.status(400).json({ error: "Bank account number is required" });
+      }
+
+      const accountNumberStr = account_number.trim();
+      const digitsOnly = /^\d+$/;
+      
+      if (!digitsOnly.test(accountNumberStr)) {
+        return res.status(400).json({ error: "Account number must contain only digits" });
+      }
+      
+      if (accountNumberStr.length < 6 || accountNumberStr.length > 34) {
+        return res.status(400).json({ error: "Account number must be between 6 and 34 digits" });
       }
 
       const withdrawAmount = parseFloat(amount);
@@ -371,11 +387,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await storage.updateUser(userId, { balance: newBalance.toFixed(2) });
       
+      // Mask account number (keep only last 4 digits visible)
+      const last4Digits = accountNumberStr.slice(-4);
+      const maskedAccountNumber = '*'.repeat(accountNumberStr.length - 4) + last4Digits;
+      
       const transaction = await storage.createTransaction({
         userId,
         type: 'withdraw',
         amount: withdrawAmount.toFixed(2),
-        description: `Withdrawn to ${withdrawMethod}`
+        description: `Withdrawn to ${withdrawMethod}`,
+        accountNumber: maskedAccountNumber
       });
       
       await storage.updateTransaction(transaction.id, 'completed');

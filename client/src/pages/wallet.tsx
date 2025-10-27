@@ -44,6 +44,8 @@ export function WalletPage() {
   const [depositMethod, setDepositMethod] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawMethod, setWithdrawMethod] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [accountNumberError, setAccountNumberError] = useState("");
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
   
@@ -110,12 +112,39 @@ export function WalletPage() {
     }
   });
 
+  const validateAccountNumber = (value: string): boolean => {
+    setAccountNumberError("");
+    
+    if (!value || value.trim() === "") {
+      setAccountNumberError("رقم الحساب مطلوب");
+      return false;
+    }
+    
+    const digitsOnly = /^\d+$/;
+    if (!digitsOnly.test(value)) {
+      setAccountNumberError("رقم الحساب يجب أن يحتوي على أرقام فقط");
+      return false;
+    }
+    
+    if (value.length < 6 || value.length > 34) {
+      setAccountNumberError("رقم الحساب يجب أن يكون بين 6 و 34 رقم");
+      return false;
+    }
+    
+    return true;
+  };
+
   const withdrawMutation = useMutation({
     mutationFn: async () => {
+      if (!validateAccountNumber(accountNumber)) {
+        throw new Error(accountNumberError || "رقم الحساب غير صحيح");
+      }
+      
       const response = await apiRequest('POST', '/api/wallet/withdraw', {
         userId: user?.id,
         amount: withdrawAmount,
-        withdrawMethod: withdrawMethod
+        withdrawMethod: withdrawMethod,
+        account_number: accountNumber
       });
       return response.json();
     },
@@ -130,6 +159,8 @@ export function WalletPage() {
       });
       setWithdrawAmount("");
       setWithdrawMethod("");
+      setAccountNumber("");
+      setAccountNumberError("");
       setWithdrawDialogOpen(false);
     },
     onError: (error: any) => {
@@ -316,6 +347,31 @@ export function WalletPage() {
                           </SelectContent>
                         </Select>
                       </div>
+                      <div>
+                        <Label htmlFor="account-number">
+                          رقم الحساب البنكي <span className="text-destructive">*</span>
+                        </Label>
+                        <Input 
+                          id="account-number" 
+                          type="text" 
+                          placeholder="أدخل رقم الحساب البنكي (6-34 رقم)"
+                          value={accountNumber}
+                          onChange={(e) => {
+                            setAccountNumber(e.target.value);
+                            if (accountNumberError) {
+                              validateAccountNumber(e.target.value);
+                            }
+                          }}
+                          onBlur={() => validateAccountNumber(accountNumber)}
+                          className={`glass-morphism border-border/50 mt-2 ${accountNumberError ? 'border-destructive' : ''}`}
+                          data-testid="input-account-number"
+                        />
+                        {accountNumberError && (
+                          <p className="text-sm text-destructive mt-1" data-testid="error-account-number">
+                            {accountNumberError}
+                          </p>
+                        )}
+                      </div>
                       {withdrawAmount && parseFloat(withdrawAmount) > 0 && (
                         <div className="p-4 bg-primary/5 border border-primary/20 rounded-md space-y-2" data-testid="breakdown-withdraw-fee">
                           <div className="flex justify-between text-sm">
@@ -337,7 +393,7 @@ export function WalletPage() {
                         className="w-full neon-glow-primary" 
                         data-testid="button-confirm-withdraw"
                         onClick={() => withdrawMutation.mutate()}
-                        disabled={!withdrawAmount || !withdrawMethod || withdrawMutation.isPending}
+                        disabled={!withdrawAmount || !withdrawMethod || !accountNumber || withdrawMutation.isPending}
                       >
                         {withdrawMutation.isPending ? t("wallet.processing") : t("wallet.confirmWithdrawal")}
                       </Button>
