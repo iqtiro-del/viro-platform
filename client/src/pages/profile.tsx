@@ -46,7 +46,7 @@ export function ProfilePage() {
 
   // Fetch active chats for the user
   const { data: chats = [] } = useQuery<ChatWithDetails[]>({
-    queryKey: ['/api/chats', { userId: user?.id }],
+    queryKey: [`/api/chats?userId=${user?.id}`],
     enabled: !!user,
     refetchInterval: 10000, // Refresh every 10 seconds
   });

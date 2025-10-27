@@ -16,7 +16,7 @@ export function MyChatsPage() {
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
 
   const { data: chats = [], isLoading } = useQuery<ChatWithDetails[]>({
-    queryKey: ['/api/chats', { userId: user?.id }],
+    queryKey: [`/api/chats?userId=${user?.id}`],
     enabled: !!user,
     refetchInterval: 5000, // Refresh every 5 seconds
   });
