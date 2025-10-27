@@ -19,6 +19,7 @@ import { WalletPage } from "@/pages/wallet";
 import { MyProductsPage } from "@/pages/my-products";
 import { PromotePage } from "@/pages/promote";
 import { ProfilePage } from "@/pages/profile";
+import { MyChatsPage } from "@/pages/my-chats";
 import { useState } from "react";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -75,6 +76,7 @@ function Router() {
           <Route path="/my-products" component={MyProductsPage} />
           <Route path="/promote" component={PromotePage} />
           <Route path="/profile" component={ProfilePage} />
+          <Route path="/my-chats" component={MyChatsPage} />
           <Route component={NotFound} />
         </Switch>
       </ProtectedRoute>

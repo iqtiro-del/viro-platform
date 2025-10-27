@@ -9,7 +9,8 @@ import {
   LogOut,
   Sun,
   Moon,
-  CheckCircle
+  CheckCircle,
+  MessageCircle
 } from "lucide-react";
 import { useTheme } from "./theme-provider";
 import { useLanguage } from "@/lib/language-context";
@@ -43,6 +44,7 @@ export function AppNavbar({ user, onLogout }: AppNavbarProps) {
   const navItems = user ? [
     { icon: Home, label: t("nav.dashboard"), path: "/" },
     { icon: ShoppingBag, label: t("nav.services"), path: "/services" },
+    { icon: MessageCircle, label: "محادثاتي", path: "/my-chats" },
     { icon: Wallet, label: t("nav.wallet"), path: "/wallet" },
     { icon: Package, label: t("nav.myProducts"), path: "/my-products" },
     { icon: Megaphone, label: t("nav.promote"), path: "/promote" },
