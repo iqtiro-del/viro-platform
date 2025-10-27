@@ -27,6 +27,8 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
   const { data: chat } = useQuery<ChatWithDetails>({
     queryKey: ['/api/chats', chatId],
     enabled: open && !!chatId,
+    refetchOnMount: 'always',
+    staleTime: 0,
   });
 
   // Fetch messages
@@ -34,6 +36,8 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
     queryKey: ['/api/chats', chatId, 'messages'],
     enabled: open && !!chatId,
     refetchInterval: 3000, // Poll for new messages every 3 seconds
+    refetchOnMount: 'always',
+    staleTime: 0,
   });
 
   // Send message mutation
@@ -312,11 +316,24 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
 
           {/* Closed Notice */}
           {isClosed && (
-            <div className="p-4 rounded-lg bg-green-500/10 border border-green-400/30" data-testid="notice-closed">
-              <p className="text-sm text-green-200 text-center">
-                تم إغلاق المحادثة
-                {chat.closedBy === 'admin' ? ' من قبل الإدارة' : ''}
-              </p>
+            <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-400/30" data-testid="notice-closed">
+              <div className="text-center">
+                <p className="text-sm font-semibold text-blue-200 mb-1">
+                  {chat.status === 'closed_buyer' && 'مغلقة – لصالح البائع'}
+                  {chat.status === 'closed_seller' && 'مغلقة – لصالح المشتري'}
+                  {chat.status === 'resolved_buyer' && 'محلولة – لصالح المشتري'}
+                  {chat.status === 'resolved_seller' && 'محلولة – لصالح البائع'}
+                  {!['closed_buyer', 'closed_seller', 'resolved_buyer', 'resolved_seller'].includes(chat.status) && 'تم إغلاق المحادثة'}
+                </p>
+                <p className="text-xs text-blue-300/70">
+                  لا يمكن إرسال رسائل جديدة. جميع الرسائل السابقة محفوظة للسجلات.
+                </p>
+                {chat.closedBy === 'admin' && (
+                  <p className="text-xs text-blue-300/70 mt-1">
+                    تم الإغلاق من قبل الإدارة
+                  </p>
+                )}
+              </div>
             </div>
           )}
         </div>
