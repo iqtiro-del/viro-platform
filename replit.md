@@ -17,6 +17,18 @@ Tiro is a digital services marketplace platform designed for the Iraqi market, c
 - Clicking any chat card opens ChatDialog for review and messaging
 - Navigation links in both desktop navbar and mobile menu
 
+**Closed Chat Status Display**
+- Enhanced ChatDialog to show specific closure status labels in Arabic
+- When buyer closes chat: displays "مغلقة – لصالح البائع" (Closed – in favor of the seller)
+- When seller closes chat: displays "مغلقة – لصالح المشتري" (Closed – in favor of the buyer)
+- Also handles resolved states with appropriate Arabic labels
+- Closed notice includes explanatory text: "لا يمكن إرسال رسائل جديدة. جميع الرسائل السابقة محفوظة للسجلات." (Cannot send new messages. All previous messages are saved as records)
+- Message input and close buttons completely hidden for closed chats
+- All previous messages remain fully readable and visible
+- Both buyer and seller see the same closed status with no ability to send messages
+- Fixed cache staleness bug by adding `refetchOnMount: 'always'` to ensure fresh chat data when dialog reopens
+- E2E tested: buyer closes chat → status updates → both parties see correct closed state with disabled messaging
+
 **Product Credential Encryption and Purchase Details System**
 - Implemented AES-256-GCM encryption for all product credentials (username, password, email, email password)
 - Created server/crypto.ts module with secure encrypt/decrypt functions using Node.js crypto
