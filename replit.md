@@ -29,6 +29,17 @@ Tiro is a digital services marketplace platform designed for the Iraqi market, c
 - Fixed cache staleness bug by adding `refetchOnMount: 'always'` to ensure fresh chat data when dialog reopens
 - E2E tested: buyer closes chat → status updates → both parties see correct closed state with disabled messaging
 
+**Bank Account Number Validation for Withdrawals**
+- Added required bank account number field to withdrawal process with comprehensive validation
+- Frontend validation: Required field, digits-only (regex /^\d+$/), length 6-34 characters
+- Arabic error messages for validation failures: "رقم الحساب مطلوب", "رقم الحساب يجب أن يحتوي على أرقام فقط", "رقم الحساب يجب أن يكون بين 6 و 34 رقم"
+- Backend validation: Same rules with clear English error messages for API responses
+- Security: Account numbers masked before storage (only last 4 digits visible, e.g., "1234567890123456" → "************3456")
+- accountNumber field added to transactions schema (varchar, length 50, nullable for backward compatibility)
+- Withdraw button disabled until valid account number provided
+- Real-time validation feedback on blur and during typing if error exists
+- E2E tested: Frontend validation, backend validation, account masking, full withdrawal flow
+
 **Product Credential Encryption and Purchase Details System**
 - Implemented AES-256-GCM encryption for all product credentials (username, password, email, email password)
 - Created server/crypto.ts module with secure encrypt/decrypt functions using Node.js crypto
