@@ -5,6 +5,18 @@ Tiro is a digital services marketplace platform designed for the Iraqi market, c
 
 ## Recent Updates
 
+**My Chats Page - Permanent Chat Records System**
+- Created dedicated "My Chats" (محادثاتي) page at /my-chats route displaying all user conversations
+- Page automatically shows chats for both buyers and sellers (fetches where user is either party)
+- All chats (active and closed) remain permanently visible as dispute resolution records
+- Chats created automatically upon product purchase with 72-hour expiration window
+- Closing a chat only changes status (closed_seller, closed_buyer) - never deletes the record
+- Status badges: Active (green), Under Review (yellow), Closed in favor of Seller (blue), Closed in favor of Buyer (purple), Resolved (cyan/pink)
+- Auto-refreshes every 5 seconds to show real-time updates
+- Mobile-responsive card layout with neon/cyberpunk theme
+- Clicking any chat card opens ChatDialog for review and messaging
+- Navigation links in both desktop navbar and mobile menu
+
 **Product Credential Encryption and Purchase Details System**
 - Implemented AES-256-GCM encryption for all product credentials (username, password, email, email password)
 - Created server/crypto.ts module with secure encrypt/decrypt functions using Node.js crypto
@@ -36,6 +48,7 @@ The platform utilizes Neon serverless PostgreSQL with Drizzle ORM for type-safe 
     - **Service Categories**: Support for diverse digital services, including Instagram and TikTok account sales (with credential delivery).
     - **Navigation**: Responsive navigation system with a horizontal navbar for desktop and a slide-in drawer for mobile, supporting RTL.
     - **Authentication**: Public and protected routes, with integrated login/signup dialogs on the dashboard.
+    - **Chat System**: Buyer-seller chat created automatically on purchase, 72-hour active window, permanent record keeping (never deleted), status-based lifecycle (active → closed/resolved), escrow payment integration with 10-hour delay for buyer closures.
 
 ## External Dependencies
 

@@ -121,7 +121,7 @@ export function MyChatsPage() {
             محادثاتي
           </h1>
           <p className="text-muted-foreground">
-            جميع محادثاتك مع البائعين والمشترين
+            جميع محادثاتك النشطة والمغلقة محفوظة هنا كسجل دائم للمراجعة والإثبات
           </p>
         </div>
 
@@ -134,7 +134,7 @@ export function MyChatsPage() {
                 لا توجد محادثات بعد
               </h3>
               <p className="text-muted-foreground">
-                عندما تشتري أو تبيع منتجاً، ستظهر المحادثات هنا
+                عندما تشتري أو تبيع منتجاً، ستظهر المحادثات هنا وتبقى محفوظة دائماً
               </p>
             </CardContent>
           </Card>
