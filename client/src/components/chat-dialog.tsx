@@ -58,7 +58,11 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/chats', chatId] });
-      queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
+      // Invalidate all chats queries including my-chats page
+      queryClient.invalidateQueries({ 
+        queryKey: ['/api/chats'],
+        refetchType: 'all'
+      });
       onOpenChange(false);
     },
   });
