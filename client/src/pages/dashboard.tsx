@@ -16,7 +16,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
 import { useToast } from "@/hooks/use-toast";
 import type { ProductWithSeller } from "@shared/schema";
-import heroImage from "@assets/generated_images/Digital_marketplace_neon_hero_background_e0f69832.png";
+import { NeonBackground } from "@/components/neon-background";
 
 const loginSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -150,19 +150,10 @@ export function Dashboard() {
     <div className="min-h-screen pb-20 md:pb-8">
       {/* Modern Hero Section */}
       <section className="relative overflow-hidden">
-        {/* Background with improved overlay */}
+        {/* Animated Neon Background */}
         <div className="absolute inset-0 h-[600px]">
-          <img 
-            src={heroImage} 
-            alt="Digital marketplace" 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-background/80 to-secondary/30" />
-          <div className="absolute inset-0 bg-background/70" />
-          
-          {/* Decorative elements */}
-          <div className="absolute top-20 right-20 w-64 h-64 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <NeonBackground />
+          <div className="absolute inset-0 bg-background/40" />
         </div>
 
         {/* Hero Content */}
