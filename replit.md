@@ -5,6 +5,18 @@ Tiro is a digital services marketplace platform designed for the Iraqi market, c
 
 ## Recent Updates
 
+**Seller Profile Page Feature**
+- Created dedicated seller profile page at /seller/:id route (publicly accessible)
+- Displays comprehensive seller information: name, avatar, bio, rating, total reviews, verified badge
+- Shows count of active published services by the seller
+- Grid display of all seller's active products using same card design as services page
+- Clickable seller name and avatar on service cards navigates to seller profile
+- "Back to Services" (العودة إلى الخدمات) button returns user to main services listing
+- Backend endpoint GET /api/sellers/:id returns seller info and all their products in one request
+- Proper Wouter routing with /seller/:id path pattern for parameter extraction
+- Mobile-responsive layout with neon/cyberpunk theme consistency
+- E2E tested: Navigation from services → seller profile → back to services working correctly
+
 **My Chats Page - Permanent Chat Records System**
 - Created dedicated "My Chats" (محادثاتي) page at /my-chats route displaying all user conversations
 - Page automatically shows chats for both buyers and sellers (fetches where user is either party)
