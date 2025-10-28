@@ -1,22 +1,42 @@
 export function NeonBackground() {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 animated-gradient opacity-20" />
+      {/* Animated gradient background - soft neon glow */}
+      <div className="absolute inset-0 animated-gradient" />
       
-      {/* Neon grid pattern */}
+      {/* Subtle grid pattern overlay */}
       <div className="absolute inset-0" style={{
         backgroundImage: `
-          linear-gradient(hsl(280 85% 65% / 0.1) 1px, transparent 1px),
-          linear-gradient(90deg, hsl(195 100% 55% / 0.1) 1px, transparent 1px)
+          linear-gradient(hsl(280 70% 65% / 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, hsl(195 75% 60% / 0.03) 1px, transparent 1px)
         `,
-        backgroundSize: '50px 50px',
-        opacity: 0.15,
+        backgroundSize: '60px 60px',
+        opacity: 0.5,
       }} />
 
-      {/* Glowing orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      {/* Soft glowing orbs - very subtle */}
+      <div 
+        className="absolute top-[15%] left-[10%] w-[500px] h-[500px] rounded-full blur-3xl opacity-30"
+        style={{
+          background: 'radial-gradient(circle, hsl(240 70% 60% / 0.15) 0%, transparent 70%)',
+          animation: 'float 30s ease-in-out infinite',
+        }}
+      />
+      <div 
+        className="absolute bottom-[20%] right-[15%] w-[450px] h-[450px] rounded-full blur-3xl opacity-30"
+        style={{
+          background: 'radial-gradient(circle, hsl(280 70% 58% / 0.15) 0%, transparent 70%)',
+          animation: 'float 35s ease-in-out infinite reverse',
+        }}
+      />
+      <div 
+        className="absolute top-[50%] right-[25%] w-[400px] h-[400px] rounded-full blur-3xl opacity-25"
+        style={{
+          background: 'radial-gradient(circle, hsl(195 75% 58% / 0.12) 0%, transparent 70%)',
+          animation: 'float 40s ease-in-out infinite',
+          animationDelay: '5s',
+        }}
+      />
     </div>
   );
 }
