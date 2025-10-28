@@ -20,6 +20,7 @@ import { MyProductsPage } from "@/pages/my-products";
 import { PromotePage } from "@/pages/promote";
 import { ProfilePage } from "@/pages/profile";
 import { MyChatsPage } from "@/pages/my-chats";
+import { SellerProfilePage } from "@/pages/seller-profile";
 import { useState } from "react";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -59,30 +60,7 @@ function Router() {
     );
   }
 
-  // Dashboard and Services are public, other routes are protected
-  const renderContent = () => {
-    if (location === "/") {
-      return <Dashboard />;
-    }
-    
-    if (location === "/services") {
-      return <ServicesPage />;
-    }
-    
-    return (
-      <ProtectedRoute>
-        <Switch>
-          <Route path="/wallet" component={WalletPage} />
-          <Route path="/my-products" component={MyProductsPage} />
-          <Route path="/promote" component={PromotePage} />
-          <Route path="/profile" component={ProfilePage} />
-          <Route path="/my-chats" component={MyChatsPage} />
-          <Route component={NotFound} />
-        </Switch>
-      </ProtectedRoute>
-    );
-  };
-
+  // Main layout with navbar
   return (
     <>
       <div className="min-h-screen w-full">
@@ -120,7 +98,37 @@ function Router() {
 
           {/* Page Content */}
           <main className="flex-1 pb-16 md:pb-0">
-            {renderContent()}
+            <Switch>
+              <Route path="/" component={Dashboard} />
+              <Route path="/services" component={ServicesPage} />
+              <Route path="/seller/:id" component={SellerProfilePage} />
+              <Route path="/wallet">
+                <ProtectedRoute>
+                  <WalletPage />
+                </ProtectedRoute>
+              </Route>
+              <Route path="/my-products">
+                <ProtectedRoute>
+                  <MyProductsPage />
+                </ProtectedRoute>
+              </Route>
+              <Route path="/promote">
+                <ProtectedRoute>
+                  <PromotePage />
+                </ProtectedRoute>
+              </Route>
+              <Route path="/profile">
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              </Route>
+              <Route path="/my-chats">
+                <ProtectedRoute>
+                  <MyChatsPage />
+                </ProtectedRoute>
+              </Route>
+              <Route component={NotFound} />
+            </Switch>
           </main>
         </div>
       </div>

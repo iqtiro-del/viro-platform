@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -333,13 +334,20 @@ export function ServicesPage() {
                     <CardHeader className="pb-3">
                       <CardTitle className="text-base line-clamp-1">{product.title}</CardTitle>
                       <CardDescription className="flex items-center space-x-2 text-sm">
-                        <Avatar className="w-5 h-5 border border-primary/30">
-                          <AvatarImage src={getUserAvatar(product.seller.id)} />
-                          <AvatarFallback className="text-xs bg-primary/20">
-                            {product.seller.username.substring(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span>{product.seller.username}</span>
+                        <Link href={`/seller/${product.seller.id}`}>
+                          <button 
+                            className="flex items-center space-x-2 hover-elevate rounded-md p-1 -m-1 transition-all"
+                            data-testid={`link-seller-${product.seller.id}`}
+                          >
+                            <Avatar className="w-5 h-5 border border-primary/30">
+                              <AvatarImage src={getUserAvatar(product.seller.id)} />
+                              <AvatarFallback className="text-xs bg-primary/20">
+                                {product.seller.username.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="hover:text-primary transition-colors">{product.seller.username}</span>
+                          </button>
+                        </Link>
                         {product.seller.isVerified && (
                           <div className="w-3.5 h-3.5 bg-green-500 rounded-full flex items-center justify-center neon-glow-success">
                             <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
