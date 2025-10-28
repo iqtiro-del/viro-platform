@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 import { 
   User as UserIcon, 
   Mail, 
@@ -18,7 +20,9 @@ import {
   Star,
   Package,
   TrendingUp,
-  MessageCircle
+  MessageCircle,
+  ShieldCheck,
+  Upload
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
@@ -31,8 +35,12 @@ export function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedChat, setSelectedChat] = useState<ChatWithDetails | null>(null);
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
+  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
+  const [verifyFullName, setVerifyFullName] = useState("");
+  const [verifyFile, setVerifyFile] = useState<File | null>(null);
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { toast } = useToast();
 
   const { data: userData, isLoading } = useQuery<User>({ 
     queryKey: ['/api/users', user?.id], 
@@ -75,6 +83,46 @@ export function ProfilePage() {
     }
   });
 
+  const verifyAccountMutation = useMutation({
+    mutationFn: async ({ fullName, file, username, userId }: { fullName: string; file: File; username: string; userId: string }) => {
+      const formData = new FormData();
+      formData.append('fullName', fullName);
+      formData.append('username', username);
+      formData.append('userId', userId);
+      formData.append('idPhoto', file);
+
+      const response = await fetch('/api/verify-account', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to send verification request');
+      }
+
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "✅ تم الإرسال بنجاح",
+        description: data.message || "Your verification request has been sent successfully and will be reviewed soon.",
+        duration: 5000,
+      });
+      setVerifyDialogOpen(false);
+      setVerifyFullName("");
+      setVerifyFile(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "❌ فشل الإرسال",
+        description: error.message || "Failed to send verification request. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    }
+  });
+
   const handleSaveProfile = () => {
     const formData = {
       fullName: (document.getElementById('fullname') as HTMLInputElement)?.value,
@@ -83,6 +131,24 @@ export function ProfilePage() {
       bio: (document.getElementById('bio') as HTMLTextAreaElement)?.value,
     };
     updateProfileMutation.mutate(formData);
+  };
+
+  const handleVerifySubmit = () => {
+    if (!verifyFullName || !verifyFile || !user) {
+      toast({
+        title: "❌ خطأ",
+        description: "Please fill in all fields and upload your ID photo",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    verifyAccountMutation.mutate({
+      fullName: verifyFullName,
+      file: verifyFile,
+      username: user.username,
+      userId: user.id,
+    });
   };
 
   if (isLoading) {
@@ -376,6 +442,17 @@ export function ProfilePage() {
                 <CardTitle className="text-lg">{t("profile.quickActions")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
+                {!userData.isVerified && (
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start border-border/50 neon-glow-primary" 
+                    data-testid="button-verify-account"
+                    onClick={() => setVerifyDialogOpen(true)}
+                  >
+                    <ShieldCheck className="w-4 h-4 mr-2" />
+                    توثيق الحساب
+                  </Button>
+                )}
                 {activeChats.length > 0 && (
                   <Button 
                     variant="outline" 
@@ -423,6 +500,86 @@ export function ProfilePage() {
           }}
         />
       )}
+
+      {/* Verify Account Dialog */}
+      <Dialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen}>
+        <DialogContent className="glass-morphism border-border/50" data-testid="dialog-verify-account">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <ShieldCheck className="w-6 h-6 text-primary" />
+              توثيق الحساب
+            </DialogTitle>
+            <DialogDescription>
+              قم بتحميل صورة الهوية الخاصة بك لتوثيق حسابك والحصول على شارة التوثيق
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="verify-fullname">الاسم الكامل</Label>
+              <Input
+                id="verify-fullname"
+                placeholder="أدخل اسمك الكامل كما هو في الهوية"
+                value={verifyFullName}
+                onChange={(e) => setVerifyFullName(e.target.value)}
+                className="glass-morphism border-border/50"
+                data-testid="input-verify-fullname"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="verify-id-photo">صورة الهوية</Label>
+              <div className="flex flex-col gap-2">
+                <Input
+                  id="verify-id-photo"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setVerifyFile(file);
+                    }
+                  }}
+                  className="glass-morphism border-border/50"
+                  data-testid="input-verify-id-photo"
+                />
+                {verifyFile && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Upload className="w-4 h-4" />
+                    <span data-testid="text-selected-file">{verifyFile.name}</span>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                يرجى تحميل صورة واضحة لهويتك الشخصية. سيتم مراجعة طلبك في أقرب وقت.
+              </p>
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setVerifyDialogOpen(false);
+                  setVerifyFullName("");
+                  setVerifyFile(null);
+                }}
+                className="flex-1"
+                data-testid="button-cancel-verify"
+              >
+                إلغاء
+              </Button>
+              <Button
+                onClick={handleVerifySubmit}
+                disabled={verifyAccountMutation.isPending || !verifyFullName || !verifyFile}
+                className="flex-1 neon-glow-primary"
+                data-testid="button-submit-verify"
+              >
+                {verifyAccountMutation.isPending ? "جاري الإرسال..." : "إرسال الطلب"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

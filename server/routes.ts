@@ -12,6 +12,13 @@ import {
 } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import { encryptCredentials, decryptCredentials } from "./crypto";
+import multer from "multer";
+
+// Configure multer for memory storage (no file saved to disk)
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB max file size
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
@@ -109,6 +116,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(userWithoutPassword);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Verify Account - sends ID photo to Telegram bot
+  app.post("/api/verify-account", upload.single('idPhoto'), async (req, res) => {
+    try {
+      const { fullName, username, userId } = req.body;
+      const file = req.file;
+
+      if (!fullName || !username || !userId || !file) {
+        return res.status(400).json({ error: "Full name, username, user ID, and ID photo are required" });
+      }
+
+      // Verify that the user exists and the username matches
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized: User not found" });
+      }
+
+      if (user.username !== username) {
+        return res.status(401).json({ error: "Unauthorized: Username mismatch" });
+      }
+
+      const botToken = process.env.BOT_TOKEN;
+      const chatId = process.env.CHAT_ID;
+
+      if (!botToken || !chatId) {
+        return res.status(500).json({ error: "Telegram bot configuration is missing" });
+      }
+
+      // Create FormData for Telegram API
+      const formData = new FormData();
+      
+      // Convert buffer to Blob for FormData
+      const blob = new Blob([file.buffer], { type: file.mimetype });
+      formData.append('photo', blob, file.originalname);
+      formData.append('chat_id', chatId);
+      
+      // Create caption with user details and current timestamp
+      const timestamp = new Date().toLocaleString('en-US', { 
+        timeZone: 'Asia/Baghdad',
+        dateStyle: 'full',
+        timeStyle: 'long'
+      });
+      
+      const caption = `🔔 New Verification Request\n\n` +
+                     `Full Name: ${fullName}\n` +
+                     `Username: ${username}\n` +
+                     `Sent at: ${timestamp}`;
+      
+      formData.append('caption', caption);
+
+      // Send to Telegram
+      const telegramUrl = `https://api.telegram.org/bot${botToken}/sendPhoto`;
+      const response = await fetch(telegramUrl, {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error('Telegram API error:', result);
+        return res.status(500).json({ error: "Failed to send verification request to Telegram" });
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Your verification request has been sent successfully and will be reviewed soon." 
+      });
+    } catch (error: any) {
+      console.error('Verification error:', error);
+      res.status(500).json({ error: error.message || "Failed to send verification request" });
     }
   });
 
