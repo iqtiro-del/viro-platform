@@ -14,7 +14,8 @@ Tiro is a digital services marketplace platform designed for the Iraqi market, c
 - Grid pattern overlay made more subtle (0.03 alpha, 60px spacing)
 - Performance optimized: uses CSS-only animations with transform and background-position properties
 - Maintains proper contrast with glass-morphism cards across all pages
-- E2E tested: verified readability and contrast across home, services, and profile pages with no performance issues
+- Applied to Dashboard (control panel) hero section - replaced static hero image with animated gradient
+- E2E tested: verified readability and contrast across all pages including dashboard with no performance issues
 
 **Seller Profile Page Feature**
 - Created dedicated seller profile page at /seller/:id route (publicly accessible)
