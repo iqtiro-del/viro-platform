@@ -5,6 +5,17 @@ Tiro is a digital services marketplace platform designed for the Iraqi market, c
 
 ## Recent Updates
 
+**Soft Animated Neon Gradient Background**
+- Updated NeonBackground component with elegant, slow-moving animated gradient (25 seconds)
+- Gradient uses 6 soft color stops: blue (240°), violet (280°), turquoise (195°), purple (260°), cyan (180°)
+- Added 3 floating orbs with gentle movement (30-40 second cycles) using transform-based animations
+- Very subtle opacity levels (0.08-0.15) to maintain excellent text readability
+- Added prefers-reduced-motion media query for accessibility - disables animations for users who prefer reduced motion
+- Grid pattern overlay made more subtle (0.03 alpha, 60px spacing)
+- Performance optimized: uses CSS-only animations with transform and background-position properties
+- Maintains proper contrast with glass-morphism cards across all pages
+- E2E tested: verified readability and contrast across home, services, and profile pages with no performance issues
+
 **Seller Profile Page Feature**
 - Created dedicated seller profile page at /seller/:id route (publicly accessible)
 - Displays comprehensive seller information: name, avatar, bio, rating, total reviews, verified badge
