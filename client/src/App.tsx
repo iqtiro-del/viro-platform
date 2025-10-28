@@ -9,6 +9,7 @@ import { LanguageProvider } from "@/lib/language-context";
 import { NeonBackground } from "@/components/neon-background";
 import { AppNavbar } from "@/components/app-navbar";
 import { MobileMenu } from "@/components/mobile-menu";
+import { PageTransition } from "@/components/page-transition";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotFound from "@/pages/not-found";
@@ -52,10 +53,12 @@ function Router() {
     return (
       <>
         <NeonBackground />
-        <Switch>
-          <Route path="/login" component={() => <AuthPage mode="login" />} />
-          <Route path="/register" component={() => <AuthPage mode="register" />} />
-        </Switch>
+        <PageTransition>
+          <Switch>
+            <Route path="/login" component={() => <AuthPage mode="login" />} />
+            <Route path="/register" component={() => <AuthPage mode="register" />} />
+          </Switch>
+        </PageTransition>
       </>
     );
   }
@@ -98,37 +101,39 @@ function Router() {
 
           {/* Page Content */}
           <main className="flex-1 pb-16 md:pb-0">
-            <Switch>
-              <Route path="/" component={Dashboard} />
-              <Route path="/services" component={ServicesPage} />
-              <Route path="/seller/:id" component={SellerProfilePage} />
-              <Route path="/wallet">
-                <ProtectedRoute>
-                  <WalletPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path="/my-products">
-                <ProtectedRoute>
-                  <MyProductsPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path="/promote">
-                <ProtectedRoute>
-                  <PromotePage />
-                </ProtectedRoute>
-              </Route>
-              <Route path="/profile">
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              </Route>
-              <Route path="/my-chats">
-                <ProtectedRoute>
-                  <MyChatsPage />
-                </ProtectedRoute>
-              </Route>
-              <Route component={NotFound} />
-            </Switch>
+            <PageTransition>
+              <Switch>
+                <Route path="/" component={Dashboard} />
+                <Route path="/services" component={ServicesPage} />
+                <Route path="/seller/:id" component={SellerProfilePage} />
+                <Route path="/wallet">
+                  <ProtectedRoute>
+                    <WalletPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path="/my-products">
+                  <ProtectedRoute>
+                    <MyProductsPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path="/promote">
+                  <ProtectedRoute>
+                    <PromotePage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path="/profile">
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path="/my-chats">
+                  <ProtectedRoute>
+                    <MyChatsPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route component={NotFound} />
+              </Switch>
+            </PageTransition>
           </main>
         </div>
       </div>
