@@ -5,6 +5,17 @@ Tiro is a digital services marketplace platform designed for the Iraqi market, c
 
 ## Recent Updates
 
+**Dashboard Professional Neon Stats Cards**
+- Redesigned stats cards with professional neon styling matching site theme
+- Each card has distinct neon border: purple (280° 85% 65%), cyan (195° 100% 55%), pink (330° 85% 65%)
+- Added hover neon glow effect with blur and opacity transition for interactive feedback
+- Icon repositioned to top-left with matching gradient background for each card
+- Increased value text size to text-5xl for better prominence and readability
+- Added bottom accent line with color-matched gradient (fades to transparent)
+- Improved spacing and padding (p-8) for more professional appearance
+- Cards maintain glass-morphism with stronger borders (2px) for better definition
+- E2E tested: verified distinct colors, hover effects, readability, and no console errors
+
 **Soft Animated Neon Gradient Background**
 - Updated NeonBackground component with elegant, slow-moving animated gradient (25 seconds)
 - Gradient uses 6 soft color stops: blue (240°), violet (280°), turquoise (195°), purple (260°), cyan (180°)
