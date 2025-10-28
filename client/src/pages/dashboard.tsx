@@ -225,7 +225,7 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Stats Cards - Floating Style */}
+        {/* Stats Cards - Professional Neon Style */}
         <div className="relative z-20 container mx-auto px-4 -mt-16">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {stats.map((stat, index) => {
@@ -233,16 +233,53 @@ export function Dashboard() {
               return (
                 <Card 
                   key={index}
-                  className="glass-morphism-strong border-border/40 hover:border-primary/50 transition-all hover-elevate shadow-lg"
+                  className="group relative overflow-hidden glass-morphism-strong border-2 hover:border-primary/40 transition-all duration-300 hover-elevate shadow-xl"
+                  style={{
+                    borderColor: index === 0 ? 'hsl(280 85% 65% / 0.3)' : index === 1 ? 'hsl(195 100% 55% / 0.3)' : 'hsl(330 85% 65% / 0.3)',
+                  }}
                 >
-                  <CardContent className="p-6">
-                    <div className={`bg-gradient-to-br ${stat.gradient} rounded-xl p-6 mb-4`}>
-                      <div className={`inline-flex p-3 rounded-lg ${stat.iconBg} mb-3`}>
-                        <Icon className={`w-6 h-6 ${stat.iconColor}`} />
+                  {/* Neon glow effect */}
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl -z-10"
+                    style={{
+                      background: index === 0 ? 'hsl(280 85% 65% / 0.15)' : index === 1 ? 'hsl(195 100% 55% / 0.15)' : 'hsl(330 85% 65% / 0.15)',
+                    }}
+                  />
+                  
+                  <CardContent className="p-8">
+                    <div className="flex items-start justify-between mb-6">
+                      {/* Icon with neon background */}
+                      <div 
+                        className="p-4 rounded-xl relative"
+                        style={{
+                          background: index === 0 
+                            ? 'linear-gradient(135deg, hsl(280 85% 65% / 0.15), hsl(280 85% 65% / 0.05))'
+                            : index === 1 
+                            ? 'linear-gradient(135deg, hsl(195 100% 55% / 0.15), hsl(195 100% 55% / 0.05))'
+                            : 'linear-gradient(135deg, hsl(330 85% 65% / 0.15), hsl(330 85% 65% / 0.05))',
+                        }}
+                      >
+                        <Icon className={`w-7 h-7 ${stat.iconColor}`} />
                       </div>
-                      <p className="text-4xl font-bold text-foreground mb-1">{stat.value}</p>
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                    
+                    {/* Value */}
+                    <p className="text-5xl font-bold text-foreground mb-3 tracking-tight">{stat.value}</p>
+                    
+                    {/* Label */}
+                    <p className="text-sm font-medium text-muted-foreground/80">{stat.label}</p>
+                    
+                    {/* Bottom accent line */}
+                    <div 
+                      className="absolute bottom-0 left-0 right-0 h-1 opacity-60"
+                      style={{
+                        background: index === 0 
+                          ? 'linear-gradient(90deg, hsl(280 85% 65% / 0.5), transparent)'
+                          : index === 1 
+                          ? 'linear-gradient(90deg, hsl(195 100% 55% / 0.5), transparent)'
+                          : 'linear-gradient(90deg, hsl(330 85% 65% / 0.5), transparent)',
+                      }}
+                    />
                   </CardContent>
                 </Card>
               );
