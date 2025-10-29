@@ -333,7 +333,9 @@ export function ServicesPage() {
 
                     {/* Mobile-optimized content layout */}
                     <CardHeader className="pb-4 md:pb-3 pt-5 md:pt-6">
-                      <CardTitle className="text-lg md:text-base mb-2 md:mb-0 line-clamp-2 md:line-clamp-1">{product.title}</CardTitle>
+                      <CardTitle className="text-lg md:text-base mb-2 md:mb-0">
+                        <span className="line-clamp-2 md:line-clamp-1">{product.title}</span>
+                      </CardTitle>
                       <CardDescription className="flex items-center space-x-2 text-sm mt-2 md:mt-0">
                         <Link href={`/seller/${product.seller.id}`}>
                           <button 
@@ -365,23 +367,33 @@ export function ServicesPage() {
                         {product.description}
                       </p>
                       
-                      {/* Pricing Section - Vertical on mobile, horizontal on desktop */}
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-5 md:mb-3 space-y-4 md:space-y-0">
-                        {/* Rating - Hidden on mobile, shown on desktop */}
-                        <div className="hidden md:flex items-center space-x-1">
+                      {/* Mobile-only pricing section - Centered and larger */}
+                      <div className="flex flex-col items-center mb-5 md:hidden">
+                        {product.oldPrice && parseFloat(product.oldPrice) > 0 && (
+                          <p className="text-lg text-red-500 line-through font-medium">
+                            ${product.oldPrice}
+                          </p>
+                        )}
+                        <p className="text-2xl font-bold text-primary neon-text-glow">
+                          ${product.price}
+                        </p>
+                      </div>
+
+                      {/* Desktop-only pricing section - Rating and price on same line */}
+                      <div className="hidden md:flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-1">
                           <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
                           <span className="text-sm font-semibold">{product.seller.rating || "0.00"}</span>
                           <span className="text-xs text-muted-foreground">({product.seller.totalReviews || 0})</span>
                         </div>
                         
-                        {/* Price section - Centered and larger on mobile */}
-                        <div className="flex flex-col items-center md:items-end gap-2 md:gap-1">
+                        <div className="flex flex-col items-end gap-1">
                           {product.oldPrice && parseFloat(product.oldPrice) > 0 && (
-                            <p className="text-lg md:text-sm text-red-500 line-through font-medium" data-testid={`text-old-price-${product.id}`}>
+                            <p className="text-sm text-red-500 line-through" data-testid={`text-old-price-${product.id}`}>
                               ${product.oldPrice}
                             </p>
                           )}
-                          <p className="text-2xl md:text-lg font-bold text-primary neon-text-glow" data-testid={`text-price-${product.id}`}>
+                          <p className="text-lg font-bold text-primary neon-text-glow" data-testid={`text-price-${product.id}`}>
                             ${product.price}
                           </p>
                         </div>
