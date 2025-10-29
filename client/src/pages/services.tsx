@@ -314,32 +314,33 @@ export function ServicesPage() {
                 <p className="text-muted-foreground">{t("services.tryDifferent")}</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {filteredProducts.map((product) => (
                   <Card 
                     key={product.id}
                     className="glass-morphism border-border/30 hover:border-primary/50 transition-all hover-elevate group"
                     data-testid={`card-product-${product.id}`}
                   >
-                    {/* Service Image */}
-                    <div className="h-40 bg-gradient-to-br from-primary/20 to-secondary/20 relative overflow-hidden">
+                    {/* Service Image - Larger on mobile */}
+                    <div className="h-52 md:h-40 bg-gradient-to-br from-primary/20 to-secondary/20 relative overflow-hidden">
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <ShoppingBag className="w-12 h-12 text-primary/40" />
+                        <ShoppingBag className="w-16 md:w-12 h-16 md:h-12 text-primary/40" />
                       </div>
-                      <Badge className="absolute top-2 right-2 bg-primary/90 neon-glow-primary">
+                      <Badge className="absolute top-3 right-3 md:top-2 md:right-2 bg-primary/90 neon-glow-primary text-sm md:text-xs">
                         {product.category}
                       </Badge>
                     </div>
 
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base line-clamp-1">{product.title}</CardTitle>
-                      <CardDescription className="flex items-center space-x-2 text-sm">
+                    {/* Mobile-optimized content layout */}
+                    <CardHeader className="pb-4 md:pb-3 pt-5 md:pt-6">
+                      <CardTitle className="text-lg md:text-base mb-2 md:mb-0 line-clamp-2 md:line-clamp-1">{product.title}</CardTitle>
+                      <CardDescription className="flex items-center space-x-2 text-sm mt-2 md:mt-0">
                         <Link href={`/seller/${product.seller.id}`}>
                           <button 
                             className="flex items-center space-x-2 hover-elevate rounded-md p-1 -m-1 transition-all"
                             data-testid={`link-seller-${product.seller.id}`}
                           >
-                            <Avatar className="w-5 h-5 border border-primary/30">
+                            <Avatar className="w-6 md:w-5 h-6 md:h-5 border border-primary/30">
                               <AvatarImage src={getUserAvatar(product.seller.id)} />
                               <AvatarFallback className="text-xs bg-primary/20">
                                 {product.seller.username.substring(0, 2).toUpperCase()}
@@ -349,8 +350,8 @@ export function ServicesPage() {
                           </button>
                         </Link>
                         {product.seller.isVerified && (
-                          <div className="w-3.5 h-3.5 bg-green-500 rounded-full flex items-center justify-center neon-glow-success">
-                            <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <div className="w-4 md:w-3.5 h-4 md:h-3.5 bg-green-500 rounded-full flex items-center justify-center neon-glow-success">
+                            <svg className="w-2.5 md:w-2 h-2.5 md:h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
                           </div>
@@ -358,32 +359,37 @@ export function ServicesPage() {
                       </CardDescription>
                     </CardHeader>
 
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                    <CardContent className="space-y-5 md:space-y-0">
+                      {/* Description - More lines on mobile */}
+                      <p className="text-base md:text-sm text-muted-foreground mb-5 md:mb-4 line-clamp-3 md:line-clamp-2 leading-relaxed">
                         {product.description}
                       </p>
                       
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center space-x-1">
+                      {/* Pricing Section - Vertical on mobile, horizontal on desktop */}
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-5 md:mb-3 space-y-4 md:space-y-0">
+                        {/* Rating - Hidden on mobile, shown on desktop */}
+                        <div className="hidden md:flex items-center space-x-1">
                           <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
                           <span className="text-sm font-semibold">{product.seller.rating || "0.00"}</span>
                           <span className="text-xs text-muted-foreground">({product.seller.totalReviews || 0})</span>
                         </div>
-                        <div className="flex flex-col items-end gap-1">
+                        
+                        {/* Price section - Centered and larger on mobile */}
+                        <div className="flex flex-col items-center md:items-end gap-2 md:gap-1">
                           {product.oldPrice && parseFloat(product.oldPrice) > 0 && (
-                            <p className="text-sm text-red-500 line-through" data-testid={`text-old-price-${product.id}`}>
+                            <p className="text-lg md:text-sm text-red-500 line-through font-medium" data-testid={`text-old-price-${product.id}`}>
                               ${product.oldPrice}
                             </p>
                           )}
-                          <p className="text-lg font-bold text-primary neon-text-glow" data-testid={`text-price-${product.id}`}>
+                          <p className="text-2xl md:text-lg font-bold text-primary neon-text-glow" data-testid={`text-price-${product.id}`}>
                             ${product.price}
                           </p>
                         </div>
                       </div>
 
+                      {/* Buy Button - Larger on mobile */}
                       <Button 
-                        className="w-full neon-glow-secondary" 
-                        size="sm"
+                        className="w-full neon-glow-secondary h-12 md:h-9 text-base md:text-sm font-semibold" 
                         onClick={() => {
                           setSelectedProduct(product);
                           setPurchaseDialogOpen(true);
