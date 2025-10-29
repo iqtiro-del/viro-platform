@@ -369,7 +369,16 @@ export function ServicesPage() {
                           <span className="text-sm font-semibold">{product.seller.rating || "0.00"}</span>
                           <span className="text-xs text-muted-foreground">({product.seller.totalReviews || 0})</span>
                         </div>
-                        <p className="text-lg font-bold text-primary neon-text-glow">${product.price}</p>
+                        <div className="flex flex-col items-end gap-1">
+                          {product.oldPrice && parseFloat(product.oldPrice) > 0 && (
+                            <p className="text-sm text-red-500 line-through" data-testid={`text-old-price-${product.id}`}>
+                              ${product.oldPrice}
+                            </p>
+                          )}
+                          <p className="text-lg font-bold text-primary neon-text-glow" data-testid={`text-price-${product.id}`}>
+                            ${product.price}
+                          </p>
+                        </div>
                       </div>
 
                       <Button 
@@ -425,7 +434,12 @@ export function ServicesPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("services.price")}:</span>
-                  <span className="font-bold text-primary">${selectedProduct.price}</span>
+                  <div className="flex flex-col items-end gap-1">
+                    {selectedProduct.oldPrice && parseFloat(selectedProduct.oldPrice) > 0 && (
+                      <span className="text-sm text-red-500 line-through">${selectedProduct.oldPrice}</span>
+                    )}
+                    <span className="font-bold text-primary">${selectedProduct.price}</span>
+                  </div>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("services.yourBalance")}:</span>

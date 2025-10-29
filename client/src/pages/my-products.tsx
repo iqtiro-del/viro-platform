@@ -159,6 +159,7 @@ export function MyProductsPage() {
         title: product.title,
         description: product.description,
         price: product.price.toString(),
+        oldPrice: product.oldPrice ? product.oldPrice.toString() : "",
         category: product.category,
         imageUrl: product.imageUrl,
         isActive: product.isActive,
@@ -171,6 +172,7 @@ export function MyProductsPage() {
         title: "",
         description: "",
         price: "",
+        oldPrice: "",
         category: "",
         imageUrl: "",
         isActive: true,
@@ -233,13 +235,61 @@ export function MyProductsPage() {
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="category"
+            render={({ field }) => {
+              const selectedCategory = categories.find(c => c.value === field.value);
+              return (
+                <FormItem>
+                  <FormLabel>{t("myProducts.category")}</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="glass-morphism border-border/50" data-testid="select-product-category">
+                        <SelectValue placeholder={t("myProducts.selectCategory")}>
+                          {selectedCategory?.label || t("myProducts.selectCategory")}
+                        </SelectValue>
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="glass-morphism-strong border-border/50">
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+
           <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="oldPrice"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>السعر القديم (قبل التخفيض)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field}
+                      type="number" 
+                      placeholder="مثال: 150"
+                      className="glass-morphism border-border/50"
+                      data-testid="input-product-old-price"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("myProducts.priceUSD")}</FormLabel>
+                  <FormLabel>السعر الجديد (بعد التخفيض)</FormLabel>
                   <FormControl>
                     <Input 
                       {...field}
@@ -252,34 +302,6 @@ export function MyProductsPage() {
                   <FormMessage />
                 </FormItem>
               )}
-            />
-
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => {
-                const selectedCategory = categories.find(c => c.value === field.value);
-                return (
-                  <FormItem>
-                    <FormLabel>{t("myProducts.category")}</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="glass-morphism border-border/50" data-testid="select-product-category">
-                          <SelectValue placeholder={t("myProducts.selectCategory")}>
-                            {selectedCategory?.label || t("myProducts.selectCategory")}
-                          </SelectValue>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="glass-morphism-strong border-border/50">
-                        {categories.map((cat) => (
-                          <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
             />
           </div>
 

@@ -215,7 +215,14 @@ export function SellerProfilePage() {
                       <span className="text-sm font-semibold">{seller.rating || "0.00"}</span>
                       <span className="text-xs text-muted-foreground">({seller.totalReviews || 0})</span>
                     </div>
-                    <p className="text-lg font-bold text-primary neon-text-glow">${product.price}</p>
+                    <div className="flex flex-col items-end gap-1">
+                      {product.oldPrice && parseFloat(product.oldPrice) > 0 && (
+                        <p className="text-sm text-red-500 line-through">
+                          ${product.oldPrice}
+                        </p>
+                      )}
+                      <p className="text-lg font-bold text-primary neon-text-glow">${product.price}</p>
+                    </div>
                   </div>
 
                   <Link href="/services">
