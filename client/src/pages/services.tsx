@@ -361,9 +361,9 @@ export function ServicesPage() {
                       </CardDescription>
                     </CardHeader>
 
-                    <CardContent className="space-y-5 md:space-y-0">
+                    <CardContent>
                       {/* Description - More lines on mobile */}
-                      <p className="text-base md:text-sm text-muted-foreground mb-5 md:mb-4 line-clamp-3 md:line-clamp-2 leading-relaxed">
+                      <p className="text-base md:text-sm text-muted-foreground mb-5 md:mb-3 line-clamp-3 md:line-clamp-2 leading-relaxed">
                         {product.description}
                       </p>
                       
@@ -380,7 +380,7 @@ export function ServicesPage() {
                       </div>
 
                       {/* Desktop-only pricing section - Rating and price on same line */}
-                      <div className="hidden md:flex items-center justify-between mb-3">
+                      <div className="hidden md:flex md:items-center md:justify-between md:mb-3">
                         <div className="flex items-center space-x-1">
                           <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
                           <span className="text-sm font-semibold">{product.seller.rating || "0.00"}</span>

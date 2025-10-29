@@ -5,6 +5,13 @@ Tiro is a digital services marketplace platform designed for the Iraqi market, c
 
 ## Recent Updates
 
+**Mobile-Optimized Services Page Layout**
+- Implemented responsive vertical card layout for mobile devices (< 768px breakpoint)
+- Mobile enhancements: single-column grid, taller images (h-52 = 208px), larger typography (text-lg titles, text-base descriptions), centered pricing (text-2xl new price, text-lg old price), tall touch-friendly buttons (h-12 = 48px), hidden rating stars for cleaner mobile view
+- Desktop layout unchanged: maintains 3-column grid (lg:grid-cols-3), standard image height (h-40), compact typography, horizontal rating/price alignment, standard button height (h-9)
+- Separate mobile and desktop pricing sections to avoid CSS conflicts and ensure proper responsive behavior
+- E2E tested: verified single-column mobile layout with prominent elements and multi-column desktop grid with rating/price alignment
+
 **Comprehensive UX/UI Improvements - Smooth Transitions & Mobile Optimization**
 - Implemented smooth page transition system with fade animations (200ms exit, 300ms enter)
 - Fixed PageTransition component using state-based rendering to eliminate flicker
