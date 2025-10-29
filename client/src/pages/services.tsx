@@ -370,14 +370,14 @@ export function ServicesPage() {
                         {product.description}
                       </p>
                       
-                      {/* Mobile-only pricing - Stacked: old price → new price */}
-                      <div className="mb-4 md:hidden">
+                      {/* Mobile-only pricing - Old and new price side by side */}
+                      <div className="flex items-center gap-3 mb-4 md:hidden">
                         {product.oldPrice && parseFloat(product.oldPrice) > 0 && (
-                          <p className="text-lg text-red-500 line-through font-medium mb-1">
+                          <p className="text-lg text-red-500 line-through font-medium">
                             ${product.oldPrice}
                           </p>
                         )}
-                        <p className="text-2xl font-bold text-primary neon-text-glow mb-4">
+                        <p className="text-2xl font-bold text-primary neon-text-glow">
                           ${product.price}
                         </p>
                       </div>
