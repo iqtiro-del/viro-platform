@@ -331,18 +331,21 @@ export function ServicesPage() {
                       </Badge>
                     </div>
 
-                    {/* Mobile-optimized content layout */}
+                    {/* Card Header - Title and Seller Info */}
                     <CardHeader className="pb-4 md:pb-3 pt-5 md:pt-6">
-                      <CardTitle className="text-lg md:text-base mb-2 md:mb-0">
+                      {/* Title */}
+                      <CardTitle className="text-lg md:text-base mb-3 md:mb-0">
                         <span className="line-clamp-2 md:line-clamp-1">{product.title}</span>
                       </CardTitle>
-                      <CardDescription className="flex items-center space-x-2 text-sm mt-2 md:mt-0">
+                      
+                      {/* Seller Info - Hidden on mobile, shown on desktop */}
+                      <CardDescription className="hidden md:flex items-center space-x-2 text-sm">
                         <Link href={`/seller/${product.seller.id}`}>
                           <button 
                             className="flex items-center space-x-2 hover-elevate rounded-md p-1 -m-1 transition-all"
                             data-testid={`link-seller-${product.seller.id}`}
                           >
-                            <Avatar className="w-6 md:w-5 h-6 md:h-5 border border-primary/30">
+                            <Avatar className="w-5 h-5 border border-primary/30">
                               <AvatarImage src={getUserAvatar(product.seller.id)} />
                               <AvatarFallback className="text-xs bg-primary/20">
                                 {product.seller.username.substring(0, 2).toUpperCase()}
@@ -352,8 +355,8 @@ export function ServicesPage() {
                           </button>
                         </Link>
                         {product.seller.isVerified && (
-                          <div className="w-4 md:w-3.5 h-4 md:h-3.5 bg-green-500 rounded-full flex items-center justify-center neon-glow-success">
-                            <svg className="w-2.5 md:w-2 h-2.5 md:h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <div className="w-3.5 h-3.5 bg-green-500 rounded-full flex items-center justify-center neon-glow-success">
+                            <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
                           </div>
@@ -362,19 +365,19 @@ export function ServicesPage() {
                     </CardHeader>
 
                     <CardContent>
-                      {/* Description - More lines on mobile */}
-                      <p className="text-base md:text-sm text-muted-foreground mb-5 md:mb-3 line-clamp-3 md:line-clamp-2 leading-relaxed">
+                      {/* Description */}
+                      <p className="text-base md:text-sm text-muted-foreground mb-4 md:mb-3 line-clamp-3 md:line-clamp-2 leading-relaxed">
                         {product.description}
                       </p>
                       
-                      {/* Mobile-only pricing section - Centered and larger */}
-                      <div className="flex flex-col items-center mb-5 md:hidden">
+                      {/* Mobile-only pricing - Stacked: old price → new price */}
+                      <div className="mb-4 md:hidden">
                         {product.oldPrice && parseFloat(product.oldPrice) > 0 && (
-                          <p className="text-lg text-red-500 line-through font-medium">
+                          <p className="text-lg text-red-500 line-through font-medium mb-1">
                             ${product.oldPrice}
                           </p>
                         )}
-                        <p className="text-2xl font-bold text-primary neon-text-glow">
+                        <p className="text-2xl font-bold text-primary neon-text-glow mb-4">
                           ${product.price}
                         </p>
                       </div>
@@ -399,7 +402,7 @@ export function ServicesPage() {
                         </div>
                       </div>
 
-                      {/* Buy Button - Larger on mobile */}
+                      {/* Buy Button - Wide and tall on mobile */}
                       <Button 
                         className="w-full neon-glow-secondary h-12 md:h-9 text-base md:text-sm font-semibold" 
                         onClick={() => {
