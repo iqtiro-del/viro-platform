@@ -98,6 +98,17 @@ Tiro is a digital services marketplace platform designed for the Iraqi market, c
 - Environment variable ENCRYPTION_KEY (SHA-256 hashed) for production deployment security
 - E2E tested: product creation → encryption → purchase → decryption → display flow working correctly
 
+**Discount Pricing System**
+- Added `oldPrice` field to products schema as optional varchar for backward compatibility
+- Updated ProductForm in My Products page with two price input fields: "السعر القديم (قبل التخفيض)" and "السعر الجديد (بعد التخفيض)"
+- Old price field is optional, allowing sellers to create products without discounts
+- Enhanced price display across all pages: Services, Seller Profile, Purchase Dialog
+- Old price shown with red text (text-red-500) and line-through decoration when present
+- New price displayed in bold with neon/primary color styling (text-primary, neon-text-glow)
+- Prices stacked vertically (flex-col, items-end) with old price above new price
+- Conditional rendering: old price only displays if value exists and is greater than 0
+- E2E tested: product creation with discount pricing → correct display on services page with strikethrough styling
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
