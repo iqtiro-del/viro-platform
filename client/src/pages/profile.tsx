@@ -442,17 +442,16 @@ export function ProfilePage() {
                 <CardTitle className="text-lg">{t("profile.quickActions")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {!userData.isVerified && (
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start border-border/50 neon-glow-primary" 
-                    data-testid="button-verify-account"
-                    onClick={() => setVerifyDialogOpen(true)}
-                  >
-                    <ShieldCheck className="w-4 h-4 mr-2" />
-                    توثيق الحساب
-                  </Button>
-                )}
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start border-border/50 neon-glow-primary" 
+                  data-testid="button-verify-account"
+                  onClick={() => setVerifyDialogOpen(true)}
+                  disabled={userData.isVerified}
+                >
+                  <ShieldCheck className="w-4 h-4 mr-2" />
+                  {userData.isVerified ? "الحساب موثق ✓" : "توثيق الحساب"}
+                </Button>
                 {activeChats.length > 0 && (
                   <Button 
                     variant="outline" 
