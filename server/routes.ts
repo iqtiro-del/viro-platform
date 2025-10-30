@@ -853,6 +853,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin - Get banned users
+  app.get("/api/admin/banned-users", requireAdmin, async (req, res) => {
+    try {
+      const bannedUsers = await storage.getBannedUsers();
+      const usersWithoutPasswords = bannedUsers.map(({ password, ...user }) => user);
+      res.json(usersWithoutPasswords);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Admin - Unban user
+  app.patch("/api/admin/users/:id/unban", requireAdmin, async (req, res) => {
+    try {
+      const user = await storage.updateUser(req.params.id, {
+        isBanned: false,
+        banReason: '',
+        bannedAt: null
+      });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      const { password, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Admin - Get all products
   app.get("/api/admin/products", requireAdmin, async (req, res) => {
     try {

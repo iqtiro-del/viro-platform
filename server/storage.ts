@@ -37,6 +37,7 @@ export interface IStorage {
   // Users
   getUser(id: string): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
+  getBannedUsers(): Promise<User[]>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, data: Partial<User>): Promise<User | undefined>;
@@ -117,6 +118,10 @@ export class DatabaseStorage implements IStorage {
 
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users);
+  }
+
+  async getBannedUsers(): Promise<User[]> {
+    return await db.select().from(users).where(eq(users.isBanned, true));
   }
 
   async updateUser(id: string, data: Partial<User>): Promise<User | undefined> {
