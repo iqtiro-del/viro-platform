@@ -1091,3 +1091,138 @@ function WithdrawalsManagement({ adminId }: { adminId: string }) {
     </div>
   );
 }
+
+// Banned Users Management Component
+function BannedUsersManagement({ adminId }: { adminId: string }) {
+  const { toast } = useToast();
+  const [unbanUserId, setUnbanUserId] = useState<string | null>(null);
+  
+  const { data: bannedUsers = [] } = useQuery<User[]>({
+    queryKey: ['/api/admin/banned-users'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/banned-users', {
+        headers: { 'x-user-id': adminId },
+      });
+      if (!res.ok) throw new Error('Failed to fetch banned users');
+      return res.json();
+    },
+  });
+
+  const unbanUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const res = await fetch(`/api/admin/users/${userId}/unban`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-id': adminId 
+        },
+      });
+      if (!res.ok) throw new Error('Failed to unban user');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ['/api/admin/banned-users'] });
+      queryClient.refetchQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.refetchQueries({ queryKey: ['/api/admin/stats'] });
+      toast({
+        title: "تم إلغاء الحظر",
+        description: "User has been unbanned successfully",
+      });
+      setUnbanUserId(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطأ",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  return (
+    <div className="space-y-6">
+      <Card className="glass-morphism">
+        <CardHeader>
+          <CardTitle>Banned Users ({bannedUsers.length})</CardTitle>
+          <CardDescription>View and manage banned users</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Username</TableHead>
+                  <TableHead>Full Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Ban Reason</TableHead>
+                  <TableHead>Banned At</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bannedUsers.map((user) => (
+                  <TableRow key={user.id} data-testid={`row-banned-user-${user.id}`}>
+                    <TableCell className="font-medium">{user.username}</TableCell>
+                    <TableCell>{user.fullName}</TableCell>
+                    <TableCell>{user.email || '-'}</TableCell>
+                    <TableCell className="max-w-xs truncate">{user.banReason || 'No reason provided'}</TableCell>
+                    <TableCell className="text-xs">
+                      {user.bannedAt ? new Date(user.bannedAt).toLocaleString() : '-'}
+                    </TableCell>
+                    <TableCell>
+                      <Dialog open={unbanUserId === user.id} onOpenChange={(open) => !open && setUnbanUserId(null)}>
+                        <DialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => setUnbanUserId(user.id)}
+                            data-testid={`button-unban-${user.id}`}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Unban
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="glass-morphism">
+                          <DialogHeader>
+                            <DialogTitle>Confirm Unban</DialogTitle>
+                            <DialogDescription>
+                              Are you sure you want to unban user "{user.username}"? They will be able to access the platform again.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="flex justify-end gap-2 mt-4">
+                            <Button
+                              variant="outline"
+                              onClick={() => setUnbanUserId(null)}
+                              data-testid="button-cancel-unban"
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              variant="default"
+                              onClick={() => unbanUserMutation.mutate(user.id)}
+                              disabled={unbanUserMutation.isPending}
+                              data-testid="button-confirm-unban"
+                            >
+                              {unbanUserMutation.isPending ? "Unbanning..." : "Confirm Unban"}
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {bannedUsers.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground">
+                      No banned users
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
