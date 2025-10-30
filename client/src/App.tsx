@@ -22,6 +22,7 @@ import { PromotePage } from "@/pages/promote";
 import { ProfilePage } from "@/pages/profile";
 import { MyChatsPage } from "@/pages/my-chats";
 import { SellerProfilePage } from "@/pages/seller-profile";
+import AdminDashboard from "@/pages/admin";
 import { useState } from "react";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -104,6 +105,7 @@ function Router() {
             <PageTransition>
               <Switch>
                 <Route path="/" component={Dashboard} />
+                <Route path="/admin" component={AdminDashboard} />
                 <Route path="/services" component={ServicesPage} />
                 <Route path="/seller/:id" component={SellerProfilePage} />
                 <Route path="/wallet">
