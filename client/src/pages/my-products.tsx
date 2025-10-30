@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +18,16 @@ import {
   DollarSign,
   Package
 } from "lucide-react";
+
+// Import default category images
+import instagramImage from "@assets/stock_images/instagram_app_icon_s_a38179b5.jpg";
+import designImage from "@assets/stock_images/graphic_design_tools_3e0fc2bd.jpg";
+import developmentImage from "@assets/stock_images/programming_code_com_38e46ac7.jpg";
+import writingImage from "@assets/stock_images/writing_paper_pen_no_9e56c035.jpg";
+import marketingImage from "@assets/stock_images/digital_marketing_so_7cb49cc6.jpg";
+import musicImage from "@assets/stock_images/music_headphones_aud_3ecbf0d1.jpg";
+import tiktokImage from "@assets/stock_images/tiktok_app_social_me_3db68c54.jpg";
+import videoImage from "@assets/stock_images/video_camera_film_pr_04d2757b.jpg";
 import {
   Dialog,
   DialogContent,
@@ -151,6 +161,18 @@ export function MyProductsPage() {
     { value: "TikTok", label: t("services.categories.tiktok") },
   ];
 
+  // Default category images mapping
+  const categoryImages: Record<string, string> = {
+    "Instagram": instagramImage,
+    "Design": designImage,
+    "Development": developmentImage,
+    "Writing": writingImage,
+    "Marketing": marketingImage,
+    "Music & Audio": musicImage,
+    "TikTok": tiktokImage,
+    "Video & Animation": videoImage,
+  };
+
   const ProductForm = ({ product, onClose }: { product?: Product; onClose: () => void }) => {
     const form = useForm<InsertProduct>({
       resolver: zodResolver(insertProductSchema),
@@ -184,7 +206,19 @@ export function MyProductsPage() {
     });
 
     const selectedCategory = form.watch("category");
+    const currentImageUrl = form.watch("imageUrl");
     const showAccountFields = selectedCategory === "Instagram" || selectedCategory === "TikTok";
+
+    // Auto-assign default category image when category changes (only if no custom image)
+    useEffect(() => {
+      // Only auto-assign for new products (not editing existing ones)
+      if (!product && selectedCategory && !currentImageUrl) {
+        const defaultImage = categoryImages[selectedCategory];
+        if (defaultImage) {
+          form.setValue("imageUrl", defaultImage);
+        }
+      }
+    }, [selectedCategory, product, currentImageUrl, form]);
 
     const onSubmit = (data: InsertProduct) => {
       if (product) {

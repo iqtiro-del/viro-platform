@@ -255,10 +255,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         accountEmailPassword: data.accountEmailPassword,
       });
       
-      const product = await storage.createProduct({
+      // Handle empty oldPrice - convert to null/undefined for database
+      const productData = {
         ...data,
+        oldPrice: data.oldPrice && data.oldPrice.trim() !== "" ? data.oldPrice : undefined,
         ...encryptedCredentials,
-      });
+      };
+      
+      const product = await storage.createProduct(productData);
       
       res.json(product);
     } catch (error: any) {
@@ -278,6 +282,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         accountEmail: data.accountEmail,
         accountEmailPassword: data.accountEmailPassword,
       });
+      
+      // Handle empty oldPrice - convert to undefined for database
+      if (data.oldPrice !== undefined && data.oldPrice.trim() === "") {
+        data.oldPrice = undefined;
+      }
       
       // Merge encrypted credentials into data (only provided fields)
       Object.assign(data, encryptedCredentials);
