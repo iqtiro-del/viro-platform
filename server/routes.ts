@@ -887,6 +887,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin - Create verification request for a user
+  app.post("/api/admin/verification-requests", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+
+      // Get user details
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Check if user already has a pending verification request
+      const existingRequest = await storage.getVerificationRequestByUser(userId);
+      if (existingRequest && existingRequest.status === 'pending') {
+        return res.status(400).json({ error: "User already has a pending verification request" });
+      }
+
+      // Create verification request
+      const request = await storage.createVerificationRequest({
+        userId,
+        fullName: user.fullName,
+        photoUrl: 'admin-initiated'
+      });
+
+      res.json(request);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Admin - Approve/Reject verification request
   app.patch("/api/admin/verification-requests/:id", requireAdmin, async (req, res) => {
     try {

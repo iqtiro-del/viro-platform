@@ -338,6 +338,38 @@ function UsersManagement({ adminId }: { adminId: string }) {
     },
   });
 
+  const createVerificationRequestMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const res = await fetch('/api/admin/verification-requests', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-id': adminId 
+        },
+        body: JSON.stringify({ userId }),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to create verification request');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/verification-requests'] });
+      toast({
+        title: "تم إنشاء طلب التحقق",
+        description: "Verification request created. Go to Verifications panel to approve.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطأ",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   return (
     <Card className="glass-morphism">
       <CardHeader>
@@ -398,7 +430,8 @@ function UsersManagement({ adminId }: { adminId: string }) {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => updateUserMutation.mutate({ id: user.id, data: { isVerified: true } })}
+                        onClick={() => createVerificationRequestMutation.mutate(user.id)}
+                        disabled={createVerificationRequestMutation.isPending}
                         data-testid={`button-verify-${user.id}`}
                       >
                         <BadgeCheck className="w-4 h-4 mr-1" />
