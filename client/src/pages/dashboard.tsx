@@ -40,7 +40,9 @@ export function Dashboard() {
   });
 
   const { data: statsData } = useQuery<{ activeServices: number; verifiedSellers: number; totalSales: string }>({
-    queryKey: ['/api/stats']
+    queryKey: ['/api/stats'],
+    refetchInterval: 30000, // Auto-refresh every 30 seconds for real-time updates
+    staleTime: 0, // Always fetch fresh data
   });
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({

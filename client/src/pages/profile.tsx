@@ -65,7 +65,9 @@ export function ProfilePage() {
   const totalSales = userProducts.reduce((sum, p) => sum + (p.sales || 0), 0);
   
   const { data: statsData } = useQuery<{ verifiedSellers: number }>({
-    queryKey: ['/api/stats']
+    queryKey: ['/api/stats'],
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    staleTime: 0, // Always fetch fresh data
   });
   
   const sellerRank = userData && statsData 

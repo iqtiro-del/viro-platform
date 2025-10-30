@@ -81,6 +81,7 @@ export function MyProductsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] }); // Refresh stats after product creation
       toast({
         title: t("common.success"),
         description: t("myProducts.createSuccess"),
@@ -104,6 +105,7 @@ export function MyProductsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] }); // Refresh stats after product update
       toast({
         title: t("common.success"),
         description: t("myProducts.updateSuccess"),
@@ -127,6 +129,7 @@ export function MyProductsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] }); // Refresh stats after product deletion
       toast({
         title: t("common.success"),
         description: t("myProducts.deleteSuccess"),

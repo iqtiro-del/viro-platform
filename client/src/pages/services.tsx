@@ -107,6 +107,7 @@ export function ServicesPage() {
     onSuccess: (data: any) => {
       setUser(data.buyer);
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] }); // Refresh stats after purchase
       queryClient.invalidateQueries({ queryKey: ['/api/transactions', user?.id] });
       
       setPurchaseDialogOpen(false);
