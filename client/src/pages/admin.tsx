@@ -7,11 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Users, Package, DollarSign, ShoppingCart, BadgeCheck, XCircle, CheckCircle, Trash2, Edit, Shield } from "lucide-react";
+import { Users, Package, DollarSign, ShoppingCart, BadgeCheck, XCircle, CheckCircle, Trash2, Edit, Shield, MoreVertical, ArrowDownToLine, ArrowUpFromLine, Receipt } from "lucide-react";
 import type { User, ProductWithSeller, Transaction, VerificationRequestWithUser } from "@shared/schema";
+
+type AdminSection = 'users' | 'services' | 'verifications' | 'transactions' | 'deposits' | 'withdrawals';
 
 export default function AdminDashboard() {
   const { toast } = useToast();
@@ -20,6 +22,7 @@ export default function AdminDashboard() {
     return saved ? JSON.parse(saved) : null;
   });
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
+  const [currentSection, setCurrentSection] = useState<AdminSection>('users');
 
   // Login mutation
   const loginMutation = useMutation({
@@ -119,16 +122,60 @@ export default function AdminDashboard() {
     );
   }
 
+  const sections = [
+    { id: 'users' as AdminSection, label: 'Users', icon: Users },
+    { id: 'services' as AdminSection, label: 'Services', icon: Package },
+    { id: 'verifications' as AdminSection, label: 'Verifications', icon: BadgeCheck },
+    { id: 'transactions' as AdminSection, label: 'Transactions', icon: Receipt },
+    { id: 'deposits' as AdminSection, label: 'Deposits', icon: ArrowDownToLine },
+    { id: 'withdrawals' as AdminSection, label: 'Withdrawals', icon: ArrowUpFromLine },
+  ];
+
+  const currentSectionData = sections.find(s => s.id === currentSection);
+
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-accent font-bold neon-text-glow mb-2" data-testid="text-admin-title">
-              Admin Dashboard
-            </h1>
-            <p className="text-muted-foreground">Welcome, {adminUser.username}</p>
+          <div className="flex items-center gap-4">
+            <div>
+              <h1 className="text-4xl font-accent font-bold neon-text-glow mb-2" data-testid="text-admin-title">
+                Admin Dashboard
+              </h1>
+              <p className="text-muted-foreground">Welcome, {adminUser.username}</p>
+            </div>
+            {/* Navigation Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className="neon-glow-primary"
+                  data-testid="button-admin-menu"
+                >
+                  <MoreVertical className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 glass-morphism">
+                <DropdownMenuLabel>Navigation</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {sections.map((section) => {
+                  const Icon = section.icon;
+                  return (
+                    <DropdownMenuItem
+                      key={section.id}
+                      onClick={() => setCurrentSection(section.id)}
+                      className={currentSection === section.id ? 'bg-primary/20' : ''}
+                      data-testid={`menu-item-${section.id}`}
+                    >
+                      <Icon className="w-4 h-4 mr-2" />
+                      {section.label}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <Button variant="outline" onClick={handleLogout} data-testid="button-admin-logout">
             Logout
@@ -138,31 +185,28 @@ export default function AdminDashboard() {
         {/* Stats Overview */}
         <StatsOverview adminId={adminUser.id} />
 
-        {/* Management Tabs */}
-        <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="users" data-testid="tab-users">Users</TabsTrigger>
-            <TabsTrigger value="services" data-testid="tab-services">Services</TabsTrigger>
-            <TabsTrigger value="verifications" data-testid="tab-verifications">Verifications</TabsTrigger>
-            <TabsTrigger value="transactions" data-testid="tab-transactions">Transactions</TabsTrigger>
-          </TabsList>
+        {/* Current Section Header */}
+        {currentSectionData && (
+          <div className="flex items-center gap-2">
+            {(() => {
+              const Icon = currentSectionData.icon;
+              return <Icon className="w-6 h-6 text-primary" />;
+            })()}
+            <h2 className="text-2xl font-bold neon-text-glow" data-testid={`text-section-${currentSection}`}>
+              {currentSectionData.label}
+            </h2>
+          </div>
+        )}
 
-          <TabsContent value="users" className="mt-6">
-            <UsersManagement adminId={adminUser.id} />
-          </TabsContent>
-
-          <TabsContent value="services" className="mt-6">
-            <ServicesManagement adminId={adminUser.id} />
-          </TabsContent>
-
-          <TabsContent value="verifications" className="mt-6">
-            <VerificationsManagement adminId={adminUser.id} />
-          </TabsContent>
-
-          <TabsContent value="transactions" className="mt-6">
-            <TransactionsManagement adminId={adminUser.id} />
-          </TabsContent>
-        </Tabs>
+        {/* Management Sections */}
+        <div className="mt-6">
+          {currentSection === 'users' && <UsersManagement adminId={adminUser.id} />}
+          {currentSection === 'services' && <ServicesManagement adminId={adminUser.id} />}
+          {currentSection === 'verifications' && <VerificationsManagement adminId={adminUser.id} />}
+          {currentSection === 'transactions' && <TransactionsManagement adminId={adminUser.id} />}
+          {currentSection === 'deposits' && <DepositsManagement adminId={adminUser.id} />}
+          {currentSection === 'withdrawals' && <WithdrawalsManagement adminId={adminUser.id} />}
+        </div>
       </div>
     </div>
   );
@@ -629,5 +673,381 @@ function TransactionsManagement({ adminId }: { adminId: string }) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+// Deposits Management Component
+function DepositsManagement({ adminId }: { adminId: string }) {
+  const { toast } = useToast();
+  const { data: deposits = [] } = useQuery<(Transaction & { user?: User })[]>({
+    queryKey: ['/api/admin/transactions?type=deposit'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/transactions?type=deposit', {
+        headers: { 'x-user-id': adminId },
+      });
+      if (!res.ok) throw new Error('Failed to fetch deposits');
+      return res.json();
+    },
+  });
+
+  const updateTransactionMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: 'completed' | 'failed' }) => {
+      const res = await fetch(`/api/admin/transactions/${id}`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-id': adminId 
+        },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error('Failed to update transaction');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/transactions?type=deposit'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      toast({
+        title: "تم التحديث",
+        description: "Deposit request updated successfully",
+      });
+    },
+  });
+
+  const pendingDeposits = deposits.filter(d => d.status === 'pending');
+  const completedDeposits = deposits.filter(d => d.status === 'completed');
+  const rejectedDeposits = deposits.filter(d => d.status === 'failed');
+
+  return (
+    <div className="space-y-6">
+      {/* Pending Deposits */}
+      <Card className="glass-morphism border-2 border-yellow-500/30 neon-glow-warning">
+        <CardHeader>
+          <CardTitle>Pending Deposit Requests</CardTitle>
+          <CardDescription>Approve or reject pending deposit requests</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Account Number</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pendingDeposits.map((deposit) => (
+                  <TableRow key={deposit.id} data-testid={`row-deposit-${deposit.id}`}>
+                    <TableCell className="font-medium">{deposit.user?.username || deposit.userId.slice(0, 8)}</TableCell>
+                    <TableCell className="font-semibold text-green-400">${deposit.amount}</TableCell>
+                    <TableCell className="font-mono text-xs">{deposit.accountNumber || '-'}</TableCell>
+                    <TableCell className="max-w-xs truncate">{deposit.description || '-'}</TableCell>
+                    <TableCell className="text-xs">{new Date(deposit.createdAt).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">pending</Badge>
+                    </TableCell>
+                    <TableCell className="space-x-2">
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => updateTransactionMutation.mutate({ id: deposit.id, status: 'completed' })}
+                        disabled={updateTransactionMutation.isPending}
+                        data-testid={`button-approve-deposit-${deposit.id}`}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => updateTransactionMutation.mutate({ id: deposit.id, status: 'failed' })}
+                        disabled={updateTransactionMutation.isPending}
+                        data-testid={`button-reject-deposit-${deposit.id}`}
+                      >
+                        <XCircle className="w-4 h-4 mr-1" />
+                        Reject
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {pendingDeposits.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                      No pending deposit requests
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Recent Completed Deposits */}
+      <Card className="glass-morphism">
+        <CardHeader>
+          <CardTitle>Recent Completed Deposits ({completedDeposits.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {completedDeposits.slice(0, 10).map((deposit) => (
+                  <TableRow key={deposit.id}>
+                    <TableCell className="font-medium">{deposit.user?.username || deposit.userId.slice(0, 8)}</TableCell>
+                    <TableCell className="font-semibold text-green-400">${deposit.amount}</TableCell>
+                    <TableCell className="text-xs">{new Date(deposit.createdAt).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span className="text-green-500">Approved</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Recent Rejected Deposits */}
+      {rejectedDeposits.length > 0 && (
+        <Card className="glass-morphism">
+          <CardHeader>
+            <CardTitle>Recent Rejected Deposits ({rejectedDeposits.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rejectedDeposits.slice(0, 10).map((deposit) => (
+                    <TableRow key={deposit.id}>
+                      <TableCell className="font-medium">{deposit.user?.username || deposit.userId.slice(0, 8)}</TableCell>
+                      <TableCell className="font-semibold text-red-400">${deposit.amount}</TableCell>
+                      <TableCell className="text-xs">{new Date(deposit.createdAt).toLocaleString()}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <XCircle className="w-4 h-4 text-red-500" />
+                          <span className="text-red-500">Rejected</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+// Withdrawals Management Component
+function WithdrawalsManagement({ adminId }: { adminId: string }) {
+  const { toast } = useToast();
+  const { data: withdrawals = [] } = useQuery<(Transaction & { user?: User })[]>({
+    queryKey: ['/api/admin/transactions?type=withdraw'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/transactions?type=withdraw', {
+        headers: { 'x-user-id': adminId },
+      });
+      if (!res.ok) throw new Error('Failed to fetch withdrawals');
+      return res.json();
+    },
+  });
+
+  const updateTransactionMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: 'completed' | 'failed' }) => {
+      const res = await fetch(`/api/admin/transactions/${id}`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-id': adminId 
+        },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error('Failed to update transaction');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/transactions?type=withdraw'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      toast({
+        title: "تم التحديث",
+        description: "Withdrawal request updated successfully",
+      });
+    },
+  });
+
+  const pendingWithdrawals = withdrawals.filter(w => w.status === 'pending');
+  const completedWithdrawals = withdrawals.filter(w => w.status === 'completed');
+  const rejectedWithdrawals = withdrawals.filter(w => w.status === 'failed');
+
+  return (
+    <div className="space-y-6">
+      {/* Pending Withdrawals */}
+      <Card className="glass-morphism border-2 border-yellow-500/30 neon-glow-warning">
+        <CardHeader>
+          <CardTitle>Pending Withdrawal Requests</CardTitle>
+          <CardDescription>Approve or reject pending withdrawal requests</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Account Number</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pendingWithdrawals.map((withdrawal) => (
+                  <TableRow key={withdrawal.id} data-testid={`row-withdrawal-${withdrawal.id}`}>
+                    <TableCell className="font-medium">{withdrawal.user?.username || withdrawal.userId.slice(0, 8)}</TableCell>
+                    <TableCell className="font-semibold text-red-400">${withdrawal.amount}</TableCell>
+                    <TableCell className="font-mono text-xs">{withdrawal.accountNumber || '-'}</TableCell>
+                    <TableCell className="max-w-xs truncate">{withdrawal.description || '-'}</TableCell>
+                    <TableCell className="text-xs">{new Date(withdrawal.createdAt).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">pending</Badge>
+                    </TableCell>
+                    <TableCell className="space-x-2">
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => updateTransactionMutation.mutate({ id: withdrawal.id, status: 'completed' })}
+                        disabled={updateTransactionMutation.isPending}
+                        data-testid={`button-approve-withdrawal-${withdrawal.id}`}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => updateTransactionMutation.mutate({ id: withdrawal.id, status: 'failed' })}
+                        disabled={updateTransactionMutation.isPending}
+                        data-testid={`button-reject-withdrawal-${withdrawal.id}`}
+                      >
+                        <XCircle className="w-4 h-4 mr-1" />
+                        Reject
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {pendingWithdrawals.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                      No pending withdrawal requests
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Recent Completed Withdrawals */}
+      <Card className="glass-morphism">
+        <CardHeader>
+          <CardTitle>Recent Completed Withdrawals ({completedWithdrawals.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {completedWithdrawals.slice(0, 10).map((withdrawal) => (
+                  <TableRow key={withdrawal.id}>
+                    <TableCell className="font-medium">{withdrawal.user?.username || withdrawal.userId.slice(0, 8)}</TableCell>
+                    <TableCell className="font-semibold text-red-400">${withdrawal.amount}</TableCell>
+                    <TableCell className="text-xs">{new Date(withdrawal.createdAt).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span className="text-green-500">Approved</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Recent Rejected Withdrawals */}
+      {rejectedWithdrawals.length > 0 && (
+        <Card className="glass-morphism">
+          <CardHeader>
+            <CardTitle>Recent Rejected Withdrawals ({rejectedWithdrawals.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rejectedWithdrawals.slice(0, 10).map((withdrawal) => (
+                    <TableRow key={withdrawal.id}>
+                      <TableCell className="font-medium">{withdrawal.user?.username || withdrawal.userId.slice(0, 8)}</TableCell>
+                      <TableCell className="font-semibold text-red-400">${withdrawal.amount}</TableCell>
+                      <TableCell className="text-xs">{new Date(withdrawal.createdAt).toLocaleString()}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <XCircle className="w-4 h-4 text-red-500" />
+                          <span className="text-red-500">Rejected</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }

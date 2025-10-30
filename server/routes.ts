@@ -917,11 +917,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin - Get all transactions
+  // Admin - Get all transactions (with optional type filter)
   app.get("/api/admin/transactions", requireAdmin, async (req, res) => {
     try {
-      const transactions = await storage.getAllTransactions();
-      res.json(transactions);
+      const { type } = req.query;
+      let transactions = await storage.getAllTransactions();
+      
+      // Filter by type if specified
+      if (type && typeof type === 'string') {
+        transactions = transactions.filter(t => t.type === type);
+      }
+      
+      // Enrich with user data
+      const enrichedTransactions = await Promise.all(
+        transactions.map(async (transaction) => {
+          const user = await storage.getUser(transaction.userId);
+          return {
+            ...transaction,
+            user: user ? {
+              id: user.id,
+              username: user.username,
+              fullName: user.fullName,
+            } : undefined,
+          };
+        })
+      );
+      
+      res.json(enrichedTransactions);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Admin - Update transaction status (approve/reject deposits/withdrawals)
+  app.patch("/api/admin/transactions/:id", requireAdmin, async (req, res) => {
+    try {
+      const { status } = req.body;
+      const transactionId = req.params.id;
+      
+      if (!['completed', 'failed'].includes(status)) {
+        return res.status(400).json({ error: "Invalid status. Must be 'completed' or 'failed'" });
+      }
+
+      // Find the transaction
+      const allTransactions = await storage.getAllTransactions();
+      const transaction = allTransactions.find(t => t.id === transactionId);
+      
+      if (!transaction) {
+        return res.status(404).json({ error: "Transaction not found" });
+      }
+
+      // Only allow updating pending transactions
+      if (transaction.status !== 'pending') {
+        return res.status(400).json({ error: "Can only update pending transactions" });
+      }
+
+      // Update transaction status
+      const updated = await storage.updateTransaction(transactionId, status);
+
+      // If it's a deposit being approved, update user balance
+      if (transaction.type === 'deposit' && status === 'completed') {
+        const user = await storage.getUser(transaction.userId);
+        if (user) {
+          const depositAmount = parseFloat(transaction.amount);
+          const feeRate = 0.10;
+          const amountAfterFee = depositAmount - (depositAmount * feeRate);
+          const newBalance = parseFloat(user.balance) + amountAfterFee;
+          await storage.updateUser(user.id, { 
+            balance: newBalance.toFixed(2) 
+          });
+        }
+      }
+
+      // If it's a withdrawal being rejected, refund the user
+      if (transaction.type === 'withdraw' && status === 'failed') {
+        const user = await storage.getUser(transaction.userId);
+        if (user) {
+          const withdrawAmount = parseFloat(transaction.amount);
+          const newBalance = parseFloat(user.balance) + withdrawAmount;
+          await storage.updateUser(user.id, { 
+            balance: newBalance.toFixed(2) 
+          });
+        }
+      }
+
+      res.json(updated);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
