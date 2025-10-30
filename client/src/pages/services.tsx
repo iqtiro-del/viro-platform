@@ -46,6 +46,7 @@ import { useLanguage } from "@/lib/language-context";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { getUserAvatar } from "@/lib/utils";
+import { getProductImage } from "@/lib/category-images";
 
 export function ServicesPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -322,10 +323,12 @@ export function ServicesPage() {
                     data-testid={`card-product-${product.id}`}
                   >
                     {/* Service Image - Larger on mobile */}
-                    <div className="h-52 md:h-40 bg-gradient-to-br from-primary/20 to-secondary/20 relative overflow-hidden">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <ShoppingBag className="w-16 md:w-12 h-16 md:h-12 text-primary/40" />
-                      </div>
+                    <div className="h-52 md:h-40 relative overflow-hidden">
+                      <img 
+                        src={getProductImage(product.category, product.imageUrl)} 
+                        alt={product.title}
+                        className="w-full h-full object-cover"
+                      />
                       <Badge className="absolute top-3 right-3 md:top-2 md:right-2 bg-primary/90 neon-glow-primary text-sm md:text-xs">
                         {product.category}
                       </Badge>

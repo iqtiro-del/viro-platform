@@ -19,15 +19,7 @@ import {
   Package
 } from "lucide-react";
 
-// Import default category images
-import instagramImage from "@assets/stock_images/instagram_app_icon_s_a38179b5.jpg";
-import designImage from "@assets/stock_images/graphic_design_tools_3e0fc2bd.jpg";
-import developmentImage from "@assets/stock_images/programming_code_com_38e46ac7.jpg";
-import writingImage from "@assets/stock_images/writing_paper_pen_no_9e56c035.jpg";
-import marketingImage from "@assets/stock_images/digital_marketing_so_7cb49cc6.jpg";
-import musicImage from "@assets/stock_images/music_headphones_aud_3ecbf0d1.jpg";
-import tiktokImage from "@assets/stock_images/tiktok_app_social_me_3db68c54.jpg";
-import videoImage from "@assets/stock_images/video_camera_film_pr_04d2757b.jpg";
+import { getProductImage } from "@/lib/category-images";
 import {
   Dialog,
   DialogContent,
@@ -161,18 +153,6 @@ export function MyProductsPage() {
     { value: "TikTok", label: t("services.categories.tiktok") },
   ];
 
-  // Default category images mapping
-  const categoryImages: Record<string, string> = {
-    "Instagram": instagramImage,
-    "Design": designImage,
-    "Development": developmentImage,
-    "Writing": writingImage,
-    "Marketing": marketingImage,
-    "Music & Audio": musicImage,
-    "TikTok": tiktokImage,
-    "Video & Animation": videoImage,
-  };
-
   const ProductForm = ({ product, onClose }: { product?: Product; onClose: () => void }) => {
     const form = useForm<InsertProduct>({
       resolver: zodResolver(insertProductSchema),
@@ -206,19 +186,7 @@ export function MyProductsPage() {
     });
 
     const selectedCategory = form.watch("category");
-    const currentImageUrl = form.watch("imageUrl");
     const showAccountFields = selectedCategory === "Instagram" || selectedCategory === "TikTok";
-
-    // Auto-assign default category image when category changes (only if no custom image)
-    useEffect(() => {
-      // Only auto-assign for new products (not editing existing ones)
-      if (!product && selectedCategory && !currentImageUrl) {
-        const defaultImage = categoryImages[selectedCategory];
-        if (defaultImage) {
-          form.setValue("imageUrl", defaultImage);
-        }
-      }
-    }, [selectedCategory, product, currentImageUrl, form]);
 
     const onSubmit = (data: InsertProduct) => {
       if (product) {
@@ -557,8 +525,12 @@ export function MyProductsPage() {
                 <div className="md:hidden flex flex-col gap-2">
                   {/* Icon and Title */}
                   <div className="flex items-start gap-2">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center flex-shrink-0">
-                      <ShoppingBag className="w-5 h-5 text-primary" />
+                    <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                      <img 
+                        src={getProductImage(product.category, product.imageUrl)} 
+                        alt={product.title}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-sm font-semibold text-foreground line-clamp-2 mb-1" data-testid={`text-product-title-mobile-${product.id}`}>
@@ -656,8 +628,12 @@ export function MyProductsPage() {
                 <div className="hidden md:flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                        <ShoppingBag className="w-6 h-6 text-primary" />
+                      <div className="w-12 h-12 rounded-lg overflow-hidden">
+                        <img 
+                          src={getProductImage(product.category, product.imageUrl)} 
+                          alt={product.title}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
