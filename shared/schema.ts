@@ -229,6 +229,24 @@ export const insertProductSchema = createInsertSchema(products).omit({
   accountEmailPassword: z.string().optional(),
 });
 
+export const updateProductSchema = insertProductSchema.partial().extend({
+  price: z.string().transform((val) => val.trim()).refine((val) => parseFloat(val) > 0, "Price must be greater than 0").optional(),
+  oldPrice: z.union([z.string(), z.null(), z.undefined()])
+    .optional()
+    .transform((val) => {
+      // Normalize empty strings, whitespace-only strings, null, and undefined to undefined
+      if (val === null || val === undefined) {
+        return undefined;
+      }
+      if (typeof val === "string") {
+        const trimmed = val.trim();
+        return trimmed === "" ? undefined : trimmed;
+      }
+      return val;
+    })
+    .refine((val) => val === undefined || (typeof val === "string" && parseFloat(val) >= 0), "Old price must be 0 or greater"),
+});
+
 export const insertReviewSchema = createInsertSchema(reviews).omit({
   id: true,
   createdAt: true,
@@ -269,6 +287,7 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type UpdateProduct = z.infer<typeof updateProductSchema>;
 export type Product = typeof products.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type Review = typeof reviews.$inferSelect;

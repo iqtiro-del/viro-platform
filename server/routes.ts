@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { 
   insertUserSchema, 
   insertProductSchema,
+  updateProductSchema,
   insertReviewSchema,
   insertPromotionSchema,
   insertTransactionSchema,
@@ -272,7 +273,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/products/:id", async (req, res) => {
     try {
-      const data = req.body;
+      // Validate and normalize the update data
+      const data = updateProductSchema.parse(req.body);
       
       // Encrypt credentials if they are being updated
       // encryptCredentials now only returns fields that are provided (not empty/undefined)
@@ -283,15 +285,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         accountEmailPassword: data.accountEmailPassword,
       });
       
-      // Handle empty oldPrice - convert to undefined for database
-      if (data.oldPrice !== undefined && data.oldPrice.trim() === "") {
-        data.oldPrice = undefined;
-      }
-      
       // Merge encrypted credentials into data (only provided fields)
-      Object.assign(data, encryptedCredentials);
+      const updateData = {
+        ...data,
+        ...encryptedCredentials,
+      };
       
-      const product = await storage.updateProduct(req.params.id, data);
+      const product = await storage.updateProduct(req.params.id, updateData);
       if (!product) {
         return res.status(404).json({ error: "Product not found" });
       }
