@@ -10,10 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Users, Package, DollarSign, ShoppingCart, BadgeCheck, XCircle, CheckCircle, Trash2, Edit, Shield, MoreVertical, ArrowDownToLine, ArrowUpFromLine, Receipt } from "lucide-react";
+import { Users, Package, DollarSign, ShoppingCart, BadgeCheck, XCircle, CheckCircle, Trash2, Edit, Shield, MoreVertical, ArrowDownToLine, ArrowUpFromLine, Receipt, UserX } from "lucide-react";
 import type { User, ProductWithSeller, Transaction, VerificationRequestWithUser } from "@shared/schema";
 
-type AdminSection = 'users' | 'services' | 'verifications' | 'transactions' | 'deposits' | 'withdrawals';
+type AdminSection = 'users' | 'services' | 'verifications' | 'transactions' | 'deposits' | 'withdrawals' | 'banned';
 
 export default function AdminDashboard() {
   const { toast } = useToast();
@@ -129,6 +129,7 @@ export default function AdminDashboard() {
     { id: 'transactions' as AdminSection, label: 'Transactions', icon: Receipt },
     { id: 'deposits' as AdminSection, label: 'Deposits', icon: ArrowDownToLine },
     { id: 'withdrawals' as AdminSection, label: 'Withdrawals', icon: ArrowUpFromLine },
+    { id: 'banned' as AdminSection, label: 'Banned Users', icon: UserX },
   ];
 
   const currentSectionData = sections.find(s => s.id === currentSection);
@@ -206,6 +207,7 @@ export default function AdminDashboard() {
           {currentSection === 'transactions' && <TransactionsManagement adminId={adminUser.id} />}
           {currentSection === 'deposits' && <DepositsManagement adminId={adminUser.id} />}
           {currentSection === 'withdrawals' && <WithdrawalsManagement adminId={adminUser.id} />}
+          {currentSection === 'banned' && <BannedUsersManagement adminId={adminUser.id} />}
         </div>
       </div>
     </div>
