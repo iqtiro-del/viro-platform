@@ -30,6 +30,7 @@ The platform uses Neon serverless PostgreSQL with Drizzle ORM for type-safe quer
     - **Seller Profile Page**: Dedicated public page displaying seller information and their active products.
     - **Dashboard**: Professional neon-styled stats cards with distinct color schemes and hover effects.
     - **Background**: Soft animated neon gradient background with subtle floating orbs, optimized for performance and accessibility (respects `prefers-reduced-motion`).
+    - **Default Category Images**: Automatic assignment of representative stock images for each service category when sellers create new products. Covers 8 categories (Instagram, Design, Programming, Writing, Marketing, Music & Audio, TikTok, Video & Animation) with professional stock imagery. Auto-assignment only applies to new services, not edits, preserving existing custom images.
 
 ## External Dependencies
 
