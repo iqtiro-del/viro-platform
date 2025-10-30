@@ -7,6 +7,7 @@ import {
   transactions,
   chats,
   messages,
+  verificationRequests,
   type User, 
   type InsertUser,
   type Product,
@@ -21,10 +22,13 @@ import {
   type InsertChat,
   type Message,
   type InsertMessage,
+  type VerificationRequest,
+  type InsertVerificationRequest,
   type ProductWithSeller,
   type ReviewWithBuyer,
   type ChatWithDetails,
-  type MessageWithSender
+  type MessageWithSender,
+  type VerificationRequestWithUser
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -77,6 +81,12 @@ export interface IStorage {
   // Messages
   getMessagesByChat(chatId: string): Promise<MessageWithSender[]>;
   createMessage(message: InsertMessage): Promise<Message>;
+  
+  // Verification Requests
+  getVerificationRequests(status?: 'pending' | 'approved' | 'rejected'): Promise<VerificationRequestWithUser[]>;
+  getVerificationRequestByUser(userId: string): Promise<VerificationRequest | undefined>;
+  createVerificationRequest(request: InsertVerificationRequest): Promise<VerificationRequest>;
+  updateVerificationRequest(id: string, data: Partial<VerificationRequest>): Promise<VerificationRequest | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -724,6 +734,52 @@ export class DatabaseStorage implements IStorage {
       .values(message)
       .returning();
     return newMessage;
+  }
+
+  // Verification Requests
+  async getVerificationRequests(status?: 'pending' | 'approved' | 'rejected'): Promise<VerificationRequestWithUser[]> {
+    let query = db
+      .select()
+      .from(verificationRequests)
+      .leftJoin(users, eq(verificationRequests.userId, users.id))
+      .orderBy(desc(verificationRequests.createdAt));
+    
+    if (status) {
+      query = query.where(eq(verificationRequests.status, status)) as any;
+    }
+
+    const results = await query;
+    
+    return results.map(row => ({
+      ...row.verification_requests,
+      user: row.users!
+    }));
+  }
+
+  async getVerificationRequestByUser(userId: string): Promise<VerificationRequest | undefined> {
+    const [request] = await db
+      .select()
+      .from(verificationRequests)
+      .where(eq(verificationRequests.userId, userId))
+      .orderBy(desc(verificationRequests.createdAt));
+    return request || undefined;
+  }
+
+  async createVerificationRequest(request: InsertVerificationRequest): Promise<VerificationRequest> {
+    const [newRequest] = await db
+      .insert(verificationRequests)
+      .values(request)
+      .returning();
+    return newRequest;
+  }
+
+  async updateVerificationRequest(id: string, data: Partial<VerificationRequest>): Promise<VerificationRequest | undefined> {
+    const [request] = await db
+      .update(verificationRequests)
+      .set(data)
+      .where(eq(verificationRequests.id, id))
+      .returning();
+    return request || undefined;
   }
 }
 

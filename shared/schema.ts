@@ -19,6 +19,7 @@ export const transactionTypeEnum = pgEnum('transaction_type', ['deposit', 'withd
 export const transactionStatusEnum = pgEnum('transaction_status', ['pending', 'completed', 'failed']);
 export const chatStatusEnum = pgEnum('chat_status', ['active', 'closed_seller', 'closed_buyer', 'under_review', 'resolved_seller', 'resolved_buyer']);
 export const messageSenderTypeEnum = pgEnum('message_sender_type', ['user', 'system']);
+export const verificationStatusEnum = pgEnum('verification_status', ['pending', 'approved', 'rejected']);
 
 // Users table
 export const users = pgTable("users", {
@@ -31,6 +32,8 @@ export const users = pgTable("users", {
   bio: text("bio").default(''),
   avatarUrl: text("avatar_url").default(''),
   isVerified: boolean("is_verified").default(false).notNull(),
+  isAdmin: boolean("is_admin").default(false).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
   balance: decimal("balance", { precision: 10, scale: 2 }).default('0.00').notNull(),
   totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default('0.00').notNull(),
   rating: decimal("rating", { precision: 3, scale: 2 }).default('0.00'),
@@ -118,6 +121,18 @@ export const messages = pgTable("messages", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Verification Requests table
+export const verificationRequests = pgTable("verification_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  fullName: text("full_name").notNull(),
+  photoUrl: text("photo_url").notNull(),
+  status: verificationStatusEnum("status").default('pending').notNull(),
+  reviewedBy: varchar("reviewed_by").references(() => users.id, { onDelete: 'set null' }),
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   products: many(products),
@@ -126,6 +141,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   chatsAsBuyer: many(chats, { relationName: 'buyer' }),
   chatsAsSeller: many(chats, { relationName: 'seller' }),
   messages: many(messages),
+  verificationRequests: many(verificationRequests),
 }));
 
 export const productsRelations = relations(products, ({ one, many }) => ({
@@ -197,6 +213,17 @@ export const messagesRelations = relations(messages, ({ one }) => ({
   }),
   sender: one(users, {
     fields: [messages.senderId],
+    references: [users.id],
+  }),
+}));
+
+export const verificationRequestsRelations = relations(verificationRequests, ({ one }) => ({
+  user: one(users, {
+    fields: [verificationRequests.userId],
+    references: [users.id],
+  }),
+  reviewer: one(users, {
+    fields: [verificationRequests.reviewedBy],
     references: [users.id],
   }),
 }));
@@ -283,6 +310,14 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
   message: z.string().min(1, "Message cannot be empty"),
 });
 
+export const insertVerificationRequestSchema = createInsertSchema(verificationRequests).omit({
+  id: true,
+  createdAt: true,
+  reviewedAt: true,
+  reviewedBy: true,
+  status: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -299,6 +334,8 @@ export type InsertChat = z.infer<typeof insertChatSchema>;
 export type Chat = typeof chats.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
+export type InsertVerificationRequest = z.infer<typeof insertVerificationRequestSchema>;
+export type VerificationRequest = typeof verificationRequests.$inferSelect;
 
 // Extended types with relations
 export type ProductWithSeller = Product & {
@@ -319,4 +356,8 @@ export type ChatWithDetails = Chat & {
 
 export type MessageWithSender = Message & {
   sender: User;
+};
+
+export type VerificationRequestWithUser = VerificationRequest & {
+  user: User;
 };
