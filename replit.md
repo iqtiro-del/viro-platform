@@ -38,12 +38,15 @@ The platform uses Neon serverless PostgreSQL with Drizzle ORM for type-safe quer
     - **Admin Dashboard**: Protected admin interface at `/admin` for platform management. Features include:
       - **Authentication**: Dedicated admin login with credentials (username: admin, password: admin123) and database `isAdmin` flag
       - **Real-time Statistics**: Auto-refreshing dashboard showing total users, active services, total sales, pending/completed orders, and pending verifications (refreshes every 30 seconds)
+      - **Navigation**: Dropdown menu accessed via 3-dot icon (MoreVertical) for improved mobile UX and scalability
       - **User Management**: List all users, activate/deactivate accounts, manually verify sellers, view user balances and status
       - **Service Management**: View all platform services, delete any service, monitor service sales and status
       - **Verification Requests**: Approve or reject seller verification requests with database tracking in `verification_requests` table
       - **Transaction Management**: View all platform transactions with filtering by type (deposit, withdraw, sale, purchase, promotion)
+      - **Deposit Management**: Dedicated section showing pending/completed/rejected deposits with approve/reject controls. Approved deposits auto-update user balance (amount - 10% fee)
+      - **Withdrawal Management**: Dedicated section showing pending/completed/rejected withdrawals with approve/reject controls. Rejected withdrawals auto-refund user balance
       - **Security**: Admin middleware validates `x-user-id` header and `isAdmin` flag on all admin endpoints (returns 403 if not admin)
-      - **UI/UX**: Neon/cyberpunk themed tabbed interface with glass-morphism cards matching platform design
+      - **UI/UX**: Neon/cyberpunk themed dropdown navigation with glass-morphism cards matching platform design
 
 ## External Dependencies
 
