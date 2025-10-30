@@ -45,6 +45,12 @@ The platform uses Neon serverless PostgreSQL with Drizzle ORM for type-safe quer
       - **Transaction Management**: View all platform transactions with filtering by type (deposit, withdraw, sale, purchase, promotion)
       - **Deposit Management**: Dedicated section showing pending/completed/rejected deposits with approve/reject controls. Approved deposits auto-update user balance (amount - 10% fee)
       - **Withdrawal Management**: Dedicated section showing pending/completed/rejected withdrawals with approve/reject controls. Rejected withdrawals auto-refund user balance
+      - **Banned Users Management**: Dedicated section for viewing and managing banned users. Features include:
+        - Table displaying all banned users with username, full name, email, ban reason, and ban timestamp
+        - Unban functionality with confirmation dialog for safety
+        - Automatic query invalidation to keep UI in sync after unbanning
+        - Database fields: `isBanned` (boolean), `banReason` (text), `bannedAt` (timestamp)
+        - Proper cleanup of ban metadata on unban (sets isBanned=false, banReason='', bannedAt=null)
       - **Security**: Admin middleware validates `x-user-id` header and `isAdmin` flag on all admin endpoints (returns 403 if not admin)
       - **UI/UX**: Neon/cyberpunk themed dropdown navigation with glass-morphism cards matching platform design
 
