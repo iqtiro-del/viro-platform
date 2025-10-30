@@ -306,6 +306,9 @@ function StatsOverview({ adminId }: { adminId: string }) {
 // Users Management Component
 function UsersManagement({ adminId }: { adminId: string }) {
   const { toast } = useToast();
+  const [banUserId, setBanUserId] = useState<string | null>(null);
+  const [banReason, setBanReason] = useState('');
+  
   const { data: users = [] } = useQuery<User[]>({
     queryKey: ['/api/admin/users'],
     queryFn: async () => {
@@ -331,8 +334,9 @@ function UsersManagement({ adminId }: { adminId: string }) {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      queryClient.refetchQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.refetchQueries({ queryKey: ['/api/admin/banned-users'] });
+      queryClient.refetchQueries({ queryKey: ['/api/admin/stats'] });
       toast({
         title: "تم التحديث",
         description: "User updated successfully",
@@ -439,6 +443,80 @@ function UsersManagement({ adminId }: { adminId: string }) {
                         <BadgeCheck className="w-4 h-4 mr-1" />
                         Verify
                       </Button>
+                    )}
+                    {!user.isBanned && !user.isAdmin && (
+                      <Dialog open={banUserId === user.id} onOpenChange={(open) => {
+                        if (!open) {
+                          setBanUserId(null);
+                          setBanReason('');
+                        }
+                      }}>
+                        <DialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => {
+                              setBanUserId(user.id);
+                              setBanReason('');
+                            }}
+                            data-testid={`button-ban-${user.id}`}
+                          >
+                            <UserX className="w-4 h-4 mr-1" />
+                            Ban
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="glass-morphism">
+                          <DialogHeader>
+                            <DialogTitle>Ban User</DialogTitle>
+                            <DialogDescription>
+                              Ban user "{user.username}" from the platform. Please provide a reason.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4 mt-4">
+                            <div>
+                              <Label htmlFor="ban-reason">Ban Reason</Label>
+                              <Input
+                                id="ban-reason"
+                                placeholder="Enter reason for banning this user"
+                                value={banReason}
+                                onChange={(e) => setBanReason(e.target.value)}
+                                data-testid="input-ban-reason"
+                              />
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setBanUserId(null);
+                                  setBanReason('');
+                                }}
+                                data-testid="button-cancel-ban"
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                onClick={() => {
+                                  updateUserMutation.mutate({ 
+                                    id: user.id, 
+                                    data: { 
+                                      isBanned: true, 
+                                      banReason: banReason || 'No reason provided',
+                                      bannedAt: new Date()
+                                    } 
+                                  });
+                                  setBanUserId(null);
+                                  setBanReason('');
+                                }}
+                                disabled={updateUserMutation.isPending}
+                                data-testid="button-confirm-ban"
+                              >
+                                {updateUserMutation.isPending ? "Banning..." : "Confirm Ban"}
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     )}
                   </TableCell>
                 </TableRow>
