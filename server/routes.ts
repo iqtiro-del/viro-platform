@@ -183,6 +183,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "Failed to send verification request to Telegram" });
       }
 
+      // Store verification request in database
+      const photoUrl = result.result?.photo?.[0]?.file_id || 'telegram-photo';
+      await storage.createVerificationRequest({
+        userId,
+        fullName,
+        photoUrl
+      });
+
       res.json({ 
         success: true, 
         message: "Your verification request has been sent successfully and will be reviewed soon." 
@@ -723,6 +731,197 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.processScheduledPayments();
       res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Admin middleware
+  async function requireAdmin(req: any, res: any, next: any) {
+    try {
+      const userId = req.headers['x-user-id'];
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: No user ID provided" });
+      }
+
+      const user = await storage.getUser(userId as string);
+      if (!user || !user.isAdmin) {
+        return res.status(403).json({ error: "Forbidden: Admin access required" });
+      }
+
+      req.adminUser = user;
+      next();
+    } catch (error: any) {
+      res.status(401).json({ error: error.message });
+    }
+  }
+
+  // Admin Routes
+  
+  // Admin login endpoint - same as regular login but checks isAdmin
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      if (!user.isAdmin) {
+        return res.status(403).json({ error: "Access denied: Admin privileges required" });
+      }
+
+      const validPassword = await bcrypt.compare(password, user.password);
+      if (!validPassword) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      const { password: _, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Admin stats - comprehensive dashboard stats
+  app.get("/api/admin/stats", requireAdmin, async (req, res) => {
+    try {
+      const allProducts = await storage.getAllProducts();
+      const allUsers = await storage.getAllUsers();
+      const allTransactions = await storage.getAllTransactions();
+      const allChats = await storage.getChatsByUser(''); // Get all chats
+      
+      const activeServices = allProducts.filter(p => p.isActive).length;
+      const inactiveServices = allProducts.filter(p => !p.isActive).length;
+      const verifiedSellers = allUsers.filter(u => u.isVerified).length;
+      const activeUsers = allUsers.filter(u => u.isActive).length;
+      const totalUsers = allUsers.length;
+      
+      const totalSales = allTransactions
+        .filter(t => t.type === 'sale' && t.status === 'completed')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      
+      const pendingOrders = allTransactions
+        .filter(t => t.type === 'purchase' && t.status === 'pending').length;
+      
+      const completedOrders = allTransactions
+        .filter(t => t.type === 'purchase' && t.status === 'completed').length;
+      
+      const pendingVerifications = await storage.getVerificationRequests('pending');
+      
+      res.json({
+        activeServices,
+        inactiveServices,
+        totalServices: allProducts.length,
+        verifiedSellers,
+        activeUsers,
+        totalUsers,
+        totalSales: totalSales.toFixed(2),
+        pendingOrders,
+        completedOrders,
+        totalOrders: pendingOrders + completedOrders,
+        pendingVerifications: pendingVerifications.length
+      });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Admin - Get all users
+  app.get("/api/admin/users", requireAdmin, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+      res.json(usersWithoutPasswords);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Admin - Update any user
+  app.patch("/api/admin/users/:id", requireAdmin, async (req, res) => {
+    try {
+      const user = await storage.updateUser(req.params.id, req.body);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      const { password, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Admin - Get all products
+  app.get("/api/admin/products", requireAdmin, async (req, res) => {
+    try {
+      const products = await storage.getAllProducts();
+      res.json(products);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Admin - Delete any product
+  app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
+    try {
+      const success = await storage.deleteProduct(req.params.id);
+      if (!success) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Admin - Get verification requests
+  app.get("/api/admin/verification-requests", requireAdmin, async (req, res) => {
+    try {
+      const status = req.query.status as 'pending' | 'approved' | 'rejected' | undefined;
+      const requests = await storage.getVerificationRequests(status);
+      res.json(requests);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Admin - Approve/Reject verification request
+  app.patch("/api/admin/verification-requests/:id", requireAdmin, async (req, res) => {
+    try {
+      const { status, userId } = req.body;
+      
+      if (!['approved', 'rejected'].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+
+      const request = await storage.updateVerificationRequest(req.params.id, {
+        status,
+        reviewedBy: (req as any).adminUser.id,
+        reviewedAt: new Date()
+      });
+
+      if (!request) {
+        return res.status(404).json({ error: "Verification request not found" });
+      }
+
+      // If approved, update user's isVerified status
+      if (status === 'approved' && userId) {
+        await storage.updateUser(userId, { isVerified: true });
+      }
+
+      res.json(request);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Admin - Get all transactions
+  app.get("/api/admin/transactions", requireAdmin, async (req, res) => {
+    try {
+      const transactions = await storage.getAllTransactions();
+      res.json(transactions);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
