@@ -565,10 +565,15 @@ function VerificationsManagement({ adminId }: { adminId: string }) {
       if (!res.ok) throw new Error('Failed to update request');
       return res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/verification-requests'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+    onSuccess: async () => {
+      // Invalidate and refetch all related queries
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/verification-requests'] }),
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] }),
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] }),
+      ]);
+      // Force refetch users to ensure UI updates
+      await queryClient.refetchQueries({ queryKey: ['/api/admin/users'] });
       toast({
         title: "تم التحديث",
         description: "Verification request updated",
