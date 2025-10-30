@@ -28,7 +28,11 @@ The platform uses Neon serverless PostgreSQL with Drizzle ORM for type-safe quer
     - **Discount Pricing**: Supports optional `oldPrice` for displaying discounted services with visual cues (strikethrough, prominent new price).
     - **Withdrawal Validation**: Bank account number validation (digits-only, length 6-34) with masking for security.
     - **Seller Profile Page**: Dedicated public page displaying seller information and their active products.
-    - **Dashboard**: Professional neon-styled stats cards with distinct color schemes and hover effects.
+    - **Dashboard**: Professional neon-styled stats cards with distinct color schemes and hover effects. Statistics are fully automatic and calculated from real database data:
+      - **Verified Sellers**: Auto-counts users with `isVerified = true`
+      - **Total Sales**: Auto-calculates sum of all completed sale transactions
+      - **Active Services**: Auto-counts products with `isActive = true`
+      - Real-time updates: Stats auto-refresh every 30 seconds and invalidate on relevant actions (purchases, product changes)
     - **Background**: Soft animated neon gradient background with subtle floating orbs, optimized for performance and accessibility (respects `prefers-reduced-motion`).
     - **Default Category Images**: Automatic assignment of representative stock images for each service category when sellers create new products. Covers 8 categories (Instagram, Design, Programming, Writing, Marketing, Music & Audio, TikTok, Video & Animation) with professional stock imagery. Auto-assignment only applies to new services, not edits, preserving existing custom images.
 
