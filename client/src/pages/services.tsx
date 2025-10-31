@@ -323,14 +323,18 @@ export function ServicesPage() {
                     className="glass-morphism border-border/30 hover:border-primary/50 transition-all hover-elevate group"
                     data-testid={`card-product-${product.id}`}
                   >
-                    {/* Service Image - Larger on mobile */}
-                    <div className="h-52 md:h-40 relative overflow-hidden">
+                    {/* Service Image - Modern professional design with gradient overlay */}
+                    <div className="h-52 md:h-40 relative overflow-hidden rounded-t-md">
                       <img 
                         src={getProductImage(product.category, product.imageUrl)} 
                         alt={product.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
-                      <Badge className="absolute top-3 right-3 md:top-2 md:right-2 bg-primary/90 neon-glow-primary text-sm md:text-xs">
+                      {/* Gradient overlay for better text readability and premium look */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                      {/* Neon glow effect on hover */}
+                      <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-all duration-300 rounded-t-md"></div>
+                      <Badge className="absolute top-3 right-3 md:top-2 md:right-2 bg-primary/90 backdrop-blur-sm neon-glow-primary text-sm md:text-xs z-10">
                         {product.category}
                       </Badge>
                     </div>
