@@ -1,7 +1,7 @@
 // Default category images mapping - Modern professional stock images
 import instagramImage from "@assets/stock_images/instagram_social_med_c8519eb0.jpg";
 import designImage from "@assets/stock_images/graphic_design_creat_1bd5ede7.jpg";
-import programmingImage from "@assets/stock_images/programming_coding_d_1c88c7e8.jpg";
+import developmentImage from "@assets/stock_images/programming_coding_d_1c88c7e8.jpg";
 import writingImage from "@assets/stock_images/content_writing_blog_4204903c.jpg";
 import marketingImage from "@assets/stock_images/digital_marketing_an_facee684.jpg";
 import musicImage from "@assets/stock_images/music_production_aud_fe34ddfd.jpg";
@@ -11,7 +11,7 @@ import videoImage from "@assets/stock_images/video_editing_animat_804f56fe.jpg";
 export const categoryImages: Record<string, string> = {
   "Instagram": instagramImage,
   "Design": designImage,
-  "Programming": programmingImage,
+  "Development": developmentImage,
   "Writing": writingImage,
   "Marketing": marketingImage,
   "Music & Audio": musicImage,
