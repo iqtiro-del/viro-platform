@@ -432,23 +432,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const feeAmount = depositAmount * feeRate;
       const amountAfterFee = depositAmount - feeAmount;
       
-      const newBalance = parseFloat(user.balance) + amountAfterFee;
-      
-      await storage.updateUser(userId, { balance: newBalance.toFixed(2) });
-      
+      // Create pending transaction - admin will approve/reject
       const transaction = await storage.createTransaction({
         userId,
         type: 'deposit',
         amount: depositAmount.toFixed(2),
-        description: `Deposited via ${paymentMethod}`
+        description: `Deposit via ${paymentMethod} (Pending approval)`
       });
       
-      await storage.updateTransaction(transaction.id, 'completed');
+      // Transaction stays in pending status until admin approves
       
       res.json({ 
         success: true, 
-        newBalance: newBalance.toFixed(2), 
+        status: 'pending',
         transaction,
+        message: 'Deposit request submitted. Awaiting admin approval.',
         feeDetails: {
           depositAmount: depositAmount.toFixed(2),
           feeAmount: feeAmount.toFixed(2),
@@ -500,28 +498,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Insufficient balance" });
       }
 
-      const newBalance = currentBalance - withdrawAmount;
-      
-      await storage.updateUser(userId, { balance: newBalance.toFixed(2) });
-      
       // Mask account number (keep only last 4 digits visible)
       const last4Digits = accountNumberStr.slice(-4);
       const maskedAccountNumber = '*'.repeat(accountNumberStr.length - 4) + last4Digits;
       
+      // Create pending transaction - admin will approve/reject
+      // Don't deduct balance yet - only deduct when admin approves
       const transaction = await storage.createTransaction({
         userId,
         type: 'withdraw',
         amount: withdrawAmount.toFixed(2),
-        description: `Withdrawn to ${withdrawMethod}`,
+        description: `Withdrawal to ${withdrawMethod} (Pending approval)`,
         accountNumber: maskedAccountNumber
       });
       
-      await storage.updateTransaction(transaction.id, 'completed');
+      // Transaction stays in pending status until admin approves
       
       res.json({ 
         success: true, 
-        newBalance: newBalance.toFixed(2), 
+        status: 'pending',
         transaction,
+        message: 'Withdrawal request submitted. Awaiting admin approval.',
         feeDetails: {
           requestedAmount: withdrawAmount.toFixed(2),
           feeAmount: feeAmount.toFixed(2),
@@ -1038,7 +1035,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update transaction status
       const updated = await storage.updateTransaction(transactionId, status);
 
-      // If it's a deposit being approved, update user balance
+      // If it's a deposit being approved, add balance to user
       if (transaction.type === 'deposit' && status === 'completed') {
         const user = await storage.getUser(transaction.userId);
         if (user) {
@@ -1052,12 +1049,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // If it's a withdrawal being rejected, refund the user
-      if (transaction.type === 'withdraw' && status === 'failed') {
+      // If it's a withdrawal being approved, deduct balance from user
+      if (transaction.type === 'withdraw' && status === 'completed') {
         const user = await storage.getUser(transaction.userId);
         if (user) {
           const withdrawAmount = parseFloat(transaction.amount);
-          const newBalance = parseFloat(user.balance) + withdrawAmount;
+          const newBalance = parseFloat(user.balance) - withdrawAmount;
           await storage.updateUser(user.id, { 
             balance: newBalance.toFixed(2) 
           });
