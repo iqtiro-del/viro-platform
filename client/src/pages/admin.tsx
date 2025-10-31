@@ -1072,7 +1072,7 @@ function WithdrawalsManagement({ adminId }: { adminId: string }) {
               <TableHeader>
                 <TableRow>
                   <TableHead>User</TableHead>
-                  <TableHead>Amount</TableHead>
+                  <TableHead>Amount (After Fee)</TableHead>
                   <TableHead>Account Number</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Date</TableHead>
@@ -1081,10 +1081,18 @@ function WithdrawalsManagement({ adminId }: { adminId: string }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pendingWithdrawals.map((withdrawal) => (
+                {pendingWithdrawals.map((withdrawal) => {
+                  const originalAmount = parseFloat(withdrawal.amount);
+                  const amountAfterFee = (originalAmount * 0.9).toFixed(2);
+                  return (
                   <TableRow key={withdrawal.id} data-testid={`row-withdrawal-${withdrawal.id}`}>
                     <TableCell className="font-medium">{withdrawal.user?.username || withdrawal.userId.slice(0, 8)}</TableCell>
-                    <TableCell className="font-semibold text-red-400">${withdrawal.amount}</TableCell>
+                    <TableCell className="font-semibold text-red-400">
+                      <div className="flex flex-col">
+                        <span>${amountAfterFee}</span>
+                        <span className="text-xs text-muted-foreground">(Original: ${originalAmount})</span>
+                      </div>
+                    </TableCell>
                     <TableCell className="font-mono text-xs">{withdrawal.accountNumber || '-'}</TableCell>
                     <TableCell className="max-w-xs truncate">{withdrawal.description || '-'}</TableCell>
                     <TableCell className="text-xs">{new Date(withdrawal.createdAt).toLocaleString()}</TableCell>
@@ -1114,7 +1122,8 @@ function WithdrawalsManagement({ adminId }: { adminId: string }) {
                       </Button>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
                 {pendingWithdrawals.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center text-muted-foreground">
@@ -1139,16 +1148,24 @@ function WithdrawalsManagement({ adminId }: { adminId: string }) {
               <TableHeader>
                 <TableRow>
                   <TableHead>User</TableHead>
-                  <TableHead>Amount</TableHead>
+                  <TableHead>Amount (After Fee)</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {completedWithdrawals.slice(0, 10).map((withdrawal) => (
+                {completedWithdrawals.slice(0, 10).map((withdrawal) => {
+                  const originalAmount = parseFloat(withdrawal.amount);
+                  const amountAfterFee = (originalAmount * 0.9).toFixed(2);
+                  return (
                   <TableRow key={withdrawal.id}>
                     <TableCell className="font-medium">{withdrawal.user?.username || withdrawal.userId.slice(0, 8)}</TableCell>
-                    <TableCell className="font-semibold text-red-400">${withdrawal.amount}</TableCell>
+                    <TableCell className="font-semibold text-red-400">
+                      <div className="flex flex-col">
+                        <span>${amountAfterFee}</span>
+                        <span className="text-xs text-muted-foreground">(Original: ${originalAmount})</span>
+                      </div>
+                    </TableCell>
                     <TableCell className="text-xs">{new Date(withdrawal.createdAt).toLocaleString()}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
@@ -1157,7 +1174,8 @@ function WithdrawalsManagement({ adminId }: { adminId: string }) {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
@@ -1176,16 +1194,24 @@ function WithdrawalsManagement({ adminId }: { adminId: string }) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>User</TableHead>
-                    <TableHead>Amount</TableHead>
+                    <TableHead>Amount (After Fee)</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {rejectedWithdrawals.slice(0, 10).map((withdrawal) => (
+                  {rejectedWithdrawals.slice(0, 10).map((withdrawal) => {
+                    const originalAmount = parseFloat(withdrawal.amount);
+                    const amountAfterFee = (originalAmount * 0.9).toFixed(2);
+                    return (
                     <TableRow key={withdrawal.id}>
                       <TableCell className="font-medium">{withdrawal.user?.username || withdrawal.userId.slice(0, 8)}</TableCell>
-                      <TableCell className="font-semibold text-red-400">${withdrawal.amount}</TableCell>
+                      <TableCell className="font-semibold text-red-400">
+                        <div className="flex flex-col">
+                          <span>${amountAfterFee}</span>
+                          <span className="text-xs text-muted-foreground">(Original: ${originalAmount})</span>
+                        </div>
+                      </TableCell>
                       <TableCell className="text-xs">{new Date(withdrawal.createdAt).toLocaleString()}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
@@ -1194,7 +1220,8 @@ function WithdrawalsManagement({ adminId }: { adminId: string }) {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
