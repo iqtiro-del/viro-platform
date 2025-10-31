@@ -1,17 +1,17 @@
-// Default category images mapping
-import instagramImage from "@assets/stock_images/instagram_app_icon_s_a38179b5.jpg";
-import designImage from "@assets/stock_images/graphic_design_tools_3e0fc2bd.jpg";
-import developmentImage from "@assets/stock_images/programming_code_com_38e46ac7.jpg";
-import writingImage from "@assets/stock_images/writing_paper_pen_no_9e56c035.jpg";
-import marketingImage from "@assets/stock_images/digital_marketing_so_7cb49cc6.jpg";
-import musicImage from "@assets/stock_images/music_headphones_aud_3ecbf0d1.jpg";
-import tiktokImage from "@assets/stock_images/tiktok_app_social_me_3db68c54.jpg";
-import videoImage from "@assets/stock_images/video_camera_film_pr_04d2757b.jpg";
+// Default category images mapping - Modern professional stock images
+import instagramImage from "@assets/stock_images/instagram_social_med_c8519eb0.jpg";
+import designImage from "@assets/stock_images/graphic_design_creat_1bd5ede7.jpg";
+import programmingImage from "@assets/stock_images/programming_coding_d_1c88c7e8.jpg";
+import writingImage from "@assets/stock_images/content_writing_blog_4204903c.jpg";
+import marketingImage from "@assets/stock_images/digital_marketing_an_facee684.jpg";
+import musicImage from "@assets/stock_images/music_production_aud_fe34ddfd.jpg";
+import tiktokImage from "@assets/stock_images/tiktok_video_recordi_5bb32005.jpg";
+import videoImage from "@assets/stock_images/video_editing_animat_804f56fe.jpg";
 
 export const categoryImages: Record<string, string> = {
   "Instagram": instagramImage,
   "Design": designImage,
-  "Development": developmentImage,
+  "Programming": programmingImage,
   "Writing": writingImage,
   "Marketing": marketingImage,
   "Music & Audio": musicImage,
