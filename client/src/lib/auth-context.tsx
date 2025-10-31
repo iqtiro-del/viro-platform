@@ -10,6 +10,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<void>;
   register: (data: { username: string; password: string; fullName: string }) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -71,6 +72,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLocation("/");
   };
 
+  const refreshUser = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const response = await fetch(`/api/users/${user.id}`, {
+        headers: { 'x-user-id': user.id }
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to refresh user data');
+        return;
+      }
+      
+      const freshUserData = await response.json();
+      setUser(freshUserData);
+      localStorage.setItem("tiro-user", JSON.stringify(freshUserData));
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+    }
+  };
+
   const updateUser = (updatedUser: AuthUser | null) => {
     setUser(updatedUser);
     if (updatedUser) {
@@ -81,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser: updateUser, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, setUser: updateUser, login, register, logout, refreshUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

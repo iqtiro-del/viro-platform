@@ -34,10 +34,10 @@ import { useLanguage } from "@/lib/language-context";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Transaction } from "@shared/schema";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function WalletPage() {
-  const { user, setUser } = useAuth();
+  const { user, setUser, refreshUser } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
   const [depositAmount, setDepositAmount] = useState("");
@@ -49,6 +49,11 @@ export function WalletPage() {
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
   
+  // Refresh user data when wallet page loads to get latest balance
+  useEffect(() => {
+    refreshUser();
+  }, []);
+
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({ 
     queryKey: ['/api/users', user?.id, 'transactions'], 
     enabled: !!user 
@@ -90,11 +95,13 @@ export function WalletPage() {
       });
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       // Invalidate transaction queries
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
       // Invalidate user data to refresh balance
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id] });
+      // Refresh user data from server immediately
+      await refreshUser();
       
       if (data.status === 'pending') {
         toast({
@@ -158,11 +165,13 @@ export function WalletPage() {
       });
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       // Invalidate transaction queries
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
       // Invalidate user data to refresh balance
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id] });
+      // Refresh user data from server immediately
+      await refreshUser();
       
       if (data.status === 'pending') {
         toast({
