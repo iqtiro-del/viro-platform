@@ -43,8 +43,13 @@ The platform uses Neon serverless PostgreSQL with Drizzle ORM for type-safe quer
       - **Service Management**: View all platform services, delete any service, monitor service sales and status
       - **Verification Requests**: Approve or reject seller verification requests with database tracking in `verification_requests` table
       - **Transaction Management**: View all platform transactions with filtering by type (deposit, withdraw, sale, purchase, promotion)
+      - **Transaction Review Workflow**: Deposits and withdrawals require admin approval before balance updates:
+        - **Deposit Flow**: User submits deposit → creates pending transaction → admin reviews → on approval: adds (amount - 10% fee) to balance → user notified
+        - **Withdrawal Flow**: User submits withdrawal → creates pending transaction → admin reviews → on approval: validates sufficient balance → deducts amount → user notified
+        - **Safety Guards**: Withdrawal approval checks current balance to prevent negative balances; rejections return error without updating transaction status
+        - **UI Feedback**: Users see "under review" message after submission; balance updates only after admin approval
       - **Deposit Management**: Dedicated section showing pending/completed/rejected deposits with approve/reject controls. Approved deposits auto-update user balance (amount - 10% fee)
-      - **Withdrawal Management**: Dedicated section showing pending/completed/rejected withdrawals with approve/reject controls. Rejected withdrawals auto-refund user balance
+      - **Withdrawal Management**: Dedicated section showing pending/completed/rejected withdrawals with approve/reject controls. Includes balance validation to prevent overdrafts
       - **Banned Users Management**: Dedicated section for viewing and managing banned users. Features include:
         - Table displaying all banned users with username, full name, email, ban reason, and ban timestamp
         - Unban functionality with confirmation dialog for safety

@@ -1064,6 +1064,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (user) {
           const withdrawAmount = parseFloat(transaction.amount);
           const currentBalance = parseFloat(user.balance);
+          
+          // Check if user has sufficient balance
+          if (currentBalance < withdrawAmount) {
+            return res.status(400).json({ 
+              error: "Insufficient balance. User's current balance is not enough to complete this withdrawal." 
+            });
+          }
+          
           const newBalance = currentBalance - withdrawAmount;
           console.log('[WITHDRAWAL APPROVAL]', {
             userId: user.id,
