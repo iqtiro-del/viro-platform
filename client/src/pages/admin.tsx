@@ -823,6 +823,9 @@ function DepositsManagement({ adminId }: { adminId: string }) {
       if (!res.ok) throw new Error('Failed to fetch deposits');
       return res.json();
     },
+    staleTime: 0, // Always consider data stale
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window regains focus
   });
 
   const updateTransactionMutation = useMutation({
@@ -1017,6 +1020,9 @@ function WithdrawalsManagement({ adminId }: { adminId: string }) {
       if (!res.ok) throw new Error('Failed to fetch withdrawals');
       return res.json();
     },
+    staleTime: 0, // Always consider data stale
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window regains focus
   });
 
   const updateTransactionMutation = useMutation({
