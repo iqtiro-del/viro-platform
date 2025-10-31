@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Plus, 
   Edit, 
@@ -466,14 +467,16 @@ export function MyProductsPage() {
                 {t("myProducts.addNewService")}
               </Button>
             </DialogTrigger>
-            <DialogContent className="glass-morphism-strong border-border/50 max-w-2xl">
-              <DialogHeader>
+            <DialogContent className="glass-morphism-strong border-border/50 max-w-lg max-h-[90vh] p-0">
+              <DialogHeader className="px-6 pt-6 pb-2">
                 <DialogTitle>{t("myProducts.addNewService")}</DialogTitle>
                 <DialogDescription>
                   {t("myProducts.createService")}
                 </DialogDescription>
               </DialogHeader>
-              <ProductForm onClose={() => setIsAddDialogOpen(false)} />
+              <ScrollArea className="max-h-[calc(90vh-120px)] px-6 pb-6">
+                <ProductForm onClose={() => setIsAddDialogOpen(false)} />
+              </ScrollArea>
             </DialogContent>
           </Dialog>
         </div>
@@ -582,14 +585,16 @@ export function MyProductsPage() {
                           {t("common.edit")}
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="glass-morphism-strong border-border/50 max-w-2xl">
-                        <DialogHeader>
+                      <DialogContent className="glass-morphism-strong border-border/50 max-w-lg max-h-[90vh] p-0">
+                        <DialogHeader className="px-6 pt-6 pb-2">
                           <DialogTitle>{t("myProducts.editService")}</DialogTitle>
                           <DialogDescription>
                             {t("myProducts.updateDetails")}
                           </DialogDescription>
                         </DialogHeader>
-                        <ProductForm product={product} onClose={() => setEditingProduct(null)} />
+                        <ScrollArea className="max-h-[calc(90vh-120px)] px-6 pb-6">
+                          <ProductForm product={product} onClose={() => setEditingProduct(null)} />
+                        </ScrollArea>
                       </DialogContent>
                     </Dialog>
 
@@ -681,14 +686,16 @@ export function MyProductsPage() {
                           <Edit className="w-4 h-4" />
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="glass-morphism-strong border-border/50 max-w-2xl">
-                        <DialogHeader>
+                      <DialogContent className="glass-morphism-strong border-border/50 max-w-lg max-h-[90vh] p-0">
+                        <DialogHeader className="px-6 pt-6 pb-2">
                           <DialogTitle>{t("myProducts.editService")}</DialogTitle>
                           <DialogDescription>
                             {t("myProducts.updateDetails")}
                           </DialogDescription>
                         </DialogHeader>
-                        <ProductForm product={product} onClose={() => setEditingProduct(null)} />
+                        <ScrollArea className="max-h-[calc(90vh-120px)] px-6 pb-6">
+                          <ProductForm product={product} onClose={() => setEditingProduct(null)} />
+                        </ScrollArea>
                       </DialogContent>
                     </Dialog>
 
