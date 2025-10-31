@@ -502,8 +502,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const last4Digits = accountNumberStr.slice(-4);
       const maskedAccountNumber = '*'.repeat(accountNumberStr.length - 4) + last4Digits;
       
+      // **NEW FLOW**: Deduct balance IMMEDIATELY when user requests withdrawal
+      const newBalance = currentBalance - withdrawAmount;
+      await storage.updateUser(userId, { 
+        balance: newBalance.toFixed(2) 
+      });
+      
+      console.log('[WITHDRAWAL REQUEST]', {
+        userId,
+        username: user.username,
+        withdrawAmount,
+        currentBalance,
+        newBalance: newBalance.toFixed(2),
+        status: 'Balance deducted immediately'
+      });
+      
       // Create pending transaction - admin will approve/reject
-      // Don't deduct balance yet - only deduct when admin approves
+      // Balance is already deducted, admin approval is just confirmation
       const transaction = await storage.createTransaction({
         userId,
         type: 'withdraw',
@@ -1058,31 +1073,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // If it's a withdrawal being approved, deduct balance from user
-      if (transaction.type === 'withdraw' && status === 'completed') {
+      // **NEW WITHDRAWAL FLOW**: Balance already deducted when user requested withdrawal
+      // If admin APPROVES: Just log confirmation (no balance change needed)
+      // If admin REJECTS: Refund the amount back to user
+      
+      if (transaction.type === 'withdraw') {
         const user = await storage.getUser(transaction.userId);
         if (user) {
           const withdrawAmount = parseFloat(transaction.amount);
           const currentBalance = parseFloat(user.balance);
           
-          // Check if user has sufficient balance
-          if (currentBalance < withdrawAmount) {
-            return res.status(400).json({ 
-              error: "Insufficient balance. User's current balance is not enough to complete this withdrawal." 
+          if (status === 'completed') {
+            // Approval: just confirm (balance was already deducted)
+            console.log('[WITHDRAWAL APPROVED]', {
+              userId: user.id,
+              username: user.username,
+              withdrawAmount,
+              currentBalance,
+              status: 'Withdrawal approved - funds already deducted'
+            });
+          } else if (status === 'failed') {
+            // Rejection: REFUND the amount back to user
+            const newBalance = currentBalance + withdrawAmount;
+            console.log('[WITHDRAWAL REJECTED - REFUNDING]', {
+              userId: user.id,
+              username: user.username,
+              withdrawAmount,
+              currentBalance,
+              newBalance: newBalance.toFixed(2),
+              status: 'Refunding withdrawn amount'
+            });
+            await storage.updateUser(user.id, { 
+              balance: newBalance.toFixed(2) 
             });
           }
-          
-          const newBalance = currentBalance - withdrawAmount;
-          console.log('[WITHDRAWAL APPROVAL]', {
-            userId: user.id,
-            username: user.username,
-            currentBalance,
-            withdrawAmount,
-            newBalance: newBalance.toFixed(2)
-          });
-          await storage.updateUser(user.id, { 
-            balance: newBalance.toFixed(2) 
-          });
         }
       }
 
