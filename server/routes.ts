@@ -1042,7 +1042,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const depositAmount = parseFloat(transaction.amount);
           const feeRate = 0.10;
           const amountAfterFee = depositAmount - (depositAmount * feeRate);
-          const newBalance = parseFloat(user.balance) + amountAfterFee;
+          const currentBalance = parseFloat(user.balance);
+          const newBalance = currentBalance + amountAfterFee;
+          console.log('[DEPOSIT APPROVAL]', {
+            userId: user.id,
+            username: user.username,
+            currentBalance,
+            depositAmount,
+            amountAfterFee,
+            newBalance: newBalance.toFixed(2)
+          });
           await storage.updateUser(user.id, { 
             balance: newBalance.toFixed(2) 
           });
@@ -1054,7 +1063,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const user = await storage.getUser(transaction.userId);
         if (user) {
           const withdrawAmount = parseFloat(transaction.amount);
-          const newBalance = parseFloat(user.balance) - withdrawAmount;
+          const currentBalance = parseFloat(user.balance);
+          const newBalance = currentBalance - withdrawAmount;
+          console.log('[WITHDRAWAL APPROVAL]', {
+            userId: user.id,
+            username: user.username,
+            currentBalance,
+            withdrawAmount,
+            newBalance: newBalance.toFixed(2)
+          });
           await storage.updateUser(user.id, { 
             balance: newBalance.toFixed(2) 
           });
