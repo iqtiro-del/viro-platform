@@ -308,6 +308,7 @@ function UsersManagement({ adminId }: { adminId: string }) {
   const { toast } = useToast();
   const [banUserId, setBanUserId] = useState<string | null>(null);
   const [banReason, setBanReason] = useState('');
+  const [userSearch, setUserSearch] = useState('');
   
   const { data: users = [] } = useQuery<User[]>({
     queryKey: ['/api/admin/users'],
@@ -376,6 +377,11 @@ function UsersManagement({ adminId }: { adminId: string }) {
     },
   });
 
+  // Filter users based on search query
+  const filteredUsers = users.filter(user => 
+    user.username.toLowerCase().includes(userSearch.toLowerCase())
+  );
+
   return (
     <Card className="glass-morphism">
       <CardHeader>
@@ -383,6 +389,17 @@ function UsersManagement({ adminId }: { adminId: string }) {
         <CardDescription>Manage all platform users</CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Search Box */}
+        <div className="mb-4">
+          <Input
+            placeholder="Search by username..."
+            value={userSearch}
+            onChange={(e) => setUserSearch(e.target.value)}
+            className="glass-morphism border-border/50 max-w-sm"
+            data-testid="input-user-search"
+          />
+        </div>
+
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -396,7 +413,7 @@ function UsersManagement({ adminId }: { adminId: string }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <TableRow key={user.id} data-testid={`row-user-${user.id}`}>
                   <TableCell className="font-medium">
                     {user.username}
