@@ -91,14 +91,21 @@ export function WalletPage() {
       return response.json();
     },
     onSuccess: (data) => {
-      if (user) {
-        setUser({ ...user, balance: data.newBalance });
-      }
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
-      toast({
-        title: t("wallet.depositSuccess"),
-        description: `$${depositAmount} ${t("wallet.addedToWallet")}`
-      });
+      
+      if (data.status === 'pending') {
+        toast({
+          title: "طلب الإيداع قيد المراجعة",
+          description: "سيتم إضافة الرصيد بعد موافقة الإدارة على الطلب",
+          duration: 5000
+        });
+      } else {
+        toast({
+          title: t("wallet.depositSuccess"),
+          description: `$${depositAmount} ${t("wallet.addedToWallet")}`
+        });
+      }
+      
       setDepositAmount("");
       setDepositMethod("");
       setDepositDialogOpen(false);
@@ -149,14 +156,21 @@ export function WalletPage() {
       return response.json();
     },
     onSuccess: (data) => {
-      if (user) {
-        setUser({ ...user, balance: data.newBalance });
-      }
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
-      toast({
-        title: t("wallet.withdrawSuccess"),
-        description: `$${withdrawAmount} ${t("wallet.withdrawnFrom")}`
-      });
+      
+      if (data.status === 'pending') {
+        toast({
+          title: "طلب السحب قيد المراجعة",
+          description: "سيتم خصم الرصيد بعد موافقة الإدارة على الطلب",
+          duration: 5000
+        });
+      } else {
+        toast({
+          title: t("wallet.withdrawSuccess"),
+          description: `$${withdrawAmount} ${t("wallet.withdrawnFrom")}`
+        });
+      }
+      
       setWithdrawAmount("");
       setWithdrawMethod("");
       setAccountNumber("");
