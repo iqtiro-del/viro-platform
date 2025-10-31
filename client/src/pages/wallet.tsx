@@ -91,7 +91,10 @@ export function WalletPage() {
       return response.json();
     },
     onSuccess: (data) => {
+      // Invalidate transaction queries
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
+      // Invalidate user data to refresh balance
+      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id] });
       
       if (data.status === 'pending') {
         toast({
@@ -156,12 +159,15 @@ export function WalletPage() {
       return response.json();
     },
     onSuccess: (data) => {
+      // Invalidate transaction queries
       queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
+      // Invalidate user data to refresh balance
+      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id] });
       
       if (data.status === 'pending') {
         toast({
-          title: "طلب السحب قيد المراجعة",
-          description: "سيتم خصم الرصيد بعد موافقة الإدارة على الطلب",
+          title: "تم خصم المبلغ من رصيدك",
+          description: "طلب السحب قيد المراجعة - سيتم إرجاع المبلغ إذا تم رفض الطلب",
           duration: 5000
         });
       } else {

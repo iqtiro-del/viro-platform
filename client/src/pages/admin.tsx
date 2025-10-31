@@ -839,8 +839,14 @@ function DepositsManagement({ adminId }: { adminId: string }) {
       return res.json();
     },
     onSuccess: () => {
+      // Invalidate deposit queries
       queryClient.invalidateQueries({ queryKey: ['/api/admin/transactions?type=deposit'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      
+      // CRITICAL: Invalidate all user queries so wallet balances update
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      
       toast({
         title: "تم التحديث",
         description: "Deposit request updated successfully",
@@ -1027,8 +1033,14 @@ function WithdrawalsManagement({ adminId }: { adminId: string }) {
       return res.json();
     },
     onSuccess: () => {
+      // Invalidate withdrawal queries
       queryClient.invalidateQueries({ queryKey: ['/api/admin/transactions?type=withdraw'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      
+      // CRITICAL: Invalidate all user queries so wallet balances update
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      
       toast({
         title: "تم التحديث",
         description: "Withdrawal request updated successfully",
