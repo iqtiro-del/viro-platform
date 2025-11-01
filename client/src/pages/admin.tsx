@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Users, Package, DollarSign, ShoppingCart, BadgeCheck, XCircle, CheckCircle, Trash2, Edit, Shield, MoreVertical, ArrowDownToLine, ArrowUpFromLine, Receipt, UserX } from "lucide-react";
 import type { User, ProductWithSeller, Transaction, VerificationRequestWithUser } from "@shared/schema";
+import { getProductImage } from "@/lib/category-images";
 
 type AdminSection = 'users' | 'services' | 'verifications' | 'transactions' | 'deposits' | 'withdrawals' | 'banned';
 
@@ -590,6 +591,7 @@ function ServicesManagement({ adminId }: { adminId: string }) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Image</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Seller</TableHead>
                 <TableHead>Price</TableHead>
@@ -602,6 +604,15 @@ function ServicesManagement({ adminId }: { adminId: string }) {
             <TableBody>
               {products.map((product) => (
                 <TableRow key={product.id} data-testid={`row-product-${product.id}`}>
+                  <TableCell>
+                    <div className="w-12 h-12 rounded-lg overflow-hidden">
+                      <img 
+                        src={getProductImage(product.category, product.imageUrl)}
+                        alt={product.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </TableCell>
                   <TableCell className="font-medium max-w-xs truncate">{product.title}</TableCell>
                   <TableCell>{product.seller.username}</TableCell>
                   <TableCell>${product.price}</TableCell>

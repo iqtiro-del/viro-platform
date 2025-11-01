@@ -16,6 +16,7 @@ import NotFound from "@/pages/not-found";
 import { Dashboard } from "@/pages/dashboard";
 import { AuthPage } from "@/pages/auth";
 import { ServicesPage } from "@/pages/services";
+import { ServiceDetailPage } from "@/pages/service-detail";
 import { WalletPage } from "@/pages/wallet";
 import { MyProductsPage } from "@/pages/my-products";
 import { PromotePage } from "@/pages/promote";
@@ -107,6 +108,7 @@ function Router() {
                 <Route path="/" component={Dashboard} />
                 <Route path="/admin" component={AdminDashboard} />
                 <Route path="/services" component={ServicesPage} />
+                <Route path="/service/:id" component={ServiceDetailPage} />
                 <Route path="/seller/:id" component={SellerProfilePage} />
                 <Route path="/wallet">
                   <ProtectedRoute>

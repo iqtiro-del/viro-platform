@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -403,13 +404,15 @@ export function Dashboard() {
                   </div>
 
                   {/* Action Button */}
-                  <Button 
-                    className="w-full neon-glow-secondary group-hover:scale-[1.02] transition-transform" 
-                    data-testid={`button-view-service-${product.id}`}
-                  >
-                    {t("home.viewDetails")}
-                    <ArrowRight className="w-4 h-4 mr-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
+                  <Link href={`/service/${product.id}`}>
+                    <Button 
+                      className="w-full neon-glow-secondary group-hover:scale-[1.02] transition-transform" 
+                      data-testid={`button-view-service-${product.id}`}
+                    >
+                      {t("home.viewDetails")}
+                      <ArrowRight className="w-4 h-4 mr-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             ))

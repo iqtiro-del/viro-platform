@@ -107,6 +107,20 @@ const translations = {
     "services.categories.tiktok": "TikTok",
     "services.instagram": "Instagram",
     "services.tiktok": "TikTok",
+    "services.notFound": "Service Not Found",
+    "services.details": "Service Details",
+    "services.views": "Views",
+    "services.sales": "Sales",
+    "services.rating": "Rating",
+    "services.discount": "Save",
+    "services.purchasing": "Processing...",
+    "services.loginRequired": "Please login to purchase this service",
+    "services.inactive": "Inactive",
+    "services.purchaseSuccess.description": "Check your chats to communicate with the seller",
+    
+    // Common
+    "common.back": "Back",
+    "common.goHome": "Go Home",
     
     // Wallet
     "wallet.title": "My Wallet",
@@ -424,6 +438,20 @@ const translations = {
     "services.categories.tiktok": "تيك توك",
     "services.instagram": "إنستغرام",
     "services.tiktok": "تيك توك",
+    "services.notFound": "الخدمة غير موجودة",
+    "services.details": "تفاصيل الخدمة",
+    "services.views": "المشاهدات",
+    "services.sales": "المبيعات",
+    "services.rating": "التقييم",
+    "services.discount": "وفر",
+    "services.purchasing": "جاري المعالجة...",
+    "services.loginRequired": "يرجى تسجيل الدخول لشراء هذه الخدمة",
+    "services.inactive": "غير نشط",
+    "services.purchaseSuccess.description": "تحقق من المحادثات للتواصل مع البائع",
+    
+    // Common
+    "common.back": "رجوع",
+    "common.goHome": "العودة للرئيسية",
     
     // Wallet
     "wallet.title": "محفظتي",
