@@ -54,9 +54,13 @@ export function ServiceDetailPage() {
 
   const purchaseMutation = useMutation({
     mutationFn: async (productId: string) => {
+      if (!user?.id) {
+        throw new Error('User not authenticated');
+      }
       const res = await fetch(`/api/products/${productId}/purchase`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ buyerId: user.id }),
       });
       if (!res.ok) {
         const error = await res.json();
