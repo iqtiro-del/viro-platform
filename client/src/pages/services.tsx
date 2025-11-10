@@ -320,7 +320,7 @@ export function ServicesPage() {
                 {filteredProducts.map((product) => (
                   <Card 
                     key={product.id}
-                    className="glass-morphism border-border/30 hover:border-primary/50 transition-all hover-elevate group overflow-hidden"
+                    className="glass-morphism border-border/30 hover:border-primary/50 transition-all hover-elevate group overflow-hidden rounded-3xl"
                     data-testid={`card-product-${product.id}`}
                   >
                     {/* MOBILE LAYOUT - Horizontal */}
