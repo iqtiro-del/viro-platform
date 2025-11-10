@@ -1,13 +1,24 @@
-// Default category images mapping - Modern professional stock images
+// Import stock images for each category
+import instagramImg from '@assets/stock_images/instagram_social_med_3a02d924.jpg';
+import tiktokImg from '@assets/stock_images/tiktok_app_creative__56873776.jpg';
+import designImg from '@assets/stock_images/graphic_designer_wor_d8dc611a.jpg';
+import programmingImg from '@assets/stock_images/programming_coding_d_b288b022.jpg';
+import marketingImg from '@assets/stock_images/digital_marketing_st_f28637b9.jpg';
+import writingImg from '@assets/stock_images/writing_notebook_typ_9fd0cc29.jpg';
+import videoImg from '@assets/stock_images/video_editing_animat_7913d37d.jpg';
+import musicImg from '@assets/stock_images/music_production_aud_9f10bf1e.jpg';
+
+// Default category images mapping - Professional stock images
 export const categoryImages: Record<string, string> = {
-  "Instagram": "/attached_assets/stock_images/instagram_social_med_c8519eb0.jpg",
-  "Design": "/attached_assets/stock_images/graphic_design_creat_1bd5ede7.jpg",
-  "Development": "/attached_assets/stock_images/programming_coding_d_1c88c7e8.jpg",
-  "Writing": "/attached_assets/stock_images/content_writing_blog_4204903c.jpg",
-  "Marketing": "/attached_assets/stock_images/digital_marketing_an_facee684.jpg",
-  "Music & Audio": "/attached_assets/stock_images/music_production_aud_fe34ddfd.jpg",
-  "TikTok": "/attached_assets/stock_images/tiktok_video_recordi_5bb32005.jpg",
-  "Video & Animation": "/attached_assets/stock_images/video_editing_animat_804f56fe.jpg",
+  "Instagram": instagramImg,
+  "Design": designImg,
+  "Development": programmingImg,
+  "Programming": programmingImg,
+  "Writing": writingImg,
+  "Marketing": marketingImg,
+  "Music & Audio": musicImg,
+  "TikTok": tiktokImg,
+  "Video & Animation": videoImg,
 };
 
 export function getProductImage(category: string, customImageUrl?: string | null): string {
