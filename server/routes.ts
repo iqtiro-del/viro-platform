@@ -12,7 +12,7 @@ import {
   insertMessageSchema
 } from "@shared/schema";
 import bcrypt from "bcryptjs";
-import { encryptCredentials, decryptCredentials } from "./crypto";
+import { encryptCredentials, decryptCredentials, encrypt, decrypt } from "./crypto";
 import multer from "multer";
 
 // Configure multer for memory storage (no file saved to disk)
@@ -415,7 +415,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/wallet/deposit", async (req, res) => {
     try {
-      const { userId, amount, paymentMethod } = req.body;
+      const { userId, amount, paymentMethod, payerReference } = req.body;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -427,17 +427,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Amount must be greater than 0" });
       }
 
+      // Validate payerReference for Zain Cash and Rafidain Services
+      if ((paymentMethod === "Zain Cash" || paymentMethod === "Al-Rafidain QiServices") && !payerReference) {
+        return res.status(400).json({ 
+          error: `Payment reference is required for ${paymentMethod}` 
+        });
+      }
+
       // Apply 10% fee on deposit (user receives 90% of deposited amount)
       const feeRate = 0.10;
       const feeAmount = depositAmount * feeRate;
       const amountAfterFee = depositAmount - feeAmount;
+      
+      // Encrypt payerReference if provided
+      let encryptedPayerReference = '';
+      if (payerReference && payerReference.trim() !== '') {
+        encryptedPayerReference = encrypt(payerReference.trim());
+      }
       
       // Create pending transaction - admin will approve/reject
       const transaction = await storage.createTransaction({
         userId,
         type: 'deposit',
         amount: depositAmount.toFixed(2),
-        description: `Deposit via ${paymentMethod} (Pending approval)`
+        description: `Deposit via ${paymentMethod} (Pending approval)`,
+        payerReference: encryptedPayerReference
       });
       
       // Transaction stays in pending status until admin approves
