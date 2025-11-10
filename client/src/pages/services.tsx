@@ -320,109 +320,149 @@ export function ServicesPage() {
                 {filteredProducts.map((product) => (
                   <Card 
                     key={product.id}
-                    className="glass-morphism border-border/30 hover:border-primary/50 transition-all hover-elevate group"
+                    className="glass-morphism border-border/30 hover:border-primary/50 transition-all hover-elevate group overflow-hidden"
                     data-testid={`card-product-${product.id}`}
                   >
-                    {/* Service Image - Modern professional design with gradient overlay */}
-                    <div className="h-52 md:h-40 relative overflow-hidden rounded-t-md">
-                      <img 
-                        src={getProductImage(product.category, product.imageUrl)} 
-                        alt={product.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      {/* Gradient overlay for better text readability and premium look */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-                      {/* Neon glow effect on hover */}
-                      <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-all duration-300 rounded-t-md"></div>
-                      <Badge className="absolute top-3 right-3 md:top-2 md:right-2 bg-primary/90 backdrop-blur-sm neon-glow-primary text-sm md:text-xs z-10">
-                        {product.category}
-                      </Badge>
+                    {/* MOBILE LAYOUT - Horizontal */}
+                    <div className="flex md:hidden items-center gap-3 p-3">
+                      {/* Image on left - fixed size */}
+                      <div className="flex-shrink-0 w-24 h-24 relative overflow-hidden rounded-md">
+                        <img 
+                          src={getProductImage(product.category, product.imageUrl)} 
+                          alt={product.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                      </div>
+
+                      {/* Text content in center - flexible */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm line-clamp-1 mb-1">
+                          {product.title}
+                        </h3>
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                          {product.description}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          {product.oldPrice && parseFloat(product.oldPrice) > 0 && (
+                            <span className="text-xs text-red-500 line-through">
+                              ${product.oldPrice}
+                            </span>
+                          )}
+                          <span className="text-sm font-bold text-primary">
+                            ${product.price}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Button on right - fixed width */}
+                      <div className="flex-shrink-0">
+                        <Button 
+                          size="sm"
+                          className="neon-glow-secondary text-xs px-3" 
+                          onClick={() => {
+                            setSelectedProduct(product);
+                            setPurchaseDialogOpen(true);
+                          }}
+                          disabled={!user || user.id === product.sellerId}
+                          data-testid={`button-buy-${product.id}`}
+                        >
+                          {!user ? t("services.loginToBuy") : (user.id === product.sellerId) ? t("services.yourProduct") : t("services.buyNow")}
+                        </Button>
+                      </div>
                     </div>
 
-                    {/* Card Header - Title and Seller Info */}
-                    <CardHeader className="pb-4 md:pb-3 pt-5 md:pt-6">
-                      {/* Title */}
-                      <CardTitle className="text-lg md:text-base mb-3 md:mb-0">
-                        <span className="line-clamp-2 md:line-clamp-1">{product.title}</span>
-                      </CardTitle>
-                      
-                      {/* Seller Info - Hidden on mobile, shown on desktop */}
-                      <CardDescription className="hidden md:flex items-center space-x-2 text-sm">
-                        <Link href={`/seller/${product.seller.id}`}>
-                          <button 
-                            className="flex items-center space-x-2 hover-elevate rounded-md p-1 -m-1 transition-all"
-                            data-testid={`link-seller-${product.seller.id}`}
-                          >
-                            <Avatar className="w-5 h-5 border border-primary/30">
-                              <AvatarImage src={getUserAvatar(product.seller.id)} />
-                              <AvatarFallback className="text-xs bg-primary/20">
-                                {product.seller.username.substring(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="hover:text-primary transition-colors">{product.seller.username}</span>
-                          </button>
-                        </Link>
-                        {product.seller.isVerified && (
-                          <div className="w-3.5 h-3.5 bg-green-500 rounded-full flex items-center justify-center neon-glow-success">
-                            <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                        )}
-                      </CardDescription>
-                    </CardHeader>
-
-                    <CardContent>
-                      {/* Description */}
-                      <p className="text-base md:text-sm text-muted-foreground mb-4 md:mb-3 line-clamp-3 md:line-clamp-2 leading-relaxed">
-                        {product.description}
-                      </p>
-                      
-                      {/* Mobile-only pricing - Old and new price side by side */}
-                      <div className="flex items-center gap-3 mb-4 md:hidden">
-                        {product.oldPrice && parseFloat(product.oldPrice) > 0 && (
-                          <p className="text-lg text-red-500 line-through font-medium">
-                            ${product.oldPrice}
-                          </p>
-                        )}
-                        <p className="text-2xl font-bold text-primary neon-text-glow">
-                          ${product.price}
-                        </p>
+                    {/* DESKTOP LAYOUT - Vertical (unchanged) */}
+                    <div className="hidden md:block">
+                      {/* Service Image - Modern professional design with gradient overlay */}
+                      <div className="h-40 relative overflow-hidden rounded-t-md">
+                        <img 
+                          src={getProductImage(product.category, product.imageUrl)} 
+                          alt={product.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        {/* Gradient overlay for better text readability and premium look */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                        {/* Neon glow effect on hover */}
+                        <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-all duration-300 rounded-t-md"></div>
+                        <Badge className="absolute top-2 right-2 bg-primary/90 backdrop-blur-sm neon-glow-primary text-xs z-10">
+                          {product.category}
+                        </Badge>
                       </div>
 
-                      {/* Desktop-only pricing section - Rating and price on same line */}
-                      <div className="hidden md:flex md:items-center md:justify-between md:mb-3">
-                        <div className="flex items-center space-x-1">
-                          <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
-                          <span className="text-sm font-semibold">{product.seller.rating || "0.00"}</span>
-                          <span className="text-xs text-muted-foreground">({product.seller.totalReviews || 0})</span>
-                        </div>
+                      {/* Card Header - Title and Seller Info */}
+                      <CardHeader className="pb-3 pt-6">
+                        {/* Title */}
+                        <CardTitle className="text-base mb-0">
+                          <span className="line-clamp-1">{product.title}</span>
+                        </CardTitle>
                         
-                        <div className="flex flex-col items-end gap-1">
-                          {product.oldPrice && parseFloat(product.oldPrice) > 0 && (
-                            <p className="text-sm text-red-500 line-through" data-testid={`text-old-price-${product.id}`}>
-                              ${product.oldPrice}
-                            </p>
+                        {/* Seller Info */}
+                        <CardDescription className="flex items-center space-x-2 text-sm">
+                          <Link href={`/seller/${product.seller.id}`}>
+                            <button 
+                              className="flex items-center space-x-2 hover-elevate rounded-md p-1 -m-1 transition-all"
+                              data-testid={`link-seller-${product.seller.id}`}
+                            >
+                              <Avatar className="w-5 h-5 border border-primary/30">
+                                <AvatarImage src={getUserAvatar(product.seller.id)} />
+                                <AvatarFallback className="text-xs bg-primary/20">
+                                  {product.seller.username.substring(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="hover:text-primary transition-colors">{product.seller.username}</span>
+                            </button>
+                          </Link>
+                          {product.seller.isVerified && (
+                            <div className="w-3.5 h-3.5 bg-green-500 rounded-full flex items-center justify-center neon-glow-success">
+                              <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </div>
                           )}
-                          <p className="text-lg font-bold text-primary neon-text-glow" data-testid={`text-price-${product.id}`}>
-                            ${product.price}
-                          </p>
-                        </div>
-                      </div>
+                        </CardDescription>
+                      </CardHeader>
 
-                      {/* Buy Button - Wide and tall on mobile */}
-                      <Button 
-                        className="w-full neon-glow-secondary h-12 md:h-9 text-base md:text-sm font-semibold" 
-                        onClick={() => {
-                          setSelectedProduct(product);
-                          setPurchaseDialogOpen(true);
-                        }}
-                        disabled={!user || user.id === product.sellerId}
-                        data-testid={`button-buy-${product.id}`}
-                      >
-                        {!user ? t("services.loginToBuy") : (user.id === product.sellerId) ? t("services.yourProduct") : t("services.buyNow")}
-                      </Button>
-                    </CardContent>
+                      <CardContent>
+                        {/* Description */}
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2 leading-relaxed">
+                          {product.description}
+                        </p>
+                        
+                        {/* Desktop-only pricing section - Rating and price on same line */}
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center space-x-1">
+                            <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
+                            <span className="text-sm font-semibold">{product.seller.rating || "0.00"}</span>
+                            <span className="text-xs text-muted-foreground">({product.seller.totalReviews || 0})</span>
+                          </div>
+                          
+                          <div className="flex flex-col items-end gap-1">
+                            {product.oldPrice && parseFloat(product.oldPrice) > 0 && (
+                              <p className="text-sm text-red-500 line-through" data-testid={`text-old-price-${product.id}`}>
+                                ${product.oldPrice}
+                              </p>
+                            )}
+                            <p className="text-lg font-bold text-primary neon-text-glow" data-testid={`text-price-${product.id}`}>
+                              ${product.price}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Buy Button */}
+                        <Button 
+                          className="w-full neon-glow-secondary h-9 text-sm font-semibold" 
+                          onClick={() => {
+                            setSelectedProduct(product);
+                            setPurchaseDialogOpen(true);
+                          }}
+                          disabled={!user || user.id === product.sellerId}
+                          data-testid={`button-buy-${product.id}`}
+                        >
+                          {!user ? t("services.loginToBuy") : (user.id === product.sellerId) ? t("services.yourProduct") : t("services.buyNow")}
+                        </Button>
+                      </CardContent>
+                    </div>
                   </Card>
                 ))}
               </div>
