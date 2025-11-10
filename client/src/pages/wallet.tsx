@@ -92,7 +92,8 @@ export function WalletPage() {
       const response = await apiRequest('POST', '/api/wallet/deposit', {
         userId: user?.id,
         amount: depositAmount,
-        paymentMethod: depositMethod
+        paymentMethod: depositMethod,
+        payerReference: userPaymentNumber || undefined
       });
       return response.json();
     },
@@ -119,6 +120,7 @@ export function WalletPage() {
       
       setDepositAmount("");
       setDepositMethod("");
+      setUserPaymentNumber("");
       setDepositDialogOpen(false);
     },
     onError: (error: any) => {
@@ -308,6 +310,70 @@ export function WalletPage() {
                           </SelectContent>
                         </Select>
                       </div>
+                      
+                      {/* Conditional fields for Zain Cash */}
+                      {depositMethod === "Zain Cash" && (
+                        <div className="space-y-4 p-4 bg-primary/5 border border-primary/20 rounded-md">
+                          <div>
+                            <Label>{t("wallet.platformZainNumber")}</Label>
+                            <Input 
+                              type="text"
+                              value="07708917002"
+                              readOnly
+                              className="glass-morphism border-border/50 mt-2 bg-muted/50 cursor-not-allowed"
+                              data-testid="input-platform-zain-number"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">{t("wallet.transferToThisNumber")}</p>
+                          </div>
+                          <div>
+                            <Label htmlFor="user-wallet-number">
+                              {t("wallet.yourWalletNumber")} <span className="text-destructive">*</span>
+                            </Label>
+                            <Input 
+                              id="user-wallet-number"
+                              type="text"
+                              placeholder={t("wallet.enterWalletNumber")}
+                              value={userPaymentNumber}
+                              onChange={(e) => setUserPaymentNumber(e.target.value)}
+                              className="glass-morphism border-border/50 mt-2"
+                              data-testid="input-user-wallet-number"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">{t("wallet.walletNumberHint")}</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Conditional fields for Rafidain Services */}
+                      {depositMethod === "Al-Rafidain QiServices" && (
+                        <div className="space-y-4 p-4 bg-primary/5 border border-primary/20 rounded-md">
+                          <div>
+                            <Label>{t("wallet.platformRafidainAccount")}</Label>
+                            <Input 
+                              type="text"
+                              value="5784731084"
+                              readOnly
+                              className="glass-morphism border-border/50 mt-2 bg-muted/50 cursor-not-allowed"
+                              data-testid="input-platform-rafidain-account"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">{t("wallet.transferToThisAccount")}</p>
+                          </div>
+                          <div>
+                            <Label htmlFor="user-account-number">
+                              {t("wallet.yourAccountNumber")} <span className="text-destructive">*</span>
+                            </Label>
+                            <Input 
+                              id="user-account-number"
+                              type="text"
+                              placeholder={t("wallet.enterAccountNumber")}
+                              value={userPaymentNumber}
+                              onChange={(e) => setUserPaymentNumber(e.target.value)}
+                              className="glass-morphism border-border/50 mt-2"
+                              data-testid="input-user-account-number"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">{t("wallet.accountNumberHint")}</p>
+                          </div>
+                        </div>
+                      )}
                       {depositAmount && parseFloat(depositAmount) > 0 && (
                         <div className="p-4 bg-primary/5 border border-primary/20 rounded-md space-y-2" data-testid="breakdown-deposit-fee">
                           <div className="flex justify-between text-sm">
@@ -329,7 +395,12 @@ export function WalletPage() {
                         className="w-full neon-glow-primary" 
                         data-testid="button-confirm-deposit"
                         onClick={() => depositMutation.mutate()}
-                        disabled={!depositAmount || !depositMethod || depositMutation.isPending}
+                        disabled={
+                          !depositAmount || 
+                          !depositMethod || 
+                          depositMutation.isPending ||
+                          ((depositMethod === "Zain Cash" || depositMethod === "Al-Rafidain QiServices") && !userPaymentNumber)
+                        }
                       >
                         {depositMutation.isPending ? t("wallet.processing") : t("wallet.confirmDeposit")}
                       </Button>
