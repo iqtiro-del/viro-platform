@@ -42,6 +42,7 @@ export function WalletPage() {
   const { toast } = useToast();
   const [depositAmount, setDepositAmount] = useState("");
   const [depositMethod, setDepositMethod] = useState("");
+  const [userPaymentNumber, setUserPaymentNumber] = useState(""); // User's wallet/account number for deposit
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawMethod, setWithdrawMethod] = useState("");
   const [accountNumber, setAccountNumber] = useState("");

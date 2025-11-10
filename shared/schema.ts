@@ -95,6 +95,7 @@ export const transactions = pgTable("transactions", {
   status: transactionStatusEnum("status").default('pending').notNull(),
   description: text("description").default(''),
   accountNumber: varchar("account_number", { length: 50 }),
+  payerReference: text("payer_reference").default(''), // Encrypted: User's wallet/account number for deposits
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
