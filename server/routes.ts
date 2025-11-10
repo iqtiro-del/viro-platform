@@ -428,22 +428,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Validate payerReference for Zain Cash and Rafidain Services
-      if ((paymentMethod === "Zain Cash" || paymentMethod === "Al-Rafidain QiServices") && !payerReference) {
-        return res.status(400).json({ 
-          error: `Payment reference is required for ${paymentMethod}` 
-        });
+      let encryptedPayerReference = '';
+      
+      if (paymentMethod === "Zain Cash" || paymentMethod === "Al-Rafidain QiServices") {
+        // Payment reference is required
+        if (!payerReference || payerReference.trim() === '') {
+          return res.status(400).json({ 
+            error: `Payment reference is required for ${paymentMethod}` 
+          });
+        }
+        
+        const reference = payerReference.trim();
+        const digitsOnly = /^\d+$/;
+        
+        // Validate format: digits only
+        if (!digitsOnly.test(reference)) {
+          return res.status(400).json({ 
+            error: "Payment reference must contain only digits" 
+          });
+        }
+        
+        // Validate length based on payment method
+        if (paymentMethod === "Zain Cash") {
+          // Zain Cash wallets: 10-15 digits
+          if (reference.length < 10 || reference.length > 15) {
+            return res.status(400).json({ 
+              error: "Zain Cash wallet number must be between 10 and 15 digits" 
+            });
+          }
+        } else if (paymentMethod === "Al-Rafidain QiServices") {
+          // Bank account numbers: 6-20 digits
+          if (reference.length < 6 || reference.length > 20) {
+            return res.status(400).json({ 
+              error: "Bank account number must be between 6 and 20 digits" 
+            });
+          }
+        }
+        
+        // Encrypt validated reference
+        encryptedPayerReference = encrypt(reference);
       }
 
       // Apply 10% fee on deposit (user receives 90% of deposited amount)
       const feeRate = 0.10;
       const feeAmount = depositAmount * feeRate;
       const amountAfterFee = depositAmount - feeAmount;
-      
-      // Encrypt payerReference if provided
-      let encryptedPayerReference = '';
-      if (payerReference && payerReference.trim() !== '') {
-        encryptedPayerReference = encrypt(payerReference.trim());
-      }
       
       // Create pending transaction - admin will approve/reject
       const transaction = await storage.createTransaction({
