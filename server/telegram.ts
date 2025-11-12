@@ -13,11 +13,12 @@ export async function sendDepositScreenshotToTelegram(
   filename: string,
   data: TelegramMessageData
 ): Promise<void> {
-  const botToken = process.env.BOT_TOKEN;
-  const chatId = process.env.CHAT_ID;
+  // Use separate bot credentials for deposits (not verification)
+  const botToken = process.env.DEPOSIT_BOT_TOKEN || process.env.BOT_TOKEN;
+  const chatId = process.env.DEPOSIT_CHAT_ID || process.env.CHAT_ID;
 
   if (!botToken || !chatId) {
-    throw new Error('Telegram bot configuration missing');
+    throw new Error('Telegram deposit bot configuration missing (DEPOSIT_BOT_TOKEN and DEPOSIT_CHAT_ID)');
   }
 
   // Detect content type from filename
