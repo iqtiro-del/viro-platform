@@ -1,4 +1,5 @@
 import FormData from 'form-data';
+import https from 'https';
 
 interface TelegramMessageData {
   username: string;
@@ -31,22 +32,19 @@ export async function sendDepositScreenshotToTelegram(
     contentType = 'image/webp';
   }
 
+  const caption = `🔔 طلب إيداع جديد\n\n` +
+    `👤 المستخدم: ${data.username}\n` +
+    `💰 المبلغ: $${data.amount}\n` +
+    `💳 طريقة الدفع: ${data.paymentMethod}\n` +
+    `📅 التاريخ والوقت: ${data.timestamp}`;
+
   const formData = new FormData();
   formData.append('chat_id', chatId);
   formData.append('photo', imageBuffer, {
     filename: filename,
     contentType: contentType
   });
-  
-  const caption = `🔔 طلب إيداع جديد\n\n` +
-    `👤 المستخدم: ${data.username}\n` +
-    `💰 المبلغ: $${data.amount}\n` +
-    `💳 طريقة الدفع: ${data.paymentMethod}\n` +
-    `📅 التاريخ والوقت: ${data.timestamp}`;
-  
   formData.append('caption', caption);
-
-  const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
 
   console.log('[Telegram] Sending photo:', {
     chatId,
@@ -56,47 +54,56 @@ export async function sendDepositScreenshotToTelegram(
     captionLength: caption.length
   });
 
-  const response = await fetch(url, {
-    method: 'POST',
-    body: formData as any,
-    headers: formData.getHeaders() as any
-  });
-
-  console.log('[Telegram] Response status:', response.status);
-
-  if (!response.ok) {
-    let errorMessage = `Telegram API returned status ${response.status}`;
-    try {
-      const errorText = await response.text();
-      console.error('[Telegram] Error response text:', errorText);
-      if (errorText) {
-        try {
-          const errorJson = JSON.parse(errorText);
-          console.error('[Telegram] Error JSON:', errorJson);
-          errorMessage = `Telegram error: ${errorJson.description || JSON.stringify(errorJson)}`;
-        } catch (parseError) {
-          console.error('[Telegram] Could not parse error JSON:', parseError);
-          errorMessage = `Telegram error (raw): ${errorText}`;
+  // Use form-data's submit method which properly works with Node.js https
+  return new Promise((resolve, reject) => {
+    formData.submit(
+      `https://api.telegram.org/bot${botToken}/sendPhoto`,
+      (err, response) => {
+        if (err) {
+          console.error('[Telegram] Submit error:', err);
+          reject(new Error(`Failed to send to Telegram: ${err.message}`));
+          return;
         }
-      }
-    } catch (readError) {
-      console.error('[Telegram] Could not read error response:', readError);
-    }
-    console.error('[Telegram] Final error message:', errorMessage);
-    throw new Error(errorMessage);
-  }
 
-  // Validate successful response
-  try {
-    const result = await response.json();
-    if (!result.ok) {
-      throw new Error(`Telegram API error: ${result.description || 'Unknown error'}`);
-    }
-  } catch (e: any) {
-    // If we can't parse the response, but status was OK, consider it successful
-    if (e.message.includes('Telegram API error')) {
-      throw e;
-    }
-    // Otherwise, ignore JSON parse errors for successful responses
-  }
+        let responseData = '';
+        response.on('data', (chunk) => {
+          responseData += chunk.toString();
+        });
+
+        response.on('end', () => {
+          console.log('[Telegram] Response status:', response.statusCode);
+          
+          if (response.statusCode !== 200) {
+            console.error('[Telegram] Error response:', responseData);
+            try {
+              const errorJson = JSON.parse(responseData);
+              reject(new Error(`Telegram error: ${errorJson.description || JSON.stringify(errorJson)}`));
+            } catch {
+              reject(new Error(`Telegram error (status ${response.statusCode}): ${responseData}`));
+            }
+            return;
+          }
+
+          try {
+            const result = JSON.parse(responseData);
+            if (!result.ok) {
+              reject(new Error(`Telegram API error: ${result.description || 'Unknown error'}`));
+              return;
+            }
+            console.log('[Telegram] Photo sent successfully!');
+            resolve();
+          } catch (parseError) {
+            console.error('[Telegram] Could not parse response:', parseError);
+            // If we got a 200 status, consider it successful even if we can't parse the response
+            resolve();
+          }
+        });
+
+        response.on('error', (error) => {
+          console.error('[Telegram] Response error:', error);
+          reject(error);
+        });
+      }
+    );
+  });
 }
