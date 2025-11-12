@@ -3,7 +3,7 @@ import instagramImg from '@assets/ويط_1762928206296.jpg';
 import tiktokImg from '@assets/طيط_1762928365919.jpg';
 import designImg from '@assets/stock_images/graphic_designer_wor_d8dc611a.jpg';
 import programmingImg from '@assets/stock_images/programming_coding_d_b288b022.jpg';
-import marketingImg from '@assets/stock_images/digital_marketing_st_f28637b9.jpg';
+import marketingImg from '@assets/غغغغغغغغ_1762928798341.jpg';
 import writingImg from '@assets/stock_images/writing_notebook_typ_9fd0cc29.jpg';
 import videoImg from '@assets/stock_images/video_editing_animat_7913d37d.jpg';
 import musicImg from '@assets/stock_images/music_production_aud_9f10bf1e.jpg';
