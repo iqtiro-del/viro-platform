@@ -5,7 +5,7 @@ import designImg from '@assets/stock_images/graphic_designer_wor_d8dc611a.jpg';
 import programmingImg from '@assets/stock_images/programming_coding_d_b288b022.jpg';
 import marketingImg from '@assets/غغغغغغغغ_1762928798341.jpg';
 import writingImg from '@assets/شسءسءس_1762929001931.jpg';
-import videoImg from '@assets/stock_images/video_editing_animat_7913d37d.jpg';
+import videoImg from '@assets/كمنتالبيسشسيبلاتنم_1762929251207.jpg';
 import musicImg from '@assets/stock_images/music_production_aud_9f10bf1e.jpg';
 
 // Default category images mapping - Professional stock images
