@@ -6,7 +6,7 @@ import programmingImg from '@assets/stock_images/programming_coding_d_b288b022.j
 import marketingImg from '@assets/غغغغغغغغ_1762928798341.jpg';
 import writingImg from '@assets/شسءسءس_1762929001931.jpg';
 import videoImg from '@assets/كمنتالبيسشسيبلاتنم_1762929251207.jpg';
-import musicImg from '@assets/stock_images/music_production_aud_9f10bf1e.jpg';
+import musicImg from '@assets/ثقفغعهخحخهعغفقث_1762929435287.jpg';
 
 // Default category images mapping - Professional stock images
 export const categoryImages: Record<string, string> = {
