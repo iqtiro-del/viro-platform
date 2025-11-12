@@ -1194,6 +1194,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint for Telegram connection
+  app.get("/api/test-telegram", async (req, res) => {
+    try {
+      const botToken = process.env.BOT_TOKEN;
+      const chatId = process.env.CHAT_ID;
+      
+      if (!botToken || !chatId) {
+        return res.json({ 
+          error: 'Telegram credentials missing',
+          hasBotToken: !!botToken,
+          hasChatId: !!chatId
+        });
+      }
+      
+      // Test with getMe endpoint
+      const testUrl = `https://api.telegram.org/bot${botToken}/getMe`;
+      const testResponse = await fetch(testUrl);
+      const testResult = await testResponse.json();
+      
+      res.json({
+        botTokenValid: testResponse.ok,
+        botInfo: testResult,
+        chatId: chatId,
+        note: 'If bot token is valid, try sending a test message to check chat ID'
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

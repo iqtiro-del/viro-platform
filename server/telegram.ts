@@ -48,11 +48,21 @@ export async function sendDepositScreenshotToTelegram(
 
   const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
 
+  console.log('[Telegram] Sending photo:', {
+    chatId,
+    filename,
+    bufferSize: imageBuffer.length,
+    contentType,
+    captionLength: caption.length
+  });
+
   const response = await fetch(url, {
     method: 'POST',
     body: formData as any,
     headers: formData.getHeaders() as any
   });
+
+  console.log('[Telegram] Response status:', response.status);
 
   if (!response.ok) {
     let errorMessage = `Telegram API returned status ${response.status}`;
