@@ -1,5 +1,5 @@
 // Import stock images for each category
-import instagramImg from '@assets/stock_images/instagram_app_icon_o_857ed2da.jpg';
+import instagramImg from '@assets/ويط_1762928206296.jpg';
 import tiktokImg from '@assets/stock_images/tiktok_logo_icon_71baf0c8.jpg';
 import designImg from '@assets/stock_images/graphic_designer_wor_d8dc611a.jpg';
 import programmingImg from '@assets/stock_images/programming_coding_d_b288b022.jpg';
