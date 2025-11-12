@@ -19,11 +19,23 @@ export async function sendDepositScreenshotToTelegram(
     throw new Error('Telegram bot configuration missing');
   }
 
+  // Detect content type from filename
+  let contentType = 'image/jpeg';
+  if (filename.toLowerCase().endsWith('.png')) {
+    contentType = 'image/png';
+  } else if (filename.toLowerCase().endsWith('.jpg') || filename.toLowerCase().endsWith('.jpeg')) {
+    contentType = 'image/jpeg';
+  } else if (filename.toLowerCase().endsWith('.gif')) {
+    contentType = 'image/gif';
+  } else if (filename.toLowerCase().endsWith('.webp')) {
+    contentType = 'image/webp';
+  }
+
   const formData = new FormData();
   formData.append('chat_id', chatId);
   formData.append('photo', imageBuffer, {
     filename: filename,
-    contentType: 'image/jpeg'
+    contentType: contentType
   });
   
   const caption = `🔔 طلب إيداع جديد\n\n` +
@@ -49,13 +61,15 @@ export async function sendDepositScreenshotToTelegram(
       if (errorText) {
         try {
           const errorJson = JSON.parse(errorText);
-          errorMessage = `Failed to send to Telegram: ${JSON.stringify(errorJson)}`;
+          console.error('Telegram API Error:', errorJson);
+          errorMessage = `Telegram error: ${errorJson.description || JSON.stringify(errorJson)}`;
         } catch {
-          errorMessage = `Failed to send to Telegram: ${errorText}`;
+          console.error('Telegram API Error (raw):', errorText);
+          errorMessage = `Telegram error: ${errorText}`;
         }
       }
     } catch (e) {
-      // Could not read response body
+      console.error('Could not read Telegram error response:', e);
     }
     throw new Error(errorMessage);
   }
