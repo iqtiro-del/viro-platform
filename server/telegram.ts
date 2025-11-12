@@ -68,19 +68,21 @@ export async function sendDepositScreenshotToTelegram(
     let errorMessage = `Telegram API returned status ${response.status}`;
     try {
       const errorText = await response.text();
+      console.error('[Telegram] Error response text:', errorText);
       if (errorText) {
         try {
           const errorJson = JSON.parse(errorText);
-          console.error('Telegram API Error:', errorJson);
+          console.error('[Telegram] Error JSON:', errorJson);
           errorMessage = `Telegram error: ${errorJson.description || JSON.stringify(errorJson)}`;
-        } catch {
-          console.error('Telegram API Error (raw):', errorText);
-          errorMessage = `Telegram error: ${errorText}`;
+        } catch (parseError) {
+          console.error('[Telegram] Could not parse error JSON:', parseError);
+          errorMessage = `Telegram error (raw): ${errorText}`;
         }
       }
-    } catch (e) {
-      console.error('Could not read Telegram error response:', e);
+    } catch (readError) {
+      console.error('[Telegram] Could not read error response:', readError);
     }
+    console.error('[Telegram] Final error message:', errorMessage);
     throw new Error(errorMessage);
   }
 
