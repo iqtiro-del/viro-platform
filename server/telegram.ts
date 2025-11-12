@@ -38,12 +38,39 @@ export async function sendDepositScreenshotToTelegram(
 
   const response = await fetch(url, {
     method: 'POST',
-    body: formData,
-    headers: formData.getHeaders()
+    body: formData as any,
+    headers: formData.getHeaders() as any
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(`Failed to send to Telegram: ${JSON.stringify(error)}`);
+    let errorMessage = `Telegram API returned status ${response.status}`;
+    try {
+      const errorText = await response.text();
+      if (errorText) {
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = `Failed to send to Telegram: ${JSON.stringify(errorJson)}`;
+        } catch {
+          errorMessage = `Failed to send to Telegram: ${errorText}`;
+        }
+      }
+    } catch (e) {
+      // Could not read response body
+    }
+    throw new Error(errorMessage);
+  }
+
+  // Validate successful response
+  try {
+    const result = await response.json();
+    if (!result.ok) {
+      throw new Error(`Telegram API error: ${result.description || 'Unknown error'}`);
+    }
+  } catch (e: any) {
+    // If we can't parse the response, but status was OK, consider it successful
+    if (e.message.includes('Telegram API error')) {
+      throw e;
+    }
+    // Otherwise, ignore JSON parse errors for successful responses
   }
 }
