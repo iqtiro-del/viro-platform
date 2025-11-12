@@ -294,14 +294,14 @@ export function WalletPage() {
                       {t("wallet.deposit")}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="glass-morphism-strong border-border/50">
-                    <DialogHeader>
+                  <DialogContent className="glass-morphism-strong border-border/50 max-h-[90vh] flex flex-col">
+                    <DialogHeader className="flex-shrink-0">
                       <DialogTitle>{t("wallet.depositFunds")}</DialogTitle>
                       <DialogDescription>
                         {t("wallet.depositDescription")}
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-4 pt-4">
+                    <div className="space-y-4 pt-4 overflow-y-auto flex-1 px-1">
                       <div>
                         <Label htmlFor="deposit-amount">{t("wallet.amount")}</Label>
                         <Input 
@@ -464,14 +464,14 @@ export function WalletPage() {
                       {t("wallet.withdraw")}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="glass-morphism-strong border-border/50">
-                    <DialogHeader>
+                  <DialogContent className="glass-morphism-strong border-border/50 max-h-[90vh] flex flex-col">
+                    <DialogHeader className="flex-shrink-0">
                       <DialogTitle>{t("wallet.withdrawFunds")}</DialogTitle>
                       <DialogDescription>
                         {t("wallet.withdrawDescription")}
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-4 pt-4">
+                    <div className="space-y-4 pt-4 overflow-y-auto flex-1 px-1">
                       <div>
                         <Label htmlFor="withdraw-amount">{t("wallet.amount")}</Label>
                         <Input 
