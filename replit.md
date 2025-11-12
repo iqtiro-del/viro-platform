@@ -27,6 +27,14 @@ The platform uses Neon serverless PostgreSQL with Drizzle ORM for type-safe quer
     - **Chat System**: Automatic buyer-seller chat on purchase with a 72-hour active window, permanent record-keeping for dispute resolution (never deleted), status-based lifecycle (active → closed/resolved), and escrow payment integration with a 10-hour delay for buyer closures.
     - **Discount Pricing**: Supports optional `oldPrice` for displaying discounted services with visual cues (strikethrough, prominent new price).
     - **Withdrawal Validation**: Bank account number validation (digits-only, length 6-34) with masking for security.
+    - **Deposit Screenshot Upload**: Users must upload a screenshot of their transfer receipt when making deposits. Screenshots are automatically sent to a configured Telegram bot for admin verification instead of being stored on the server. Implementation details:
+      - **Frontend**: File upload field appears in deposit dialog when payment method is selected (accepts image/*)
+      - **Backend**: Multer middleware with memory storage (no disk writes) handles file upload at `/api/wallet/deposit`
+      - **Telegram Integration**: `server/telegram.ts` service sends screenshot to Telegram bot using `BOT_TOKEN` and `CHAT_ID` environment variables
+      - **Message Format**: Telegram message includes: uploaded screenshot, username, timestamp (Baghdad timezone), deposit amount, and payment method
+      - **Validation**: Deposit request fails if screenshot is not uploaded or if Telegram send fails
+      - **Storage**: Images are never stored on server - sent directly to Telegram from memory buffer
+      - **Dependencies**: Uses `form-data` package for multipart uploads to Telegram API
     - **Seller Profile Page**: Dedicated public page displaying seller information and their active products.
     - **Dashboard**: Professional neon-styled stats cards with distinct color schemes and hover effects. Statistics are fully automatic and calculated from real database data:
       - **Verified Sellers**: Auto-counts users with `isVerified = true`
