@@ -13,6 +13,7 @@ import {
 } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import { encryptCredentials, decryptCredentials, encrypt, decrypt } from "./crypto";
+import { sendDepositScreenshotToTelegram } from "./telegram";
 import multer from "multer";
 
 // Configure multer for memory storage (no file saved to disk)
@@ -413,7 +414,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/wallet/deposit", async (req, res) => {
+  app.post("/api/wallet/deposit", upload.single('screenshot'), async (req, res) => {
     try {
       const { userId, amount, paymentMethod, payerReference } = req.body;
       const user = await storage.getUser(userId);
@@ -425,6 +426,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const depositAmount = parseFloat(amount);
       if (depositAmount <= 0) {
         return res.status(400).json({ error: "Amount must be greater than 0" });
+      }
+
+      // Validate that screenshot was uploaded
+      if (!req.file) {
+        return res.status(400).json({ error: "Deposit screenshot is required" });
       }
 
       // Validate payerReference for Zain Cash and Rafidain Services
@@ -467,6 +473,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Encrypt validated reference
         encryptedPayerReference = encrypt(reference);
+      }
+
+      // Send screenshot to Telegram bot before creating transaction
+      try {
+        const timestamp = new Date().toLocaleString('ar-IQ', {
+          timeZone: 'Asia/Baghdad',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+
+        await sendDepositScreenshotToTelegram(
+          req.file.buffer,
+          req.file.originalname,
+          {
+            username: user.username,
+            timestamp,
+            amount: depositAmount.toFixed(2),
+            paymentMethod
+          }
+        );
+      } catch (telegramError: any) {
+        console.error('Failed to send screenshot to Telegram:', telegramError);
+        return res.status(500).json({ 
+          error: 'Failed to send deposit screenshot. Please try again.' 
+        });
       }
 
       // Apply 10% fee on deposit (user receives 90% of deposited amount)
