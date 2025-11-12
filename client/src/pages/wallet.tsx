@@ -43,6 +43,7 @@ export function WalletPage() {
   const [depositAmount, setDepositAmount] = useState("");
   const [depositMethod, setDepositMethod] = useState("");
   const [userPaymentNumber, setUserPaymentNumber] = useState(""); // User's wallet/account number for deposit
+  const [depositScreenshot, setDepositScreenshot] = useState<File | null>(null);
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawMethod, setWithdrawMethod] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
@@ -89,12 +90,27 @@ export function WalletPage() {
 
   const depositMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('POST', '/api/wallet/deposit', {
-        userId: user?.id,
-        amount: depositAmount,
-        paymentMethod: depositMethod,
-        payerReference: userPaymentNumber || undefined
+      const formData = new FormData();
+      formData.append('userId', user?.id?.toString() || '');
+      formData.append('amount', depositAmount);
+      formData.append('paymentMethod', depositMethod);
+      if (userPaymentNumber) {
+        formData.append('payerReference', userPaymentNumber);
+      }
+      if (depositScreenshot) {
+        formData.append('screenshot', depositScreenshot);
+      }
+      
+      const response = await fetch('/api/wallet/deposit', {
+        method: 'POST',
+        body: formData
       });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to submit deposit');
+      }
+      
       return response.json();
     },
     onSuccess: async (data) => {
@@ -121,6 +137,7 @@ export function WalletPage() {
       setDepositAmount("");
       setDepositMethod("");
       setUserPaymentNumber("");
+      setDepositScreenshot(null);
       setDepositDialogOpen(false);
     },
     onError: (error: any) => {
@@ -374,6 +391,37 @@ export function WalletPage() {
                           </div>
                         </div>
                       )}
+                      
+                      {/* Screenshot upload field - shown for all payment methods */}
+                      {depositMethod && (
+                        <div>
+                          <Label htmlFor="deposit-screenshot">
+                            رفع صورة الإيصال <span className="text-destructive">*</span>
+                          </Label>
+                          <Input 
+                            id="deposit-screenshot"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setDepositScreenshot(file);
+                              }
+                            }}
+                            className="glass-morphism border-border/50 mt-2"
+                            data-testid="input-deposit-screenshot"
+                          />
+                          {depositScreenshot && (
+                            <p className="text-xs text-green-500 mt-1">
+                              ✓ تم اختيار الصورة: {depositScreenshot.name}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            يرجى رفع صورة واضحة لإيصال التحويل
+                          </p>
+                        </div>
+                      )}
+                      
                       {depositAmount && parseFloat(depositAmount) > 0 && (
                         <div className="p-4 bg-primary/5 border border-primary/20 rounded-md space-y-2" data-testid="breakdown-deposit-fee">
                           <div className="flex justify-between text-sm">
@@ -398,6 +446,7 @@ export function WalletPage() {
                         disabled={
                           !depositAmount || 
                           !depositMethod || 
+                          !depositScreenshot ||
                           depositMutation.isPending ||
                           ((depositMethod === "Zain Cash" || depositMethod === "Al-Rafidain QiServices") && !userPaymentNumber)
                         }
