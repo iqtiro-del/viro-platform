@@ -257,6 +257,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const data = insertProductSchema.parse(req.body);
       
+      // Check if seller is verified
+      const seller = await storage.getUser(data.sellerId);
+      if (!seller) {
+        return res.status(404).json({ error: "Seller not found" });
+      }
+      
+      if (!seller.isVerified) {
+        return res.status(403).json({ 
+          error: "Only verified sellers can publish services. Please apply for verification first.",
+          requiresVerification: true
+        });
+      }
+      
       // Encrypt credentials before storing
       const encryptedCredentials = encryptCredentials({
         accountUsername: data.accountUsername,

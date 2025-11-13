@@ -17,7 +17,9 @@ import {
   ShoppingBag,
   Eye,
   DollarSign,
-  Package
+  Package,
+  ShieldCheck,
+  AlertCircle
 } from "lucide-react";
 
 import { getProductImage } from "@/lib/category-images";
@@ -47,6 +49,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Link } from "wouter";
 import {
   Form,
   FormControl,
@@ -460,26 +464,52 @@ export function MyProductsPage() {
             <p className="text-muted-foreground">{t("myProducts.subtitle")}</p>
           </div>
 
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="neon-glow-primary" data-testid="button-add-product">
-                <Plus className="w-4 h-4 mr-2" />
-                {t("myProducts.addNewService")}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="glass-morphism-strong border-border/50 max-w-lg max-h-[90vh] p-0">
-              <DialogHeader className="px-6 pt-6 pb-2">
-                <DialogTitle>{t("myProducts.addNewService")}</DialogTitle>
-                <DialogDescription>
-                  {t("myProducts.createService")}
-                </DialogDescription>
-              </DialogHeader>
-              <ScrollArea className="max-h-[calc(90vh-120px)] px-6 pb-6">
-                <ProductForm onClose={() => setIsAddDialogOpen(false)} />
-              </ScrollArea>
-            </DialogContent>
-          </Dialog>
+          {user?.isVerified ? (
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="neon-glow-primary" data-testid="button-add-product">
+                  <Plus className="w-4 h-4 mr-2" />
+                  {t("myProducts.addNewService")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="glass-morphism-strong border-border/50 max-w-lg max-h-[90vh] p-0">
+                <DialogHeader className="px-6 pt-6 pb-2">
+                  <DialogTitle>{t("myProducts.addNewService")}</DialogTitle>
+                  <DialogDescription>
+                    {t("myProducts.createService")}
+                  </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="max-h-[calc(90vh-120px)] px-6 pb-6">
+                  <ProductForm onClose={() => setIsAddDialogOpen(false)} />
+                </ScrollArea>
+              </DialogContent>
+            </Dialog>
+          ) : null}
         </div>
+
+        {/* Verification Required Alert */}
+        {!user?.isVerified && (
+          <Alert className="glass-morphism border-primary/30 mb-8" data-testid="alert-verification-required">
+            <AlertCircle className="h-5 w-5 text-primary" />
+            <AlertTitle className="text-xl mb-2 flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5" />
+              {t("myProducts.verificationRequired")}
+            </AlertTitle>
+            <AlertDescription className="space-y-4">
+              <p className="text-muted-foreground">
+                {t("myProducts.verificationMessage")}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link href="/profile">
+                  <Button className="neon-glow-primary w-full sm:w-auto" data-testid="button-start-verification">
+                    <ShieldCheck className="w-4 h-4 mr-2" />
+                    {t("myProducts.applyForVerification")}
+                  </Button>
+                </Link>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

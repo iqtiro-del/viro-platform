@@ -250,6 +250,9 @@ const translations = {
     "myProducts.createSuccess": "Service created successfully",
     "myProducts.updateSuccess": "Service updated successfully",
     "myProducts.deleteSuccess": "Service deleted successfully",
+    "myProducts.verificationRequired": "Verification Required",
+    "myProducts.verificationMessage": "Only verified sellers can publish services on Tiro. Please apply for account verification to start selling your services.",
+    "myProducts.applyForVerification": "Apply for Verification",
     
     // Promote
     "promote.title": "Promote Your Services",
@@ -591,6 +594,9 @@ const translations = {
     "myProducts.createSuccess": "تم إنشاء الخدمة بنجاح",
     "myProducts.updateSuccess": "تم تحديث الخدمة بنجاح",
     "myProducts.deleteSuccess": "تم حذف الخدمة بنجاح",
+    "myProducts.verificationRequired": "التوثيق مطلوب",
+    "myProducts.verificationMessage": "يمكن فقط للبائعين الموثقين نشر الخدمات على تيرو. يرجى التقدم بطلب توثيق الحساب للبدء في بيع خدماتك.",
+    "myProducts.applyForVerification": "التقدم للحصول على التوثيق",
     
     // Promote
     "promote.title": "روّج لخدماتك",
