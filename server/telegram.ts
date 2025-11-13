@@ -17,6 +17,15 @@ export async function sendDepositScreenshotToTelegram(
   const botToken = (process.env.DEPOSIT_BOT_TOKEN || process.env.BOT_TOKEN)?.trim();
   const chatId = (process.env.DEPOSIT_CHAT_ID || process.env.CHAT_ID)?.trim();
 
+  console.log('[Telegram] Credentials check:', {
+    hasDepositBotToken: !!process.env.DEPOSIT_BOT_TOKEN,
+    hasFallbackBotToken: !!process.env.BOT_TOKEN,
+    hasDepositChatId: !!process.env.DEPOSIT_CHAT_ID,
+    hasFallbackChatId: !!process.env.CHAT_ID,
+    usingBotTokenPrefix: botToken?.substring(0, 10) + '...',
+    usingChatId: chatId
+  });
+
   if (!botToken || !chatId) {
     throw new Error('Telegram deposit bot configuration missing (DEPOSIT_BOT_TOKEN and DEPOSIT_CHAT_ID)');
   }
