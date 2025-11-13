@@ -30,11 +30,13 @@ The platform uses Neon serverless PostgreSQL with Drizzle ORM for type-safe quer
     - **Deposit Screenshot Upload**: Users must upload a screenshot of their transfer receipt when making deposits. Screenshots are automatically sent to a configured Telegram bot for admin verification instead of being stored on the server. Implementation details:
       - **Frontend**: File upload field appears in deposit dialog when payment method is selected (accepts image/*)
       - **Backend**: Multer middleware with memory storage (no disk writes) handles file upload at `/api/wallet/deposit`
-      - **Telegram Integration**: `server/telegram.ts` service sends screenshot to Telegram bot using `BOT_TOKEN` and `CHAT_ID` environment variables
+      - **Telegram Integration**: `server/telegram.ts` service sends screenshot to separate deposit bot using `DEPOSIT_BOT_TOKEN` (8576099373:AAHucNqZT8UmTf_xTgcxCRfgouRAKiFFwpw) and `DEPOSIT_CHAT_ID` (7881556499) environment variables
+      - **Separate Bots**: Deposit screenshots use dedicated deposit bot; account verification uses original verification bot (`BOT_TOKEN` and `CHAT_ID`)
       - **Message Format**: Telegram message includes: uploaded screenshot, username, timestamp (Baghdad timezone), deposit amount, and payment method
       - **Validation**: Deposit request fails if screenshot is not uploaded or if Telegram send fails
       - **Storage**: Images are never stored on server - sent directly to Telegram from memory buffer
       - **Dependencies**: Uses `form-data` package for multipart uploads to Telegram API
+      - **Status**: Fully functional and tested with real images (verified Nov 13, 2025)
     - **Seller Profile Page**: Dedicated public page displaying seller information and their active products.
     - **Dashboard**: Professional neon-styled stats cards with distinct color schemes and hover effects. Statistics are fully automatic and calculated from real database data:
       - **Verified Sellers**: Auto-counts users with `isVerified = true`
