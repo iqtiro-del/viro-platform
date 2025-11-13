@@ -17,17 +17,24 @@ export async function sendDepositScreenshotToTelegram(
   const botToken = (process.env.DEPOSIT_BOT_TOKEN || process.env.BOT_TOKEN)?.trim();
   const chatId = (process.env.DEPOSIT_CHAT_ID || process.env.CHAT_ID)?.trim();
 
-  console.log('[Telegram] Credentials check:', {
-    hasDepositBotToken: !!process.env.DEPOSIT_BOT_TOKEN,
-    hasFallbackBotToken: !!process.env.BOT_TOKEN,
-    hasDepositChatId: !!process.env.DEPOSIT_CHAT_ID,
-    hasFallbackChatId: !!process.env.CHAT_ID,
-    usingBotTokenPrefix: botToken?.substring(0, 10) + '...',
-    usingChatId: chatId
+  console.log('[Telegram] Raw env values:', {
+    DEPOSIT_BOT_TOKEN_length: process.env.DEPOSIT_BOT_TOKEN?.length,
+    DEPOSIT_BOT_TOKEN_first50: process.env.DEPOSIT_BOT_TOKEN?.substring(0, 50),
+    DEPOSIT_CHAT_ID: process.env.DEPOSIT_CHAT_ID,
+    BOT_TOKEN_length: process.env.BOT_TOKEN?.length,
+    BOT_TOKEN_first50: process.env.BOT_TOKEN?.substring(0, 50),
   });
 
   if (!botToken || !chatId) {
     throw new Error('Telegram deposit bot configuration missing (DEPOSIT_BOT_TOKEN and DEPOSIT_CHAT_ID)');
+  }
+
+  // Validate bot token format (should start with numbers:)
+  const validTokenPattern = /^\d+:[A-Za-z0-9_-]+$/;
+  if (!validTokenPattern.test(botToken)) {
+    console.error('[Telegram] Invalid bot token format! Token should start with numbers followed by colon and alphanumeric characters.');
+    console.error('[Telegram] Current token starts with:', botToken.substring(0, 50));
+    throw new Error('Invalid Telegram bot token format. Please check DEPOSIT_BOT_TOKEN secret.');
   }
 
   // Detect content type from filename
