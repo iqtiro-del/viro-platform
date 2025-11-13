@@ -14,8 +14,8 @@ export async function sendDepositScreenshotToTelegram(
   data: TelegramMessageData
 ): Promise<void> {
   // Use separate bot credentials for deposits (not verification)
-  const botToken = process.env.DEPOSIT_BOT_TOKEN || process.env.BOT_TOKEN;
-  const chatId = process.env.DEPOSIT_CHAT_ID || process.env.CHAT_ID;
+  const botToken = (process.env.DEPOSIT_BOT_TOKEN || process.env.BOT_TOKEN)?.trim();
+  const chatId = (process.env.DEPOSIT_CHAT_ID || process.env.CHAT_ID)?.trim();
 
   if (!botToken || !chatId) {
     throw new Error('Telegram deposit bot configuration missing (DEPOSIT_BOT_TOKEN and DEPOSIT_CHAT_ID)');
