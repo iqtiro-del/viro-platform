@@ -94,6 +94,7 @@ const translations = {
     "services.cancel": "Cancel",
     "services.confirm": "Confirm Purchase",
     "services.processing": "Processing...",
+    "services.insufficientBalance": "Your balance is insufficient to complete this purchase. Please deposit more funds to your wallet.",
     "services.accountCredentials": "Account Credentials",
     "services.credentialsDelivered": "Your account credentials have been delivered",
     "services.saveCredentials": "Please save these credentials securely",
@@ -115,6 +116,7 @@ const translations = {
     "services.discount": "Save",
     "services.purchasing": "Processing...",
     "services.loginRequired": "Please login to purchase this service",
+    "services.loginRequiredDescription": "You must be logged in to purchase services",
     "services.inactive": "Inactive",
     "services.purchaseSuccess.description": "Check your chats to communicate with the seller",
     
@@ -460,6 +462,7 @@ const translations = {
     "services.discount": "وفر",
     "services.purchasing": "جاري المعالجة...",
     "services.loginRequired": "يرجى تسجيل الدخول لشراء هذه الخدمة",
+    "services.loginRequiredDescription": "يجب تسجيل الدخول لشراء الخدمات",
     "services.inactive": "غير نشط",
     "services.purchaseSuccess.description": "تحقق من المحادثات للتواصل مع البائع",
     
