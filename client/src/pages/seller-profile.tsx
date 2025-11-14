@@ -323,59 +323,75 @@ export function SellerProfilePage() {
             </DialogDescription>
           </DialogHeader>
           
-          {selectedProduct && data && (
-            <div className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t("services.service")}:</span>
-                  <span className="font-medium">{selectedProduct.title}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t("services.seller")}:</span>
-                  <span className="font-medium">{data.seller.username}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t("services.price")}:</span>
-                  <div className="flex flex-col items-end gap-1">
-                    {selectedProduct.oldPrice && parseFloat(selectedProduct.oldPrice) > 0 && (
-                      <span className="text-sm text-red-500 line-through">${selectedProduct.oldPrice}</span>
-                    )}
-                    <span className="font-bold text-primary">${selectedProduct.price}</span>
+          {selectedProduct && data && (() => {
+            const userBalance = parseFloat(user?.balance || "0");
+            const productPrice = parseFloat(selectedProduct.price);
+            const balanceAfter = userBalance - productPrice;
+            const hasInsufficientBalance = balanceAfter < 0;
+
+            return (
+              <div className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t("services.service")}:</span>
+                    <span className="font-medium">{selectedProduct.title}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t("services.seller")}:</span>
+                    <span className="font-medium">{data.seller.username}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t("services.price")}:</span>
+                    <div className="flex flex-col items-end gap-1">
+                      {selectedProduct.oldPrice && parseFloat(selectedProduct.oldPrice) > 0 && (
+                        <span className="text-sm text-red-500 line-through">${selectedProduct.oldPrice}</span>
+                      )}
+                      <span className="font-bold text-primary">${selectedProduct.price}</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t("services.yourBalance")}:</span>
+                    <span className="font-medium">${user?.balance}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t border-border/50">
+                    <span className="text-muted-foreground">{t("services.balanceAfter")}:</span>
+                    <span className={`font-bold ${hasInsufficientBalance ? 'text-red-500' : ''}`}>
+                      ${balanceAfter.toFixed(2)}
+                    </span>
                   </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t("services.yourBalance")}:</span>
-                  <span className="font-medium">${user?.balance}</span>
-                </div>
-                <div className="flex justify-between pt-2 border-t border-border/50">
-                  <span className="text-muted-foreground">{t("services.balanceAfter")}:</span>
-                  <span className="font-bold">
-                    ${(parseFloat(user?.balance || "0") - parseFloat(selectedProduct.price)).toFixed(2)}
-                  </span>
-                </div>
-              </div>
 
-              <div className="flex gap-3">
-                <Button 
-                  variant="outline" 
-                  className="flex-1 border-border/50" 
-                  onClick={() => setPurchaseDialogOpen(false)}
-                  disabled={purchaseMutation.isPending}
-                  data-testid="button-cancel-purchase"
-                >
-                  {t("services.cancel")}
-                </Button>
-                <Button 
-                  className="flex-1 neon-glow-primary" 
-                  onClick={() => purchaseMutation.mutate(selectedProduct.id)}
-                  disabled={purchaseMutation.isPending}
-                  data-testid="button-confirm-purchase"
-                >
-                  {purchaseMutation.isPending ? t("services.processing") : t("services.confirm")}
-                </Button>
+                {hasInsufficientBalance && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                    <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-red-500">
+                      {t("services.insufficientBalance")}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 border-border/50" 
+                    onClick={() => setPurchaseDialogOpen(false)}
+                    disabled={purchaseMutation.isPending}
+                    data-testid="button-cancel-purchase"
+                  >
+                    {t("services.cancel")}
+                  </Button>
+                  <Button 
+                    className="flex-1 neon-glow-primary" 
+                    onClick={() => purchaseMutation.mutate(selectedProduct.id)}
+                    disabled={purchaseMutation.isPending || hasInsufficientBalance}
+                    data-testid="button-confirm-purchase"
+                  >
+                    {purchaseMutation.isPending ? t("services.processing") : t("services.confirm")}
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </DialogContent>
       </Dialog>
 

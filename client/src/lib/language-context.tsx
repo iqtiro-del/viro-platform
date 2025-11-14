@@ -438,6 +438,7 @@ const translations = {
     "services.cancel": "إلغاء",
     "services.confirm": "تأكيد الشراء",
     "services.processing": "جاري المعالجة...",
+    "services.insufficientBalance": "رصيدك غير كافٍ لإتمام هذا الشراء. يرجى إيداع المزيد من الأموال في محفظتك.",
     "services.accountCredentials": "بيانات الحساب",
     "services.credentialsDelivered": "تم تسليم بيانات الحساب",
     "services.saveCredentials": "يرجى حفظ هذه البيانات بشكل آمن",
