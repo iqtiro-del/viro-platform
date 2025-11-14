@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,14 +9,25 @@ import {
   ArrowLeft,
   Star, 
   ShoppingBag,
-  CheckCircle2
+  CheckCircle2,
+  MessageCircle
 } from "lucide-react";
-import type { ProductWithSeller, User } from "@shared/schema";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import type { ProductWithSeller, User, Chat } from "@shared/schema";
 import { getUserAvatar } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
 import { getProductImage } from "@/lib/category-images";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
+import { ChatDialog } from "@/components/chat-dialog";
 
 interface SellerProfileData {
   seller: User;
