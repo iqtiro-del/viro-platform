@@ -323,7 +323,7 @@ export function SellerProfilePage() {
             </DialogDescription>
           </DialogHeader>
           
-          {selectedProduct && (
+          {selectedProduct && data && (
             <div className="space-y-4 pt-4">
               <div className="space-y-2">
                 <div className="flex justify-between">
@@ -332,7 +332,7 @@ export function SellerProfilePage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("services.seller")}:</span>
-                  <span className="font-medium">{selectedProduct.seller.username}</span>
+                  <span className="font-medium">{data.seller.username}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("services.price")}:</span>
