@@ -10,7 +10,8 @@ import {
   Star, 
   ShoppingBag,
   CheckCircle2,
-  MessageCircle
+  MessageCircle,
+  AlertCircle
 } from "lucide-react";
 import {
   Dialog,
@@ -36,14 +37,72 @@ interface SellerProfileData {
 
 export function SellerProfilePage() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const { t } = useLanguage();
+  const { toast } = useToast();
+  
   const [selectedProduct, setSelectedProduct] = useState<ProductWithSeller | null>(null);
+  const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+  const [credentialsDialogOpen, setCredentialsDialogOpen] = useState(false);
+  const [purchasedProductData, setPurchasedProductData] = useState<any>(null);
+  const [chatDialogOpen, setChatDialogOpen] = useState(false);
+  const [purchasedChat, setPurchasedChat] = useState<Chat | null>(null);
 
   const { data, isLoading } = useQuery<SellerProfileData>({ 
     queryKey: [`/api/sellers/${id}`],
     enabled: !!id
   });
+
+  const purchaseMutation = useMutation({
+    mutationFn: async (productId: string) => {
+      const response = await fetch(`/api/products/${productId}/purchase`, {
+        method: "POST",
+        body: JSON.stringify({ buyerId: user?.id }),
+        headers: { "Content-Type": "application/json" }
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || t("services.purchaseError"));
+      }
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      setUser(data.buyer);
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/transactions', user?.id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/sellers/${id}`] });
+      
+      setPurchaseDialogOpen(false);
+      
+      // Show product details dialog after purchase
+      setPurchasedProductData(data.product);
+      setPurchasedChat(data.chat);
+      setCredentialsDialogOpen(true);
+      
+      setSelectedProduct(null);
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: t("services.purchaseFailed"),
+        description: error.message || t("services.purchaseError"),
+      });
+    }
+  });
+
+  const handleBuyNow = (product: ProductWithSeller) => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: t("services.loginRequired"),
+        description: t("services.loginRequiredDescription"),
+      });
+      return;
+    }
+    setSelectedProduct(product);
+    setPurchaseDialogOpen(true);
+  };
 
   if (isLoading) {
     return (
@@ -239,21 +298,204 @@ export function SellerProfilePage() {
                     </div>
                   </div>
 
-                  <Link href="/services">
-                    <Button 
-                      className="w-full neon-glow-secondary" 
-                      size="sm"
-                      data-testid={`button-view-${product.id}`}
-                    >
-                      عرض الخدمة
-                    </Button>
-                  </Link>
+                  <Button 
+                    className="w-full neon-glow-secondary" 
+                    size="sm"
+                    onClick={() => handleBuyNow(product)}
+                    data-testid={`button-view-${product.id}`}
+                  >
+                    عرض الخدمة
+                  </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
       </div>
+
+      {/* Purchase Confirmation Dialog */}
+      <Dialog open={purchaseDialogOpen} onOpenChange={setPurchaseDialogOpen}>
+        <DialogContent className="glass-morphism-strong border-border/50">
+          <DialogHeader>
+            <DialogTitle>{t("services.confirmPurchase")}</DialogTitle>
+            <DialogDescription>
+              {t("services.reviewDetails")}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedProduct && (
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("services.service")}:</span>
+                  <span className="font-medium">{selectedProduct.title}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("services.seller")}:</span>
+                  <span className="font-medium">{selectedProduct.seller.username}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("services.price")}:</span>
+                  <div className="flex flex-col items-end gap-1">
+                    {selectedProduct.oldPrice && parseFloat(selectedProduct.oldPrice) > 0 && (
+                      <span className="text-sm text-red-500 line-through">${selectedProduct.oldPrice}</span>
+                    )}
+                    <span className="font-bold text-primary">${selectedProduct.price}</span>
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("services.yourBalance")}:</span>
+                  <span className="font-medium">${user?.balance}</span>
+                </div>
+                <div className="flex justify-between pt-2 border-t border-border/50">
+                  <span className="text-muted-foreground">{t("services.balanceAfter")}:</span>
+                  <span className="font-bold">
+                    ${(parseFloat(user?.balance || "0") - parseFloat(selectedProduct.price)).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline" 
+                  className="flex-1 border-border/50" 
+                  onClick={() => setPurchaseDialogOpen(false)}
+                  disabled={purchaseMutation.isPending}
+                  data-testid="button-cancel-purchase"
+                >
+                  {t("services.cancel")}
+                </Button>
+                <Button 
+                  className="flex-1 neon-glow-primary" 
+                  onClick={() => purchaseMutation.mutate(selectedProduct.id)}
+                  disabled={purchaseMutation.isPending}
+                  data-testid="button-confirm-purchase"
+                >
+                  {purchaseMutation.isPending ? t("services.processing") : t("services.confirm")}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Product Details Dialog - Shows after purchase */}
+      <Dialog open={credentialsDialogOpen} onOpenChange={setCredentialsDialogOpen}>
+        <DialogContent className="glass-morphism-strong border-border/50 max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{t("services.purchaseSuccess")}</DialogTitle>
+            <DialogDescription>
+              {t("services.saveCredentials")}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {purchasedProductData && (
+            <div className="space-y-6 pt-4">
+              {/* Product Information */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg text-foreground">{purchasedProductData.title}</h3>
+                <p className="text-sm text-muted-foreground">{purchasedProductData.description}</p>
+                <div className="flex gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">{t("services.category")}: </span>
+                    <span className="font-medium text-foreground">{purchasedProductData.category}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t("services.price")}: </span>
+                    <span className="font-bold text-primary">${purchasedProductData.price}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Product Details/Credentials - Only show if at least one field has a value */}
+              {purchasedProductData.credentials && (
+                purchasedProductData.credentials.accountUsername || 
+                purchasedProductData.credentials.accountPassword || 
+                purchasedProductData.credentials.accountEmail || 
+                purchasedProductData.credentials.accountEmailPassword
+              ) && (
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-foreground">{t("services.accountCredentials")}</h4>
+                  <div className="p-4 bg-primary/10 border border-primary/30 rounded-md space-y-3">
+                    <div className="space-y-2">
+                      {purchasedProductData.credentials.accountUsername && (
+                        <div className="flex justify-between items-center gap-4">
+                          <span className="text-sm text-muted-foreground">{t("myProducts.accountUsername")}:</span>
+                          <span className="font-medium text-foreground break-all text-right">{purchasedProductData.credentials.accountUsername}</span>
+                        </div>
+                      )}
+                      {purchasedProductData.credentials.accountPassword && (
+                        <div className="flex justify-between items-center gap-4">
+                          <span className="text-sm text-muted-foreground">{t("myProducts.accountPassword")}:</span>
+                          <span className="font-medium text-foreground break-all text-right">{purchasedProductData.credentials.accountPassword}</span>
+                        </div>
+                      )}
+                      {purchasedProductData.credentials.accountEmail && (
+                        <div className="flex justify-between items-center gap-4">
+                          <span className="text-sm text-muted-foreground">{t("myProducts.accountEmail")}:</span>
+                          <span className="font-medium text-foreground break-all text-right">{purchasedProductData.credentials.accountEmail}</span>
+                        </div>
+                      )}
+                      {purchasedProductData.credentials.accountEmailPassword && (
+                        <div className="flex justify-between items-center gap-4">
+                          <span className="text-sm text-muted-foreground">{t("myProducts.accountEmailPassword")}:</span>
+                          <span className="font-medium text-foreground break-all text-right">{purchasedProductData.credentials.accountEmailPassword}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-yellow-500 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    {t("services.saveCredentials")}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline"
+                  className="flex-1" 
+                  onClick={() => {
+                    setCredentialsDialogOpen(false);
+                    setPurchasedProductData(null);
+                    setPurchasedChat(null);
+                    toast({
+                      title: t("services.purchaseSuccess"),
+                      description: t("services.credentialsDelivered"),
+                    });
+                  }}
+                  data-testid="button-close-credentials"
+                >
+                  {t("common.close")}
+                </Button>
+                {purchasedChat && (
+                  <Button 
+                    className="flex-1 neon-glow-primary gap-2" 
+                    onClick={() => {
+                      setCredentialsDialogOpen(false);
+                      setChatDialogOpen(true);
+                    }}
+                    data-testid="button-open-chat"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    محادثة البائع
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Chat Dialog */}
+      {purchasedChat && user && (
+        <ChatDialog
+          open={chatDialogOpen}
+          onOpenChange={setChatDialogOpen}
+          chatId={purchasedChat.id}
+          currentUser={user}
+        />
+      )}
     </div>
   );
 }
