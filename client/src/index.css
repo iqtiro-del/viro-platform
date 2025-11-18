@@ -561,6 +561,44 @@
     .glass-morphism-strong {
       margin-bottom: 1rem;
     }
+
+    /* Mobile scrollbar - visible and smooth */
+    /* Webkit browsers (Chrome, Safari, Edge) */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: hsl(var(--background));
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: hsl(var(--primary) / 0.4);
+      border-radius: 4px;
+      transition: background 0.2s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: hsl(var(--primary) / 0.6);
+    }
+
+    ::-webkit-scrollbar-thumb:active {
+      background: hsl(var(--primary) / 0.8);
+    }
+
+    /* Firefox */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: hsl(var(--primary) / 0.4) hsl(var(--background));
+    }
+
+    /* Ensure body and html can scroll */
+    html, body {
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
   }
 
   /* Smooth scrolling */
