@@ -269,19 +269,19 @@ export function WalletPage() {
           {/* Current Balance */}
           <Card className="glass-morphism-strong border-primary/30 neon-glow-primary col-span-1 md:col-span-2">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0 flex-1">
                   <CardDescription className="text-muted-foreground">{t("wallet.balance")}</CardDescription>
                   {isLoading ? (
                     <Skeleton className="h-14 w-48 mt-2" data-testid="skeleton-balance" />
                   ) : (
-                    <CardTitle className="text-5xl font-bold mt-2 neon-text-glow-cyan" data-testid="text-wallet-balance">
+                    <CardTitle className="text-3xl md:text-4xl lg:text-5xl font-bold mt-2 neon-text-glow-cyan break-all overflow-hidden" data-testid="text-wallet-balance">
                       ${walletData.balance.toFixed(2)}
                     </CardTitle>
                   )}
                 </div>
-                <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center neon-glow-primary">
-                  <WalletIcon className="w-8 h-8 text-primary" />
+                <div className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0 rounded-full bg-primary/20 flex items-center justify-center neon-glow-primary">
+                  <WalletIcon className="w-6 h-6 md:w-8 md:h-8 text-primary" />
                 </div>
               </div>
             </CardHeader>
@@ -424,18 +424,18 @@ export function WalletPage() {
                       
                       {depositAmount && parseFloat(depositAmount) > 0 && (
                         <div className="p-4 bg-primary/5 border border-primary/20 rounded-md space-y-2" data-testid="breakdown-deposit-fee">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">{t("wallet.depositAmount")}</span>
-                            <span className="font-medium">${parseFloat(depositAmount).toFixed(2)}</span>
+                          <div className="flex justify-between gap-3 text-sm">
+                            <span className="text-muted-foreground flex-shrink-0">{t("wallet.depositAmount")}</span>
+                            <span className="font-medium break-all text-right min-w-0">${parseFloat(depositAmount).toFixed(2)}</span>
                           </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">{t("wallet.processingFee")}</span>
-                            <span className="font-medium text-yellow-500">-${(parseFloat(depositAmount) * 0.10).toFixed(2)}</span>
+                          <div className="flex justify-between gap-3 text-sm">
+                            <span className="text-muted-foreground flex-shrink-0">{t("wallet.processingFee")}</span>
+                            <span className="font-medium text-yellow-500 break-all text-right min-w-0">-${(parseFloat(depositAmount) * 0.10).toFixed(2)}</span>
                           </div>
                           <div className="h-px bg-border/50 my-2"></div>
-                          <div className="flex justify-between">
-                            <span className="font-semibold text-foreground">{t("wallet.youWillReceive")}</span>
-                            <span className="font-bold text-primary text-lg">${(parseFloat(depositAmount) * 0.90).toFixed(2)}</span>
+                          <div className="flex justify-between gap-3">
+                            <span className="font-semibold text-foreground flex-shrink-0">{t("wallet.youWillReceive")}</span>
+                            <span className="font-bold text-primary text-base md:text-lg break-all text-right min-w-0">${(parseFloat(depositAmount) * 0.90).toFixed(2)}</span>
                           </div>
                         </div>
                       )}
@@ -524,18 +524,18 @@ export function WalletPage() {
                       </div>
                       {withdrawAmount && parseFloat(withdrawAmount) > 0 && (
                         <div className="p-4 bg-primary/5 border border-primary/20 rounded-md space-y-2" data-testid="breakdown-withdraw-fee">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">{t("wallet.withdrawalAmount")}</span>
-                            <span className="font-medium">${parseFloat(withdrawAmount).toFixed(2)}</span>
+                          <div className="flex justify-between gap-3 text-sm">
+                            <span className="text-muted-foreground flex-shrink-0">{t("wallet.withdrawalAmount")}</span>
+                            <span className="font-medium break-all text-right min-w-0">${parseFloat(withdrawAmount).toFixed(2)}</span>
                           </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">{t("wallet.processingFee")}</span>
-                            <span className="font-medium text-yellow-500">-${(parseFloat(withdrawAmount) * 0.10).toFixed(2)}</span>
+                          <div className="flex justify-between gap-3 text-sm">
+                            <span className="text-muted-foreground flex-shrink-0">{t("wallet.processingFee")}</span>
+                            <span className="font-medium text-yellow-500 break-all text-right min-w-0">-${(parseFloat(withdrawAmount) * 0.10).toFixed(2)}</span>
                           </div>
                           <div className="h-px bg-border/50 my-2"></div>
-                          <div className="flex justify-between">
-                            <span className="font-semibold text-foreground">{t("wallet.youWillReceive")}</span>
-                            <span className="font-bold text-primary text-lg">${(parseFloat(withdrawAmount) * 0.90).toFixed(2)}</span>
+                          <div className="flex justify-between gap-3">
+                            <span className="font-semibold text-foreground flex-shrink-0">{t("wallet.youWillReceive")}</span>
+                            <span className="font-bold text-primary text-base md:text-lg break-all text-right min-w-0">${(parseFloat(withdrawAmount) * 0.90).toFixed(2)}</span>
                           </div>
                         </div>
                       )}
@@ -561,7 +561,7 @@ export function WalletPage() {
               {isLoading ? (
                 <Skeleton className="h-9 w-36 mt-2" data-testid="skeleton-earnings" />
               ) : (
-                <CardTitle className="text-3xl font-bold" data-testid="text-total-earnings">
+                <CardTitle className="text-2xl md:text-3xl font-bold break-all overflow-hidden" data-testid="text-total-earnings">
                   ${walletData.totalEarnings.toFixed(2)}
                 </CardTitle>
               )}
@@ -631,32 +631,32 @@ export function WalletPage() {
                   return (
                     <div
                       key={transaction.id}
-                      className="flex items-center justify-between p-4 rounded-lg glass-morphism border border-border/30 hover-elevate transition-all"
+                      className="flex items-center justify-between gap-3 p-3 md:p-4 rounded-lg glass-morphism border border-border/30 hover-elevate transition-all"
                       data-testid={`transaction-${transaction.id}`}
                     >
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
+                        <div className={`w-8 h-8 md:w-10 md:h-10 flex-shrink-0 rounded-full flex items-center justify-center ${
                           amount > 0 ? 'bg-green-500/20 neon-glow-success' : 'bg-red-500/20'
                         }`}>
                           {getTransactionIcon(transaction.type)}
                         </div>
                         
-                        <div className="flex-1">
-                          <p className="font-medium text-foreground" data-testid={`text-transaction-description-${transaction.id}`}>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-foreground text-sm md:text-base truncate" data-testid={`text-transaction-description-${transaction.id}`}>
                             {transaction.description || t("wallet.noDescription")}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
-                            <Clock className="w-3 h-3 text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground" data-testid={`text-transaction-date-${transaction.id}`}>
+                            <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                            <p className="text-xs md:text-sm text-muted-foreground truncate" data-testid={`text-transaction-date-${transaction.id}`}>
                               {formattedDate}
                             </p>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4">
+                      <div className="flex flex-col md:flex-row items-end md:items-center gap-2 md:gap-4 flex-shrink-0">
                         {getStatusBadge(transaction.status)}
-                        <p className={`text-lg font-bold ${
+                        <p className={`text-base md:text-lg font-bold break-all text-right ${
                           amount > 0 ? 'text-green-500' : 'text-red-500'
                         }`} data-testid={`text-transaction-amount-${transaction.id}`}>
                           {amount > 0 ? '+' : ''}{amount > 0 ? '$' : '-$'}
