@@ -340,9 +340,32 @@ export function ServicesPage() {
                         <h3 className="font-semibold text-sm line-clamp-1 mb-1">
                           {product.title}
                         </h3>
-                        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
-                          {product.description}
-                        </p>
+                        
+                        {/* Seller Info - Mobile */}
+                        <Link href={`/seller/${product.seller.id}`}>
+                          <button 
+                            className="flex items-center gap-1.5 hover-elevate rounded-md p-0.5 -m-0.5 transition-all mb-1.5"
+                            data-testid={`link-seller-mobile-${product.seller.id}`}
+                          >
+                            <Avatar className="w-4 h-4 border border-primary/30">
+                              <AvatarImage src={getUserAvatar(product.seller.id)} />
+                              <AvatarFallback className="text-[8px] bg-primary/20">
+                                {product.seller.username.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                              {product.seller.username}
+                            </span>
+                            {product.seller.isVerified && (
+                              <div className="w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
+                                <svg className="w-1.5 h-1.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            )}
+                          </button>
+                        </Link>
+                        
                         <div className="flex items-center gap-2">
                           {product.oldPrice && parseFloat(product.oldPrice) > 0 && (
                             <span className="text-xs text-red-500 line-through">
