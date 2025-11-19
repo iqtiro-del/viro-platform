@@ -493,12 +493,58 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
+  async getAllChats(): Promise<ChatWithDetails[]> {
+    const results = await db
+      .select()
+      .from(chats)
+      .leftJoin(products, eq(chats.productId, products.id))
+      .leftJoin(users, eq(chats.buyerId, users.id))
+      .orderBy(desc(chats.createdAt));
+
+    return Promise.all(results.map(async (result) => {
+      const [seller] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, result.chats.sellerId));
+
+      return {
+        ...result.chats,
+        product: result.products!,
+        buyer: result.users!,
+        seller: seller!,
+      };
+    }));
+  }
+
   async getChatByTransaction(transactionId: string): Promise<Chat | undefined> {
     const [chat] = await db
       .select()
       .from(chats)
       .where(eq(chats.transactionId, transactionId));
     return chat || undefined;
+  }
+
+  async getChatByConversationId(conversationId: number): Promise<ChatWithDetails | undefined> {
+    const [result] = await db
+      .select()
+      .from(chats)
+      .leftJoin(products, eq(chats.productId, products.id))
+      .leftJoin(users, eq(chats.buyerId, users.id))
+      .where(eq(chats.conversationId, conversationId));
+    
+    if (!result) return undefined;
+
+    const [seller] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, result.chats.sellerId));
+
+    return {
+      ...result.chats,
+      product: result.products!,
+      buyer: result.users!,
+      seller: seller!,
+    };
   }
 
   async generateUniqueConversationId(): Promise<number> {
@@ -685,6 +731,114 @@ export class DatabaseStorage implements IStorage {
         .update(chats)
         .set({ status: 'under_review' })
         .where(eq(chats.id, chat.id));
+    }
+  }
+
+  async releasePaymentToSeller(chatId: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const chatDetails = await this.getChat(chatId);
+      if (!chatDetails) {
+        return { success: false, error: 'Chat not found' };
+      }
+
+      const transaction = chatDetails.transactionId 
+        ? await db.select().from(transactions).where(eq(transactions.id, chatDetails.transactionId)).then(r => r[0])
+        : undefined;
+
+      if (!transaction) {
+        return { success: false, error: 'No transaction associated with this chat' };
+      }
+
+      const productPrice = parseFloat(transaction.amount);
+      
+      // Payment goes to seller
+      const seller = await this.getUser(chatDetails.sellerId);
+      if (!seller) {
+        return { success: false, error: 'Seller not found' };
+      }
+
+      const sellerBalance = parseFloat(seller.balance);
+      const sellerEarnings = parseFloat(seller.totalEarnings);
+      
+      await this.updateUser(chatDetails.sellerId, {
+        balance: (sellerBalance + productPrice).toFixed(2),
+        totalEarnings: (sellerEarnings + productPrice).toFixed(2)
+      });
+
+      await this.updateTransaction(transaction.id, 'completed');
+
+      await this.createTransaction({
+        userId: chatDetails.sellerId,
+        type: 'sale',
+        amount: transaction.amount,
+        status: 'completed',
+        description: `Sold "${chatDetails.product.title}" (Admin approved)`
+      });
+
+      await db
+        .update(chats)
+        .set({ 
+          status: 'resolved_seller',
+          closedAt: new Date(),
+          closedBy: 'admin'
+        })
+        .where(eq(chats.id, chatId));
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error releasing payment to seller:', error);
+      return { success: false, error: 'Failed to release payment' };
+    }
+  }
+
+  async refundPaymentToBuyer(chatId: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const chatDetails = await this.getChat(chatId);
+      if (!chatDetails) {
+        return { success: false, error: 'Chat not found' };
+      }
+
+      const transaction = chatDetails.transactionId 
+        ? await db.select().from(transactions).where(eq(transactions.id, chatDetails.transactionId)).then(r => r[0])
+        : undefined;
+
+      if (!transaction) {
+        return { success: false, error: 'No transaction associated with this chat' };
+      }
+
+      const productPrice = parseFloat(transaction.amount);
+      
+      // Refund to buyer
+      const buyer = await this.getUser(chatDetails.buyerId);
+      if (!buyer) {
+        return { success: false, error: 'Buyer not found' };
+      }
+
+      const buyerBalance = parseFloat(buyer.balance);
+      
+      await this.updateUser(chatDetails.buyerId, {
+        balance: (buyerBalance + productPrice).toFixed(2)
+      });
+
+      await this.updateTransaction(transaction.id, 'failed');
+
+      await this.updateProduct(chatDetails.productId, {
+        sales: Math.max(0, chatDetails.product.sales - 1)
+      });
+
+      await db
+        .update(chats)
+        .set({ 
+          status: 'resolved_buyer',
+          closedAt: new Date(),
+          closedBy: 'admin'
+        })
+        .where(eq(chats.id, chatId));
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error refunding payment to buyer:', error);
+      return { success: false, error: 'Failed to refund payment' };
     }
   }
 

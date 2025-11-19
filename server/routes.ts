@@ -1208,6 +1208,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin - Get all chats
+  app.get("/api/admin/chats", requireAdmin, async (req, res) => {
+    try {
+      const chats = await storage.getAllChats();
+      res.json(chats);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Admin - Search chat by conversation ID
+  app.get("/api/admin/chats/search/:conversationId", requireAdmin, async (req, res) => {
+    try {
+      const conversationId = parseInt(req.params.conversationId);
+      if (isNaN(conversationId)) {
+        return res.status(400).json({ error: "Invalid conversation ID" });
+      }
+      
+      const chat = await storage.getChatByConversationId(conversationId);
+      if (!chat) {
+        return res.status(404).json({ error: "Chat not found" });
+      }
+      
+      res.json(chat);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Admin - Release payment to seller
+  app.post("/api/admin/chats/:id/release-payment", requireAdmin, async (req, res) => {
+    try {
+      const result = await storage.releasePaymentToSeller(req.params.id);
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
+      res.json({ success: true, message: "Payment released to seller" });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Admin - Refund payment to buyer
+  app.post("/api/admin/chats/:id/refund-payment", requireAdmin, async (req, res) => {
+    try {
+      const result = await storage.refundPaymentToBuyer(req.params.id);
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
+      res.json({ success: true, message: "Payment refunded to buyer" });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Test endpoint for Telegram connection
   app.get("/api/test-telegram", async (req, res) => {
     try {
