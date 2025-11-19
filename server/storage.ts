@@ -497,10 +497,32 @@ export class DatabaseStorage implements IStorage {
     return chat || undefined;
   }
 
+  async generateUniqueConversationId(): Promise<number> {
+    let conversationId: number;
+    let isUnique = false;
+    
+    while (!isUnique) {
+      conversationId = Math.floor(100000 + Math.random() * 900000);
+      
+      const [existing] = await db
+        .select()
+        .from(chats)
+        .where(eq(chats.conversationId, conversationId));
+      
+      if (!existing) {
+        isUnique = true;
+      }
+    }
+    
+    return conversationId!;
+  }
+
   async createChat(chat: InsertChat): Promise<Chat> {
+    const conversationId = await this.generateUniqueConversationId();
+    
     const [newChat] = await db
       .insert(chats)
-      .values(chat)
+      .values({ ...chat, conversationId })
       .returning();
     return newChat;
   }
