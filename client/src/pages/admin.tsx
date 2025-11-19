@@ -1390,14 +1390,32 @@ function ConversationsManagement({ adminId }: { adminId: string }) {
   
   const { data: allChats = [] } = useQuery<ChatWithDetails[]>({
     queryKey: ['/api/admin/chats'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/chats', {
+        headers: { 'x-user-id': adminId },
+      });
+      if (!res.ok) throw new Error('Failed to fetch chats');
+      return res.json();
+    },
     refetchInterval: 30000,
   });
 
-  const { data: searchResult } = useQuery<ChatWithDetails>({
+  const { data: searchResult, isSuccess: searchSuccess } = useQuery<ChatWithDetails>({
     queryKey: ['/api/admin/chats/search', searchId],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/chats/${searchId}`, {
+        headers: { 'x-user-id': adminId },
+      });
+      if (!res.ok) throw new Error('Failed to fetch chat');
+      return res.json();
+    },
     enabled: searchId.length === 6 && !isNaN(Number(searchId)),
     retry: false,
   });
+
+  // Determine whether we're in search mode
+  const isSearchMode = searchId.length === 6 && !isNaN(Number(searchId));
+  const displayChats = isSearchMode && searchSuccess && searchResult ? [searchResult] : (!isSearchMode ? allChats : []);
 
   const releasePaymentMutation = useMutation({
     mutationFn: async (chatId: string) => {
@@ -1444,8 +1462,6 @@ function ConversationsManagement({ adminId }: { adminId: string }) {
       });
     },
   });
-
-  const displayChats = searchResult ? [searchResult] : allChats;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
