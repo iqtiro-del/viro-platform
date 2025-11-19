@@ -807,6 +807,7 @@ export class DatabaseStorage implements IStorage {
       }
 
       const productPrice = parseFloat(transaction.amount);
+      console.log('[Refund] Product price:', productPrice);
       
       // Refund to buyer
       const buyer = await this.getUser(chatDetails.buyerId);
@@ -815,10 +816,15 @@ export class DatabaseStorage implements IStorage {
       }
 
       const buyerBalance = parseFloat(buyer.balance);
+      const newBalance = buyerBalance + productPrice;
+      console.log('[Refund] Buyer balance before:', buyerBalance);
+      console.log('[Refund] New balance to set:', newBalance);
+      console.log('[Refund] Buyer ID:', chatDetails.buyerId);
       
-      await this.updateUser(chatDetails.buyerId, {
-        balance: (buyerBalance + productPrice).toFixed(2)
+      const updatedUser = await this.updateUser(chatDetails.buyerId, {
+        balance: newBalance.toFixed(2)
       });
+      console.log('[Refund] Updated user balance:', updatedUser?.balance);
 
       await this.updateTransaction(transaction.id, 'failed');
 

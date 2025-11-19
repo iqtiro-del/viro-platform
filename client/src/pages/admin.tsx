@@ -1415,7 +1415,7 @@ function ConversationsManagement({ adminId }: { adminId: string }) {
   const { data: searchResult, isSuccess: searchSuccess } = useQuery<ChatWithDetails>({
     queryKey: ['/api/admin/chats/search', searchId],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/chats/${searchId}`, {
+      const res = await fetch(`/api/admin/chats/search/${searchId}`, {
         headers: { 'x-user-id': adminId },
       });
       if (!res.ok) throw new Error('Failed to fetch chat');
