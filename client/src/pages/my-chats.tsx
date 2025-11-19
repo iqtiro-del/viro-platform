@@ -180,10 +180,14 @@ export function MyChatsPage() {
                                 <span className="inline-block mr-1 text-green-500 text-sm md:text-base">✓</span>
                               )}
                             </h3>
-                            <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1.5 md:gap-2">
+                            <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1.5 md:gap-2 flex-wrap">
                               <span className="font-medium">{isSeller ? 'مشتري' : 'بائع'}</span>
                               <span>•</span>
-                              <span className="truncate">{createdDate}</span>
+                              <Badge variant="outline" className="text-[10px] md:text-xs px-1.5 md:px-2 py-0 md:py-0.5 border-primary/30 text-primary neon-glow-primary" data-testid={`badge-conversation-${chat.id}`}>
+                                #{chat.conversationId}
+                              </Badge>
+                              <span className="hidden sm:inline">•</span>
+                              <span className="truncate hidden sm:inline">{createdDate}</span>
                             </p>
                           </div>
                           

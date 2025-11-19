@@ -139,8 +139,11 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
                 </AvatarFallback>
               </Avatar>
               <div>
-                <DialogTitle className="text-xl font-bold text-violet-50" data-testid="text-chat-title">
+                <DialogTitle className="text-xl font-bold text-violet-50 flex items-center gap-2" data-testid="text-chat-title">
                   محادثة مع {otherUser.username}
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-violet-500/20 border border-violet-400/30 text-violet-300 font-mono" data-testid="badge-conversation-id">
+                    #{chat.conversationId}
+                  </span>
                 </DialogTitle>
                 <p className="text-sm text-violet-300/70" data-testid="text-product-title">
                   {chat.product.title}
