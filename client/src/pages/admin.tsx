@@ -15,6 +15,7 @@ import type { User, ProductWithSeller, Transaction, VerificationRequestWithUser,
 import { getProductImage } from "@/lib/category-images";
 import { getUserAvatar } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ChatDialog } from "@/components/chat-dialog";
 
 type AdminSection = 'users' | 'services' | 'verifications' | 'transactions' | 'deposits' | 'withdrawals' | 'banned' | 'conversations';
 
@@ -1387,6 +1388,17 @@ function ConversationsManagement({ adminId }: { adminId: string }) {
   const [searchId, setSearchId] = useState("");
   const [releaseDialogChatId, setReleaseDialogChatId] = useState<string | null>(null);
   const [refundDialogChatId, setRefundDialogChatId] = useState<string | null>(null);
+  const [viewChatId, setViewChatId] = useState<string | null>(null);
+  
+  // Get admin user for chat dialog
+  const { data: adminUser } = useQuery<User>({
+    queryKey: ['/api/users', adminId],
+    queryFn: async () => {
+      const res = await fetch(`/api/users/${adminId}`);
+      if (!res.ok) throw new Error('Failed to fetch admin user');
+      return res.json();
+    },
+  });
   
   const { data: allChats = [] } = useQuery<ChatWithDetails[]>({
     queryKey: ['/api/admin/chats'],
@@ -1542,7 +1554,12 @@ function ConversationsManagement({ adminId }: { adminId: string }) {
                 {displayChats.map((chat) => (
                   <TableRow key={chat.id} data-testid={`row-chat-${chat.conversationId}`}>
                     <TableCell>
-                      <Badge variant="outline" className="font-mono text-primary">
+                      <Badge 
+                        variant="outline" 
+                        className="font-mono text-primary cursor-pointer hover-elevate"
+                        onClick={() => setViewChatId(chat.id)}
+                        data-testid={`button-view-chat-${chat.conversationId}`}
+                      >
                         #{chat.conversationId}
                       </Badge>
                     </TableCell>
@@ -1580,7 +1597,7 @@ function ConversationsManagement({ adminId }: { adminId: string }) {
                                   onClick={() => setReleaseDialogChatId(chat.id)}
                                   data-testid={`button-release-${chat.conversationId}`}
                                 >
-                                  Release
+                                  إعطاء المال للبائع
                                 </Button>
                               </DialogTrigger>
                               <DialogContent className="glass-morphism">
@@ -1616,7 +1633,7 @@ function ConversationsManagement({ adminId }: { adminId: string }) {
                                   onClick={() => setRefundDialogChatId(chat.id)}
                                   data-testid={`button-refund-${chat.conversationId}`}
                                 >
-                                  Refund
+                                  استرجاع المال للمشتري
                                 </Button>
                               </DialogTrigger>
                               <DialogContent className="glass-morphism">
@@ -1664,6 +1681,16 @@ function ConversationsManagement({ adminId }: { adminId: string }) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Chat Dialog */}
+      {viewChatId && adminUser && (
+        <ChatDialog
+          open={!!viewChatId}
+          onOpenChange={(open) => !open && setViewChatId(null)}
+          chatId={viewChatId}
+          currentUser={adminUser}
+        />
+      )}
     </div>
   );
 }
