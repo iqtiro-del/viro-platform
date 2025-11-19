@@ -102,6 +102,7 @@ export const transactions = pgTable("transactions", {
 // Chats table
 export const chats = pgTable("chats", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  conversationId: integer("conversation_id").notNull().unique(),
   productId: varchar("product_id").notNull().references(() => products.id, { onDelete: 'cascade' }),
   buyerId: varchar("buyer_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
   sellerId: varchar("seller_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
