@@ -10,11 +10,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Users, Package, DollarSign, ShoppingCart, BadgeCheck, XCircle, CheckCircle, Trash2, Edit, Shield, MoreVertical, ArrowDownToLine, ArrowUpFromLine, Receipt, UserX } from "lucide-react";
-import type { User, ProductWithSeller, Transaction, VerificationRequestWithUser } from "@shared/schema";
+import { Users, Package, DollarSign, ShoppingCart, BadgeCheck, XCircle, CheckCircle, Trash2, Edit, Shield, MoreVertical, ArrowDownToLine, ArrowUpFromLine, Receipt, UserX, MessageCircle } from "lucide-react";
+import type { User, ProductWithSeller, Transaction, VerificationRequestWithUser, ChatWithDetails } from "@shared/schema";
 import { getProductImage } from "@/lib/category-images";
+import { getUserAvatar } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type AdminSection = 'users' | 'services' | 'verifications' | 'transactions' | 'deposits' | 'withdrawals' | 'banned';
+type AdminSection = 'users' | 'services' | 'verifications' | 'transactions' | 'deposits' | 'withdrawals' | 'banned' | 'conversations';
 
 export default function AdminDashboard() {
   const { toast } = useToast();
@@ -126,6 +128,7 @@ export default function AdminDashboard() {
   const sections = [
     { id: 'users' as AdminSection, label: 'Users', icon: Users },
     { id: 'services' as AdminSection, label: 'Services', icon: Package },
+    { id: 'conversations' as AdminSection, label: 'Conversations', icon: MessageCircle },
     { id: 'verifications' as AdminSection, label: 'Verifications', icon: BadgeCheck },
     { id: 'transactions' as AdminSection, label: 'Transactions', icon: Receipt },
     { id: 'deposits' as AdminSection, label: 'Deposits', icon: ArrowDownToLine },
@@ -204,6 +207,7 @@ export default function AdminDashboard() {
         <div className="mt-6">
           {currentSection === 'users' && <UsersManagement adminId={adminUser.id} />}
           {currentSection === 'services' && <ServicesManagement adminId={adminUser.id} />}
+          {currentSection === 'conversations' && <ConversationsManagement adminId={adminUser.id} />}
           {currentSection === 'verifications' && <VerificationsManagement adminId={adminUser.id} />}
           {currentSection === 'transactions' && <TransactionsManagement adminId={adminUser.id} />}
           {currentSection === 'deposits' && <DepositsManagement adminId={adminUser.id} />}
@@ -1366,6 +1370,276 @@ function BannedUsersManagement({ adminId }: { adminId: string }) {
                   <TableRow>
                     <TableCell colSpan={6} className="text-center text-muted-foreground">
                       No banned users
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function ConversationsManagement({ adminId }: { adminId: string }) {
+  const { toast } = useToast();
+  const [searchId, setSearchId] = useState("");
+  const [releaseDialogChatId, setReleaseDialogChatId] = useState<string | null>(null);
+  const [refundDialogChatId, setRefundDialogChatId] = useState<string | null>(null);
+  
+  const { data: allChats = [] } = useQuery<ChatWithDetails[]>({
+    queryKey: ['/api/admin/chats'],
+    refetchInterval: 30000,
+  });
+
+  const { data: searchResult } = useQuery<ChatWithDetails>({
+    queryKey: ['/api/admin/chats/search', searchId],
+    enabled: searchId.length === 6 && !isNaN(Number(searchId)),
+    retry: false,
+  });
+
+  const releasePaymentMutation = useMutation({
+    mutationFn: async (chatId: string) => {
+      return apiRequest('POST', `/api/admin/chats/${chatId}/release-payment`, {}, {
+        headers: { 'x-user-id': adminId }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Payment released to seller successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/chats'] });
+      setReleaseDialogChatId(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const refundPaymentMutation = useMutation({
+    mutationFn: async (chatId: string) => {
+      return apiRequest('POST', `/api/admin/chats/${chatId}/refund-payment`, {}, {
+        headers: { 'x-user-id': adminId }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Payment refunded to buyer successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/chats'] });
+      setRefundDialogChatId(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const displayChats = searchResult ? [searchResult] : allChats;
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <Badge className="bg-green-500/20 text-green-400 border-green-400/30">Active</Badge>;
+      case 'under_review':
+        return <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-400/30">Under Review</Badge>;
+      case 'closed_buyer':
+        return <Badge className="bg-blue-500/20 text-blue-400 border-blue-400/30">Closed (Buyer)</Badge>;
+      case 'closed_seller':
+        return <Badge className="bg-purple-500/20 text-purple-400 border-purple-400/30">Closed (Seller)</Badge>;
+      case 'resolved_seller':
+        return <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-400/30">Resolved (Seller)</Badge>;
+      case 'resolved_buyer':
+        return <Badge className="bg-pink-500/20 text-pink-400 border-pink-400/30">Resolved (Buyer)</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const canManagePayment = (chat: ChatWithDetails) => {
+    return chat.status === 'under_review' || chat.status === 'closed_buyer' || chat.status === 'closed_seller';
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card className="glass-morphism border-border/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageCircle className="w-6 h-6 text-primary" />
+            Conversations Management
+          </CardTitle>
+          <CardDescription>
+            Manage all chat conversations and handle payment releases/refunds
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Search */}
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <Label htmlFor="conversation-search">Search by Conversation ID</Label>
+              <Input
+                id="conversation-search"
+                type="text"
+                placeholder="Enter 6-digit conversation ID (e.g., 100001)"
+                value={searchId}
+                onChange={(e) => setSearchId(e.target.value)}
+                maxLength={6}
+                data-testid="input-conversation-search"
+              />
+            </div>
+            <Button
+              onClick={() => setSearchId("")}
+              variant="outline"
+              className="mt-6"
+              data-testid="button-clear-search"
+            >
+              Clear
+            </Button>
+          </div>
+
+          {/* Conversations Table */}
+          <div className="border rounded-lg overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Buyer</TableHead>
+                  <TableHead>Seller</TableHead>
+                  <TableHead>Product</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {displayChats.map((chat) => (
+                  <TableRow key={chat.id} data-testid={`row-chat-${chat.conversationId}`}>
+                    <TableCell>
+                      <Badge variant="outline" className="font-mono text-primary">
+                        #{chat.conversationId}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="w-6 h-6">
+                          <AvatarImage src={getUserAvatar(chat.buyer.id)} />
+                          <AvatarFallback>{chat.buyer.username[0]}</AvatarFallback>
+                        </Avatar>
+                        <span>{chat.buyer.username}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="w-6 h-6">
+                          <AvatarImage src={getUserAvatar(chat.seller.id)} />
+                          <AvatarFallback>{chat.seller.username[0]}</AvatarFallback>
+                        </Avatar>
+                        <span>{chat.seller.username}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="max-w-xs truncate">{chat.product.title}</TableCell>
+                    <TableCell>{Number(chat.product.price).toLocaleString()} IQD</TableCell>
+                    <TableCell>{getStatusBadge(chat.status)}</TableCell>
+                    <TableCell>{new Date(chat.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        {canManagePayment(chat) && (
+                          <>
+                            <Dialog open={releaseDialogChatId === chat.id} onOpenChange={(open) => !open && setReleaseDialogChatId(null)}>
+                              <DialogTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  onClick={() => setReleaseDialogChatId(chat.id)}
+                                  data-testid={`button-release-${chat.conversationId}`}
+                                >
+                                  Release
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="glass-morphism">
+                                <DialogHeader>
+                                  <DialogTitle>Release Payment to Seller</DialogTitle>
+                                  <DialogDescription>
+                                    This will release {Number(chat.product.price).toLocaleString()} IQD to seller "{chat.seller.username}" for conversation #{chat.conversationId}.
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="flex justify-end gap-2 mt-4">
+                                  <Button
+                                    variant="outline"
+                                    onClick={() => setReleaseDialogChatId(null)}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    variant="default"
+                                    onClick={() => releasePaymentMutation.mutate(chat.id)}
+                                    disabled={releasePaymentMutation.isPending}
+                                  >
+                                    {releasePaymentMutation.isPending ? "Processing..." : "Confirm Release"}
+                                  </Button>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+
+                            <Dialog open={refundDialogChatId === chat.id} onOpenChange={(open) => !open && setRefundDialogChatId(null)}>
+                              <DialogTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setRefundDialogChatId(chat.id)}
+                                  data-testid={`button-refund-${chat.conversationId}`}
+                                >
+                                  Refund
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="glass-morphism">
+                                <DialogHeader>
+                                  <DialogTitle>Refund Payment to Buyer</DialogTitle>
+                                  <DialogDescription>
+                                    This will refund {Number(chat.product.price).toLocaleString()} IQD to buyer "{chat.buyer.username}" for conversation #{chat.conversationId}.
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="flex justify-end gap-2 mt-4">
+                                  <Button
+                                    variant="outline"
+                                    onClick={() => setRefundDialogChatId(null)}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    variant="destructive"
+                                    onClick={() => refundPaymentMutation.mutate(chat.id)}
+                                    disabled={refundPaymentMutation.isPending}
+                                  >
+                                    {refundPaymentMutation.isPending ? "Processing..." : "Confirm Refund"}
+                                  </Button>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </>
+                        )}
+                        {!canManagePayment(chat) && (
+                          <span className="text-sm text-muted-foreground">N/A</span>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {displayChats.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center text-muted-foreground">
+                      {searchId ? "No conversation found with this ID" : "No conversations found"}
                     </TableCell>
                   </TableRow>
                 )}
