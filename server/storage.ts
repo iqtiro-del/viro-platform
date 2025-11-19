@@ -72,11 +72,15 @@ export interface IStorage {
   
   // Chats
   getChat(id: string): Promise<ChatWithDetails | undefined>;
+  getAllChats(): Promise<ChatWithDetails[]>;
   getChatsByUser(userId: string): Promise<ChatWithDetails[]>;
   getChatByTransaction(transactionId: string): Promise<Chat | undefined>;
+  getChatByConversationId(conversationId: number): Promise<ChatWithDetails | undefined>;
   createChat(chat: InsertChat): Promise<Chat>;
   closeChat(chatId: string, closedBy: string, status: 'closed_seller' | 'closed_buyer'): Promise<Chat | undefined>;
   resolveChat(chatId: string, status: 'resolved_seller' | 'resolved_buyer'): Promise<Chat | undefined>;
+  releasePaymentToSeller(chatId: string): Promise<{ success: boolean; error?: string }>;
+  refundPaymentToBuyer(chatId: string): Promise<{ success: boolean; error?: string }>;
   checkExpiredChats(): Promise<void>;
   processScheduledPayments(): Promise<void>;
   
@@ -685,60 +689,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async processScheduledPayments(): Promise<void> {
-    // Find chats with scheduled payments that are due
-    const duePayments = await db
-      .select()
-      .from(chats)
-      .where(
-        and(
-          eq(chats.status, 'closed_buyer'),
-          sql`${chats.paymentScheduledAt} IS NOT NULL`,
-          sql`${chats.paymentScheduledAt} <= NOW()`
-        )
-      );
-
-    // Process each payment
-    for (const chat of duePayments) {
-      const chatDetails = await this.getChat(chat.id);
-      if (!chatDetails) continue;
-
-      const transaction = chatDetails.transactionId 
-        ? await db.select().from(transactions).where(eq(transactions.id, chatDetails.transactionId)).then(r => r[0])
-        : undefined;
-
-      if (transaction) {
-        const productPrice = parseFloat(transaction.amount);
-        
-        // Payment goes to seller
-        const seller = await this.getUser(chatDetails.sellerId);
-        if (seller) {
-          const sellerBalance = parseFloat(seller.balance);
-          const sellerEarnings = parseFloat(seller.totalEarnings);
-          await this.updateUser(chatDetails.sellerId, {
-            balance: (sellerBalance + productPrice).toFixed(2),
-            totalEarnings: (sellerEarnings + productPrice).toFixed(2)
-          });
-
-          // Update transaction status
-          await this.updateTransaction(transaction.id, 'completed');
-
-          // Create seller transaction
-          await this.createTransaction({
-            userId: chatDetails.sellerId,
-            type: 'sale',
-            amount: transaction.amount,
-            status: 'completed',
-            description: `Sold "${chatDetails.product.title}"`
-          });
-
-          // Clear payment scheduled time
-          await db
-            .update(chats)
-            .set({ paymentScheduledAt: null })
-            .where(eq(chats.id, chat.id));
-        }
-      }
-    }
+    // DISABLED: Payment processing is now manual via admin panel
+    // Admin must manually release payment to seller or refund to buyer
+    // This prevents automatic payment release and ensures admin oversight
   }
 
   // Messages
