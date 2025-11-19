@@ -15,6 +15,7 @@ import bcrypt from "bcryptjs";
 import { encryptCredentials, decryptCredentials, encrypt, decrypt } from "./crypto";
 import { sendDepositScreenshotToTelegram } from "./telegram";
 import multer from "multer";
+import { Scheduler } from "./scheduler";
 
 // Configure multer for memory storage (no file saved to disk)
 const upload = multer({ 
@@ -1238,5 +1239,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  
+  // Initialize and start the scheduler for background tasks
+  const scheduler = new Scheduler(storage);
+  scheduler.start();
+
   return httpServer;
 }

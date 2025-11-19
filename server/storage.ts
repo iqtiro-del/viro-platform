@@ -78,6 +78,7 @@ export interface IStorage {
   closeChat(chatId: string, closedBy: string, status: 'closed_seller' | 'closed_buyer'): Promise<Chat | undefined>;
   resolveChat(chatId: string, status: 'resolved_seller' | 'resolved_buyer'): Promise<Chat | undefined>;
   checkExpiredChats(): Promise<void>;
+  processScheduledPayments(): Promise<void>;
   
   // Messages
   getMessagesByChat(chatId: string): Promise<MessageWithSender[]>;
