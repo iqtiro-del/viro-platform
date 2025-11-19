@@ -67,6 +67,19 @@ The platform uses Neon serverless PostgreSQL with Drizzle ORM for type-safe quer
         - Automatic query invalidation to keep UI in sync after unbanning
         - Database fields: `isBanned` (boolean), `banReason` (text), `bannedAt` (timestamp)
         - Proper cleanup of ban metadata on unban (sets isBanned=false, banReason='', bannedAt=null)
+      - **Conversation Management**: Comprehensive admin control panel for managing all buyer-seller chats and handling payment disputes. Features include:
+        - **Conversation IDs**: Each chat assigned unique 6-digit ID (100000-999999 range) for easy reference and search
+        - **Search Functionality**: Quick lookup by conversation ID with real-time table filtering
+        - **Payment Control**: Manual release and refund buttons for conversations requiring admin intervention
+        - **Status Awareness**: Release/Refund buttons only appear for chats with status 'under_review', 'closed_buyer', or 'closed_seller'
+        - **Payment Actions**:
+          - **Release Payment**: Transfers escrowed funds to seller's wallet, marks chat as 'resolved_seller'
+          - **Refund Payment**: Returns escrowed funds to buyer's wallet, marks chat as 'resolved_buyer'
+        - **Confirmation Dialogs**: Both actions require explicit admin confirmation showing amount, recipient, and conversation ID
+        - **Complete Chat Details**: Table displays conversation ID, buyer/seller (with avatars), product name, amount, status badge, creation date, and available actions
+        - **Real-time Updates**: Auto-refreshes every 30 seconds, invalidates cache after payment actions
+        - **Authentication**: All endpoints require `x-user-id` header with admin credentials
+        - **No Automatic Payments**: Automatic payment processing disabled - all releases/refunds require manual admin approval
       - **Security**: Admin middleware validates `x-user-id` header and `isAdmin` flag on all admin endpoints (returns 403 if not admin)
       - **UI/UX**: Neon/cyberpunk themed dropdown navigation with glass-morphism cards matching platform design
 
