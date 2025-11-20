@@ -82,6 +82,16 @@ The platform uses Neon serverless PostgreSQL with Drizzle ORM for type-safe quer
         - **No Automatic Payments**: Automatic payment processing disabled - all releases/refunds require manual admin approval
       - **Security**: Admin middleware validates `x-user-id` header and `isAdmin` flag on all admin endpoints (returns 403 if not admin)
       - **UI/UX**: Neon/cyberpunk themed dropdown navigation with glass-morphism cards matching platform design
+    - **Floating Support Button (FAB)**: Global draggable support button visible on all pages with FAQ chat simulation and Telegram contact. Features include:
+      - **Draggable**: Fully draggable with both mouse and touch support for mobile devices
+      - **Position Persistence**: Button stays within viewport bounds and maintains position during page navigation
+      - **FAQ Chat Simulation**: Instant answers to 6 common Arabic questions without page reload
+      - **Telegram Integration**: Direct link to Tiro support account (https://t.me/tiroiq)
+      - **Accessibility**: Full ARIA labels, keyboard navigation (ESC to close), focus trapping, and screen reader support
+      - **Implementation**: Uses shadcn Dialog component for proper accessibility, portal rendering for z-index management
+      - **SSR-Safe**: Position initialization in useEffect to prevent server-side rendering issues
+      - **Smart Click Detection**: Distinguishes between drag (>5px movement) and click to prevent accidental opens
+      - **Component**: `client/src/components/FloatingSupport.tsx`, added globally in `App.tsx`
 
 ## External Dependencies
 
