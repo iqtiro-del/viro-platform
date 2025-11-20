@@ -306,6 +306,7 @@ export const insertChatSchema = createInsertSchema(chats).omit({
   id: true,
   createdAt: true,
   closedAt: true,
+  conversationId: true,
 });
 
 export const insertMessageSchema = createInsertSchema(messages).omit({
