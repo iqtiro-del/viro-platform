@@ -37,7 +37,9 @@ export default function FloatingSupport() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [selectedFAQ, setSelectedFAQ] = useState<number | null>(null);
+  const [hasDragged, setHasDragged] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const dragStartPos = useRef({ x: 0, y: 0 });
 
   const handleDragStart = (clientX: number, clientY: number) => {
     if (!buttonRef.current) return;
@@ -46,11 +48,20 @@ export default function FloatingSupport() {
       x: clientX - rect.left,
       y: clientY - rect.top,
     });
+    dragStartPos.current = { x: clientX, y: clientY };
     setIsDragging(true);
+    setHasDragged(false);
   };
 
   const handleDragMove = (clientX: number, clientY: number) => {
     if (!isDragging) return;
+
+    // Check if moved more than 5 pixels (threshold for drag vs click)
+    const deltaX = Math.abs(clientX - dragStartPos.current.x);
+    const deltaY = Math.abs(clientY - dragStartPos.current.y);
+    if (deltaX > 5 || deltaY > 5) {
+      setHasDragged(true);
+    }
 
     const buttonSize = 60;
     const maxX = window.innerWidth - buttonSize;
@@ -64,6 +75,8 @@ export default function FloatingSupport() {
 
   const handleDragEnd = () => {
     setIsDragging(false);
+    // Reset hasDragged after a short delay to allow click event to check it
+    setTimeout(() => setHasDragged(false), 100);
   };
 
   useEffect(() => {
@@ -106,7 +119,8 @@ export default function FloatingSupport() {
   }, []);
 
   const handleButtonClick = () => {
-    if (!isDragging) {
+    // Only open if we didn't just drag the button
+    if (!hasDragged) {
       setIsOpen(!isOpen);
     }
   };
@@ -127,10 +141,12 @@ export default function FloatingSupport() {
           }
         }}
         onClick={handleButtonClick}
-        className="fixed w-14 h-14 rounded-full bg-gradient-to-br from-primary via-purple-600 to-pink-600 text-white shadow-lg hover-elevate active-elevate-2 flex items-center justify-center cursor-move z-[9999] transition-transform"
+        className="w-14 h-14 rounded-full bg-gradient-to-br from-primary via-purple-600 to-pink-600 text-white shadow-lg hover-elevate active-elevate-2 flex items-center justify-center cursor-move transition-transform"
         style={{
+          position: "fixed",
           left: `${position.x}px`,
           top: `${position.y}px`,
+          zIndex: 9999,
           touchAction: "none",
         }}
       >
@@ -139,9 +155,10 @@ export default function FloatingSupport() {
 
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998] flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setIsOpen(false)}
           data-testid="overlay-support-chat"
+          style={{ zIndex: 9998 }}
         >
           <Card
             className="w-full max-w-md max-h-[80vh] flex flex-col"
