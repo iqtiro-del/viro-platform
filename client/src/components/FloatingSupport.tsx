@@ -1,8 +1,14 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const FAQs = [
   {
@@ -33,13 +39,18 @@ const FAQs = [
 
 export default function FloatingSupport() {
   const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState({ x: 20, y: window.innerHeight - 100 });
+  const [position, setPosition] = useState({ x: 20, y: 100 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [selectedFAQ, setSelectedFAQ] = useState<number | null>(null);
   const [hasDragged, setHasDragged] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dragStartPos = useRef({ x: 0, y: 0 });
+
+  // Initialize position after mount (SSR-safe)
+  useEffect(() => {
+    setPosition({ x: 20, y: window.innerHeight - 100 });
+  }, []);
 
   const handleDragStart = (clientX: number, clientY: number) => {
     if (!buttonRef.current) return;
@@ -141,6 +152,7 @@ export default function FloatingSupport() {
           }
         }}
         onClick={handleButtonClick}
+        aria-label="فتح الدعم الفني"
         className="w-14 h-14 rounded-full bg-gradient-to-br from-primary via-purple-600 to-pink-600 text-white shadow-lg hover-elevate active-elevate-2 flex items-center justify-center cursor-move transition-transform"
         style={{
           position: "fixed",
@@ -153,82 +165,70 @@ export default function FloatingSupport() {
         <MessageCircle className="w-6 h-6" />
       </button>
 
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setIsOpen(false)}
-          data-testid="overlay-support-chat"
-          style={{ zIndex: 9998 }}
-        >
-          <Card
-            className="w-full max-w-md max-h-[80vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-            data-testid="card-support-chat"
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <CardTitle className="text-xl flex items-center gap-2">
-                <MessageCircle className="w-5 h-5 text-primary" />
-                الدعم الفني
-              </CardTitle>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => setIsOpen(false)}
-                data-testid="button-close-support"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </CardHeader>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-md max-h-[80vh] flex flex-col p-0" data-testid="card-support-chat">
+          <DialogHeader className="px-6 pt-6 pb-4">
+            <DialogTitle className="text-xl flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-primary" />
+              الدعم الفني
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              مركز الدعم الفني - الأسئلة الشائعة والتواصل عبر تيليجرام
+            </DialogDescription>
+          </DialogHeader>
 
-            <CardContent className="flex-1 overflow-y-auto space-y-4">
-              <div className="bg-muted p-4 rounded-lg">
-                <p className="text-sm text-muted-foreground">
-                  مرحباً! كيف يمكننا مساعدتك؟ يرجى اختيار أحد الأسئلة الشائعة:
-                </p>
-              </div>
+          <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-4">
+            <div className="bg-muted p-4 rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                مرحباً! كيف يمكننا مساعدتك؟ يرجى اختيار أحد الأسئلة الشائعة:
+              </p>
+            </div>
 
-              <div className="space-y-2">
-                {FAQs.map((faq, index) => (
-                  <Button
-                    key={index}
-                    variant="outline"
-                    className="w-full text-right justify-start h-auto py-3 px-4"
-                    onClick={() => handleFAQClick(index)}
-                    data-testid={`button-faq-${index}`}
-                  >
-                    {faq.question}
-                  </Button>
-                ))}
-              </div>
-
-              {selectedFAQ !== null && (
-                <div
-                  className="bg-primary/10 border-r-4 border-primary p-4 rounded-lg animate-in slide-in-from-bottom-2"
-                  data-testid="answer-faq"
-                >
-                  <Badge className="mb-2" data-testid="badge-faq-answer">الجواب</Badge>
-                  <p className="text-sm leading-relaxed">{FAQs[selectedFAQ].answer}</p>
-                </div>
-              )}
-
-              <div className="pt-4 border-t">
-                <p className="text-sm text-muted-foreground mb-3">
-                  لم تجد إجابة؟ تواصل معنا على تيليجرام:
-                </p>
+            <div className="space-y-2" role="list" aria-label="الأسئلة الشائعة">
+              {FAQs.map((faq, index) => (
                 <Button
-                  variant="default"
-                  className="w-full"
-                  onClick={() => window.open("https://t.me/YOUR_TELEGRAM_USERNAME", "_blank")}
-                  data-testid="button-telegram-support"
+                  key={index}
+                  variant="outline"
+                  className="w-full text-right justify-start h-auto py-3 px-4"
+                  onClick={() => handleFAQClick(index)}
+                  data-testid={`button-faq-${index}`}
+                  aria-expanded={selectedFAQ === index}
                 >
-                  <MessageCircle className="w-4 h-4 ml-2" />
-                  تواصل عبر تيليجرام
+                  {faq.question}
                 </Button>
+              ))}
+            </div>
+
+            {selectedFAQ !== null && (
+              <div
+                className="bg-primary/10 border-r-4 border-primary p-4 rounded-lg animate-in slide-in-from-bottom-2"
+                data-testid="answer-faq"
+                role="region"
+                aria-label="الإجابة"
+              >
+                <Badge className="mb-2" data-testid="badge-faq-answer">الجواب</Badge>
+                <p className="text-sm leading-relaxed">{FAQs[selectedFAQ].answer}</p>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+            )}
+
+            <div className="pt-4 border-t">
+              <p className="text-sm text-muted-foreground mb-3">
+                لم تجد إجابة؟ تواصل معنا على تيليجرام:
+              </p>
+              <Button
+                variant="default"
+                className="w-full"
+                onClick={() => window.open("https://t.me/tiroiq", "_blank")}
+                data-testid="button-telegram-support"
+                aria-label="فتح تيليجرام للتواصل مع الدعم"
+              >
+                <MessageCircle className="w-4 h-4 ml-2" />
+                تواصل عبر تيليجرام
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
