@@ -30,7 +30,7 @@ const translations = {
     "nav.darkMode": "Dark Mode",
     
     // Dashboard/Home
-    "home.title": "TIRO",
+    "home.title": "VIRO",
     "home.subtitle": "Iraq's Premier Digital Services Marketplace",
     "home.description": "Connect with verified sellers, discover quality services, and grow your digital business",
     "home.search.placeholder": "Search for services...",
@@ -376,7 +376,7 @@ const translations = {
     "nav.darkMode": "الوضع الداكن",
     
     // Dashboard/Home
-    "home.title": "تيرو",
+    "home.title": "فيرو",
     "home.subtitle": "منصة العراق الرائدة للخدمات الرقمية",
     "home.description": "تواصل مع بائعين موثوقين، اكتشف خدمات عالية الجودة، وقم بتنمية عملك الرقمي",
     "home.search.placeholder": "ابحث عن الخدمات...",
