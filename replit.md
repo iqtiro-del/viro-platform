@@ -1,7 +1,7 @@
-# Viro - Digital Services Marketplace
+# Viro (فيرو) - Digital Services Marketplace
 
 ## Overview
-Viro is a digital services marketplace for the Iraqi market, connecting service buyers with verified sellers of digital products and services. Inspired by platforms like Fiverr and Upwork, it aims to establish a unique Iraqi digital marketplace identity with a modern neon/cyberpunk aesthetic. The platform is a full-stack web application with a React frontend, Express backend, and PostgreSQL database. Its vision is to capture a significant share of the Iraqi digital services market by offering a reliable and user-friendly platform.
+Viro (فيرو) is an Arabic-only digital services marketplace for the Iraqi market, connecting service buyers with verified sellers of digital products and services. Inspired by platforms like Fiverr and Upwork, it aims to establish a unique Iraqi digital marketplace identity with a modern neon/cyberpunk aesthetic. The platform is a full-stack web application with a React frontend, Express backend, and PostgreSQL database. Its vision is to capture a significant share of the Iraqi digital services market by offering a reliable and user-friendly Arabic-only platform.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -9,7 +9,7 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Frontend Architecture
-The frontend is a React-based Single Page Application (SPA) using TypeScript and Vite, with Wouter for routing. UI components leverage `shadcn/ui` (New York style variant) and Radix UI primitives, styled with Tailwind CSS to create a custom neon/cyberpunk dark-mode design system. State management uses TanStack Query for server state, React Context for authentication and theme, and React hooks for local state. The design incorporates a neon color palette, specific typography (Inter, Orbitron/Exo 2, Tajawal for Arabic), glassmorphism, and neon glows. Mobile-first responsive design is implemented across all pages, ensuring a consistent user experience. Key features include smooth page transitions, enhanced dialogs and toast notifications with animations, and comprehensive mobile optimizations.
+The frontend is a React-based Single Page Application (SPA) using TypeScript and Vite, with Wouter for routing. UI components leverage `shadcn/ui` (New York style variant) and Radix UI primitives, styled with Tailwind CSS to create a custom neon/cyberpunk dark-mode design system. State management uses TanStack Query for server state, React Context for authentication and theme, and React hooks for local state. The design incorporates a neon color palette, specific typography (Inter, Orbitron/Exo 2, Tajawal for Arabic), glassmorphism, and neon glows. Mobile-first responsive design is implemented across all pages, ensuring a consistent user experience. Key features include smooth page transitions, enhanced dialogs and toast notifications with animations, and comprehensive mobile optimizations. **Language**: Platform is locked to Arabic-only (RTL), with language switching disabled. Platform name displays as "فيرو" (Viro in Arabic) throughout the entire interface.
 
 ### Backend Architecture
 The backend is built with Express.js, providing RESTful API routing and custom middleware for logging and error handling. Authentication currently uses bcrypt.js for password hashing, with plans for session-based authentication.
@@ -18,7 +18,7 @@ The backend is built with Express.js, providing RESTful API routing and custom m
 The platform uses Neon serverless PostgreSQL with Drizzle ORM for type-safe queries. The database schema includes `Users`, `Products`, `Reviews`, `Promotions`, and `Transactions` tables, with defined relationships. Key design decisions include decimal precision for monetary values, separate fields for financial tracking, boolean flags for active statuses, UUID primary keys, and timestamp tracking. Product credentials are encrypted using AES-256-GCM before storage and decrypted only upon purchase.
 
 ### System Design Choices
-- **UI/UX**: Responsive design with a mobile-first approach, full Arabic localization, and "cute avatar" system using DiceBear API. Public accessibility for browsing services.
+- **UI/UX**: Responsive design with a mobile-first approach, Arabic-only interface (language switching disabled), and "cute avatar" system using DiceBear API. Public accessibility for browsing services. Platform name is "فيرو" (Viro in Arabic).
 - **Feature Specifications**:
     - **Fee System**: A 10% fee is applied to all deposits and withdrawals, with clear UI breakdown.
     - **Service Categories**: Support for diverse digital services, including social media account sales with secure credential delivery.
