@@ -218,7 +218,7 @@ export default function FloatingSupport() {
               <Button
                 variant="default"
                 className="w-full"
-                onClick={() => window.open("https://t.me/tiroiq", "_blank")}
+                onClick={() => window.open("https://t.me/viroiq", "_blank")}
                 data-testid="button-telegram-support"
                 aria-label="فتح تيليجرام للتواصل مع الدعم"
               >

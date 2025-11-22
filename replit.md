@@ -86,7 +86,7 @@ The platform uses Neon serverless PostgreSQL with Drizzle ORM for type-safe quer
       - **Draggable**: Fully draggable with both mouse and touch support for mobile devices
       - **Position Persistence**: Button stays within viewport bounds and maintains position during page navigation
       - **FAQ Chat Simulation**: Instant answers to 6 common Arabic questions without page reload
-      - **Telegram Integration**: Direct link to Tiro support account (https://t.me/tiroiq)
+      - **Telegram Integration**: Direct link to Viro support account (https://t.me/viroiq)
       - **Accessibility**: Full ARIA labels, keyboard navigation (ESC to close), focus trapping, and screen reader support
       - **Implementation**: Uses shadcn Dialog component for proper accessibility, portal rendering for z-index management
       - **SSR-Safe**: Position initialization in useEffect to prevent server-side rendering issues
