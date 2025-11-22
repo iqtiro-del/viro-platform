@@ -42,7 +42,7 @@ interface MobileMenuProps {
 export function MobileMenu({ user, onLogout, open, onOpenChange }: MobileMenuProps) {
   const [location] = useLocation();
   const { theme, setTheme } = useTheme();
-  const { t, language, setLanguage } = useLanguage();
+  const { t } = useLanguage();
 
   const navItems = user ? [
     { icon: Home, label: t("nav.dashboard"), path: "/" },
@@ -146,17 +146,6 @@ export function MobileMenu({ user, onLogout, open, onOpenChange }: MobileMenuPro
                     </>
                   )}
                 </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start gap-3"
-                  onClick={() => setLanguage(language === "en" ? "ar" : "en")}
-                  data-testid="button-mobile-language-toggle"
-                >
-                  <span className="w-5 h-5 flex items-center justify-center font-bold text-primary">
-                    {language.toUpperCase()}
-                  </span>
-                  <span>{t("nav.language")}</span>
-                </Button>
               </div>
 
               <div className="mt-auto p-4 border-t border-border/50">
@@ -221,17 +210,6 @@ export function MobileMenu({ user, onLogout, open, onOpenChange }: MobileMenuPro
                       <span>{t("nav.darkMode")}</span>
                     </>
                   )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start gap-3"
-                  onClick={() => setLanguage(language === "en" ? "ar" : "en")}
-                  data-testid="button-mobile-language-toggle"
-                >
-                  <span className="w-5 h-5 flex items-center justify-center font-bold text-primary">
-                    {language.toUpperCase()}
-                  </span>
-                  <span>{t("nav.language")}</span>
                 </Button>
               </div>
             </>

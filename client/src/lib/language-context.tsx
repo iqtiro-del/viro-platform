@@ -376,7 +376,7 @@ const translations = {
     "nav.darkMode": "الوضع الداكن",
     
     // Dashboard/Home
-    "home.title": "تيرو",
+    "home.title": "فيرو",
     "home.subtitle": "منصة العراق الرائدة للخدمات الرقمية",
     "home.description": "تواصل مع بائعين موثوقين، اكتشف خدمات عالية الجودة، وقم بتنمية عملك الرقمي",
     "home.search.placeholder": "ابحث عن الخدمات...",
@@ -706,33 +706,25 @@ const translations = {
 };
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem("viro-language");
-    return (saved as Language) || "ar";
-  });
+  // Fixed to Arabic only
+  const language: Language = "ar";
 
   useEffect(() => {
-    // Set RTL/LTR direction based on language
-    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
-    document.documentElement.lang = language;
+    // Always set Arabic RTL direction
+    document.documentElement.dir = "rtl";
+    document.documentElement.lang = "ar";
     
-    // Set font family based on language
-    if (language === "ar") {
-      document.documentElement.style.fontFamily = "'Tajawal', 'Inter', sans-serif";
-    } else {
-      document.documentElement.style.fontFamily = "'Inter', sans-serif";
-    }
-
-    // Save to localStorage
-    localStorage.setItem("viro-language", language);
-  }, [language]);
+    // Set Arabic font family
+    document.documentElement.style.fontFamily = "'Tajawal', 'Inter', sans-serif";
+  }, []);
 
   const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
+    // Language switching disabled - Arabic only
+    console.log("Language is locked to Arabic");
   };
 
   const t = (key: string): string => {
-    return translations[language][key as keyof typeof translations.ar] || key;
+    return translations.ar[key as keyof typeof translations.ar] || key;
   };
 
   return (
