@@ -376,7 +376,7 @@ const translations = {
     "nav.darkMode": "الوضع الداكن",
     
     // Dashboard/Home
-    "home.title": "فيرو",
+    "home.title": "تيرو",
     "home.subtitle": "منصة العراق الرائدة للخدمات الرقمية",
     "home.description": "تواصل مع بائعين موثوقين، اكتشف خدمات عالية الجودة، وقم بتنمية عملك الرقمي",
     "home.search.placeholder": "ابحث عن الخدمات...",

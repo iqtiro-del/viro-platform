@@ -64,7 +64,7 @@ export function Navbar({ user, onLogout }: NavbarProps) {
         <Link href="/">
           <div className="flex items-center space-x-2 hover-elevate rounded-lg px-3 py-2 transition-all cursor-pointer" data-testid="link-home">
             <h1 className="text-2xl font-accent font-bold neon-text-glow tracking-tight">
-              TIRO
+              VIRO
             </h1>
           </div>
         </Link>

@@ -14,7 +14,7 @@ async function seed() {
       username: "demo_user",
       password: hashedPassword,
       fullName: "Demo User",
-      email: "demo@tiro.iq",
+      email: "demo@viro.iq",
       phone: "+964 750 123 4567",
       bio: "Professional developer and designer with 5+ years experience",
       avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=demo",

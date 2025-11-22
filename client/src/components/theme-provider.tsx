@@ -25,14 +25,14 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem("tiro-theme") as Theme) || defaultTheme
+    () => (localStorage.getItem("viro-theme") as Theme) || defaultTheme
   );
 
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
     root.classList.add(theme);
-    localStorage.setItem("tiro-theme", theme);
+    localStorage.setItem("viro-theme", theme);
   }, [theme]);
 
   const value = {

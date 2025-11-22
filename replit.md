@@ -1,7 +1,7 @@
-# Tiro - Digital Services Marketplace
+# Viro - Digital Services Marketplace
 
 ## Overview
-Tiro is a digital services marketplace for the Iraqi market, connecting service buyers with verified sellers of digital products and services. Inspired by platforms like Fiverr and Upwork, it aims to establish a unique Iraqi digital marketplace identity with a modern neon/cyberpunk aesthetic. The platform is a full-stack web application with a React frontend, Express backend, and PostgreSQL database. Its vision is to capture a significant share of the Iraqi digital services market by offering a reliable and user-friendly platform.
+Viro is a digital services marketplace for the Iraqi market, connecting service buyers with verified sellers of digital products and services. Inspired by platforms like Fiverr and Upwork, it aims to establish a unique Iraqi digital marketplace identity with a modern neon/cyberpunk aesthetic. The platform is a full-stack web application with a React frontend, Express backend, and PostgreSQL database. Its vision is to capture a significant share of the Iraqi digital services market by offering a reliable and user-friendly platform.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.

@@ -1,4 +1,4 @@
-# Tiro Platform Design Guidelines
+# Viro Platform Design Guidelines
 
 ## Design Approach
 **Reference-Based**: Drawing inspiration from modern service marketplaces (Fiverr, Upwork) combined with contemporary neon/cyberpunk aesthetics for a distinctive Iraqi digital marketplace identity. The design balances futuristic visual appeal with marketplace functionality.
