@@ -706,25 +706,33 @@ const translations = {
 };
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  // Fixed to Arabic only - no language switching
-  const language: Language = "ar";
+  const [language, setLanguageState] = useState<Language>(() => {
+    const saved = localStorage.getItem("viro-language");
+    return (saved as Language) || "ar";
+  });
 
   useEffect(() => {
-    // Always set Arabic RTL direction
-    document.documentElement.dir = "rtl";
-    document.documentElement.lang = "ar";
+    // Set RTL/LTR direction based on language
+    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+    document.documentElement.lang = language;
     
-    // Set Arabic font family
-    document.documentElement.style.fontFamily = "'Tajawal', 'Inter', sans-serif";
-  }, []);
+    // Set font family based on language
+    if (language === "ar") {
+      document.documentElement.style.fontFamily = "'Tajawal', 'Inter', sans-serif";
+    } else {
+      document.documentElement.style.fontFamily = "'Inter', sans-serif";
+    }
+
+    // Save to localStorage
+    localStorage.setItem("viro-language", language);
+  }, [language]);
 
   const setLanguage = (lang: Language) => {
-    // Language switching disabled - always Arabic
-    console.log("Language is fixed to Arabic");
+    setLanguageState(lang);
   };
 
   const t = (key: string): string => {
-    return translations.ar[key as keyof typeof translations.ar] || key;
+    return translations[language][key as keyof typeof translations.ar] || key;
   };
 
   return (

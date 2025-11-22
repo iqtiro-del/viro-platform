@@ -175,28 +175,66 @@ export function MobileMenu({ user, onLogout, open, onOpenChange }: MobileMenuPro
               </div>
             </>
           ) : (
-            <div className="p-4 space-y-2">
-              <Link href="/login">
-                <Button 
-                  variant="ghost" 
-                  className="w-full" 
-                  data-testid="button-mobile-login"
-                  onClick={handleNavClick}
+            <>
+              <div className="p-4 space-y-2">
+                <Link href="/login">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full" 
+                    data-testid="button-mobile-login"
+                    onClick={handleNavClick}
+                  >
+                    {t("nav.login")}
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button 
+                    variant="default" 
+                    className="w-full neon-glow-primary" 
+                    data-testid="button-mobile-register"
+                    onClick={handleNavClick}
+                  >
+                    {t("nav.signup")}
+                  </Button>
+                </Link>
+              </div>
+
+              <Separator className="my-2" />
+
+              {/* Settings for Guests */}
+              <div className="px-4 space-y-1">
+                <p className="text-xs font-semibold text-muted-foreground px-3 mb-2">{t("nav.settings")}</p>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  data-testid="button-mobile-theme-toggle"
                 >
-                  {t("nav.login")}
+                  {theme === "dark" ? (
+                    <>
+                      <Sun className="w-5 h-5" />
+                      <span>{t("nav.lightMode")}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="w-5 h-5" />
+                      <span>{t("nav.darkMode")}</span>
+                    </>
+                  )}
                 </Button>
-              </Link>
-              <Link href="/register">
-                <Button 
-                  variant="default" 
-                  className="w-full neon-glow-primary" 
-                  data-testid="button-mobile-register"
-                  onClick={handleNavClick}
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3"
+                  onClick={() => setLanguage(language === "en" ? "ar" : "en")}
+                  data-testid="button-mobile-language-toggle"
                 >
-                  {t("nav.signup")}
+                  <span className="w-5 h-5 flex items-center justify-center font-bold text-primary">
+                    {language.toUpperCase()}
+                  </span>
+                  <span>{t("nav.language")}</span>
                 </Button>
-              </Link>
-            </div>
+              </div>
+            </>
           )}
         </div>
       </SheetContent>
