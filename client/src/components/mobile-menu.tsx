@@ -42,7 +42,7 @@ interface MobileMenuProps {
 export function MobileMenu({ user, onLogout, open, onOpenChange }: MobileMenuProps) {
   const [location] = useLocation();
   const { theme, setTheme } = useTheme();
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
 
   const navItems = user ? [
     { icon: Home, label: t("nav.dashboard"), path: "/" },
@@ -65,7 +65,7 @@ export function MobileMenu({ user, onLogout, open, onOpenChange }: MobileMenuPro
       >
         <SheetHeader className="p-4 border-b border-border/50">
           <SheetTitle className="text-2xl font-accent font-bold neon-text-glow text-center">
-            تيرو
+            {t("home.title")}
           </SheetTitle>
         </SheetHeader>
 
@@ -145,6 +145,17 @@ export function MobileMenu({ user, onLogout, open, onOpenChange }: MobileMenuPro
                       <span>{t("nav.darkMode")}</span>
                     </>
                   )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3"
+                  onClick={() => setLanguage(language === "en" ? "ar" : "en")}
+                  data-testid="button-mobile-language-toggle"
+                >
+                  <span className="w-5 h-5 flex items-center justify-center font-bold text-primary">
+                    {language.toUpperCase()}
+                  </span>
+                  <span>{t("nav.language")}</span>
                 </Button>
               </div>
 

@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
-import { LanguageProvider } from "@/lib/language-context";
+import { LanguageProvider, useLanguage } from "@/lib/language-context";
 import { NeonBackground } from "@/components/neon-background";
 import { AppNavbar } from "@/components/app-navbar";
 import { MobileMenu } from "@/components/mobile-menu";
@@ -49,6 +49,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function Router() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Auth routes (no navbar)
@@ -80,7 +81,7 @@ function Router() {
               {/* Logo (left on desktop, center on mobile) */}
               <div className="flex items-center">
                 <h1 className="text-2xl font-accent font-bold neon-text-glow tracking-tight md:ml-0">
-                  تيرو
+                  {t("home.title")}
                 </h1>
               </div>
               
