@@ -684,6 +684,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get the chat that was created during the purchase
       const chat = result.transaction ? await storage.getChatByTransaction(result.transaction.id) : undefined;
 
+      // If credentials exist, create a pinned system message with the account details
+      if (chat && (decryptedCredentials.accountUsername || decryptedCredentials.accountEmail)) {
+        let credentialsMessage = "🔐 معلومات الحساب:\n\n";
+        
+        if (decryptedCredentials.accountEmail) {
+          credentialsMessage += `📧 البريد الإلكتروني: ${decryptedCredentials.accountEmail}\n`;
+        }
+        if (decryptedCredentials.accountEmailPassword) {
+          credentialsMessage += `🔑 كلمة مرور البريد: ${decryptedCredentials.accountEmailPassword}\n`;
+        }
+        if (decryptedCredentials.accountUsername) {
+          credentialsMessage += `👤 اسم المستخدم: ${decryptedCredentials.accountUsername}\n`;
+        }
+        if (decryptedCredentials.accountPassword) {
+          credentialsMessage += `🔒 كلمة المرور: ${decryptedCredentials.accountPassword}\n`;
+        }
+        
+        credentialsMessage += "\n⚠️ هام: احفظ هذه المعلومات في مكان آمن!";
+        
+        // Create a pinned system message with credentials
+        await storage.createMessage({
+          chatId: chat.id,
+          senderId: null, // System message
+          senderType: 'system',
+          message: credentialsMessage,
+          isPinned: true,
+        });
+      }
+
       res.json({ 
         success: true, 
         transaction: result.transaction,

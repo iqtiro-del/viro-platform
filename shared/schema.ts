@@ -123,6 +123,7 @@ export const messages = pgTable("messages", {
   senderId: varchar("sender_id").references(() => users.id, { onDelete: 'cascade' }),
   senderType: messageSenderTypeEnum("sender_type").default('user').notNull(),
   message: text("message").notNull(),
+  isPinned: boolean("is_pinned").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

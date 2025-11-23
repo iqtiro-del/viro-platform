@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Clock, ShieldCheck, AlertTriangle } from "lucide-react";
+import { Send, Clock, ShieldCheck, AlertTriangle, Pin } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { getUserAvatar } from "@/lib/utils";
 import { useLanguage } from "@/lib/language-context";
@@ -86,6 +86,10 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
   const isActive = chat.status === 'active';
   const isUnderReview = chat.status === 'under_review';
   const isClosed = chat.status.startsWith('closed_') || chat.status.startsWith('resolved_');
+
+  // Separate pinned and regular messages
+  const pinnedMessages = messages.filter(msg => msg.isPinned);
+  const regularMessages = messages;
 
   // Calculate time remaining
   const getTimeRemaining = () => {
@@ -187,9 +191,43 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
         {/* Messages */}
         <ScrollArea className="flex-1 p-6" ref={scrollRef}>
           <div className="space-y-4">
-            {messages.map((msg) => {
+            {/* Pinned Messages Section */}
+            {pinnedMessages.length > 0 && (
+              <div className="mb-6 space-y-3" data-testid="section-pinned-messages">
+                <div className="flex items-center gap-2 mb-2">
+                  <Pin className="w-4 h-4 text-amber-400" />
+                  <p className="text-xs font-semibold text-amber-300">رسائل مثبتة</p>
+                </div>
+                {pinnedMessages.map((msg) => (
+                  <div
+                    key={`pinned-${msg.id}`}
+                    className="flex justify-center"
+                    data-testid={`message-pinned-${msg.id}`}
+                  >
+                    <div className="max-w-full w-full px-5 py-4 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-2 border-amber-400/40 shadow-lg shadow-amber-500/10">
+                      <div className="flex items-start gap-3">
+                        <Pin className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-xs font-bold text-amber-300 mb-2 flex items-center gap-2">
+                            <span>رسالة مثبتة</span>
+                            <span className="text-amber-400/60">•</span>
+                            <span className="text-amber-400/60 font-normal">لا تحذف هذه المعلومات</span>
+                          </p>
+                          <p className="text-sm text-amber-50 whitespace-pre-line font-medium leading-relaxed">{msg.message}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <div className="border-t border-violet-500/20 pt-4" />
+              </div>
+            )}
+
+            {/* Regular Messages */}
+            {regularMessages.map((msg) => {
               const isSystemMessage = msg.senderType === 'system';
               const isOwnMessage = msg.senderId === currentUser.id;
+              const isPinned = msg.isPinned;
               
               // System message rendering
               if (isSystemMessage) {
@@ -199,12 +237,26 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
                     className="flex justify-center"
                     data-testid={`message-system-${msg.id}`}
                   >
-                    <div className="max-w-[85%] px-4 py-3 rounded-lg bg-blue-500/10 border border-blue-400/30">
+                    <div className={`max-w-[85%] px-4 py-3 rounded-lg ${
+                      isPinned 
+                        ? 'bg-amber-500/10 border border-amber-400/30' 
+                        : 'bg-blue-500/10 border border-blue-400/30'
+                    }`}>
                       <div className="flex items-start gap-2">
-                        <AlertTriangle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                        {isPinned ? (
+                          <Pin className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                        ) : (
+                          <AlertTriangle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                        )}
                         <div className="flex-1">
-                          <p className="text-xs font-semibold text-blue-300 mb-1">معلومات النظام</p>
-                          <p className="text-sm text-blue-100 whitespace-pre-line">{msg.message}</p>
+                          <p className={`text-xs font-semibold mb-1 ${
+                            isPinned ? 'text-amber-300' : 'text-blue-300'
+                          }`}>
+                            {isPinned ? 'رسالة مثبتة' : 'معلومات النظام'}
+                          </p>
+                          <p className={`text-sm whitespace-pre-line ${
+                            isPinned ? 'text-amber-100' : 'text-blue-100'
+                          }`}>{msg.message}</p>
                         </div>
                       </div>
                     </div>
