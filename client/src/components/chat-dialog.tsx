@@ -87,9 +87,9 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
   const isUnderReview = chat.status === 'under_review';
   const isClosed = chat.status.startsWith('closed_') || chat.status.startsWith('resolved_');
 
-  // Separate pinned and regular messages
+  // Separate pinned messages for dedicated section, but keep all messages for main flow
   const pinnedMessages = messages.filter(msg => msg.isPinned);
-  const regularMessages = messages;
+  const allMessages = messages;
 
   // Calculate time remaining
   const getTimeRemaining = () => {
@@ -223,8 +223,8 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
               </div>
             )}
 
-            {/* Regular Messages */}
-            {regularMessages.map((msg) => {
+            {/* All Messages (including pinned ones in chronological order) */}
+            {allMessages.map((msg) => {
               const isSystemMessage = msg.senderType === 'system';
               const isOwnMessage = msg.senderId === currentUser.id;
               const isPinned = msg.isPinned;
