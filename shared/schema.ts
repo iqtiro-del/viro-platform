@@ -20,6 +20,7 @@ export const transactionStatusEnum = pgEnum('transaction_status', ['pending', 'c
 export const chatStatusEnum = pgEnum('chat_status', ['active', 'closed_seller', 'closed_buyer', 'under_review', 'resolved_seller', 'resolved_buyer']);
 export const messageSenderTypeEnum = pgEnum('message_sender_type', ['user', 'system']);
 export const verificationStatusEnum = pgEnum('verification_status', ['pending', 'approved', 'rejected']);
+export const ratingTypeEnum = pgEnum('rating_type', ['excellent', 'bad']);
 
 // Users table
 export const users = pgTable("users", {
@@ -67,10 +68,11 @@ export const products = pgTable("products", {
 // Reviews table
 export const reviews = pgTable("reviews", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  chatId: varchar("chat_id").notNull().references(() => chats.id, { onDelete: 'cascade' }),
   productId: varchar("product_id").notNull().references(() => products.id, { onDelete: 'cascade' }),
   buyerId: varchar("buyer_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
   sellerId: varchar("seller_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
-  rating: integer("rating").notNull(),
+  ratingType: ratingTypeEnum("rating_type").notNull(),
   comment: text("comment").default(''),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -108,6 +110,7 @@ export const chats = pgTable("chats", {
   sellerId: varchar("seller_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
   transactionId: varchar("transaction_id").references(() => transactions.id, { onDelete: 'set null' }),
   status: chatStatusEnum("status").default('active').notNull(),
+  hasRated: boolean("has_rated").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   closedAt: timestamp("closed_at"),
@@ -161,6 +164,10 @@ export const productsRelations = relations(products, ({ one, many }) => ({
 }));
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
+  chat: one(chats, {
+    fields: [reviews.chatId],
+    references: [chats.id],
+  }),
   product: one(products, {
     fields: [reviews.productId],
     references: [products.id],
@@ -210,6 +217,7 @@ export const chatsRelations = relations(chats, ({ one, many }) => ({
     references: [transactions.id],
   }),
   messages: many(messages),
+  reviews: many(reviews),
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({
@@ -284,7 +292,7 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   id: true,
   createdAt: true,
 }).extend({
-  rating: z.number().min(1).max(5),
+  ratingType: z.enum(['excellent', 'bad']),
   comment: z.string().optional(),
 });
 
