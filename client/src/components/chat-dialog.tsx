@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Clock, ShieldCheck, AlertTriangle, Pin } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Send, Clock, ShieldCheck, AlertTriangle, Pin, Star, ThumbsUp, ThumbsDown } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { getUserAvatar } from "@/lib/utils";
 import { useLanguage } from "@/lib/language-context";
+import { useToast } from "@/hooks/use-toast";
 import type { ChatWithDetails, MessageWithSender, User } from "@shared/schema";
 
 interface ChatDialogProps {
@@ -20,7 +22,10 @@ interface ChatDialogProps {
 
 export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDialogProps) {
   const { t } = useLanguage();
+  const { toast } = useToast();
   const [message, setMessage] = useState("");
+  const [ratingComment, setRatingComment] = useState("");
+  const [showRatingForm, setShowRatingForm] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   
   // Fetch chat details
@@ -68,6 +73,32 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
         refetchType: 'all'
       });
       onOpenChange(false);
+    },
+  });
+
+  // Rating mutation
+  const ratingMutation = useMutation({
+    mutationFn: (ratingType: 'excellent' | 'bad') =>
+      apiRequest('POST', `/api/chats/${chatId}/rate`, {
+        ratingType,
+        comment: ratingComment,
+      }),
+    onSuccess: () => {
+      toast({
+        title: "تم التقييم بنجاح",
+        description: "شكراً لتقييمك للبائع",
+      });
+      setShowRatingForm(false);
+      setRatingComment("");
+      queryClient.invalidateQueries({ queryKey: ['/api/chats', chatId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطأ",
+        description: error.message || "فشل إرسال التقييم",
+        variant: "destructive",
+      });
     },
   });
 
@@ -388,6 +419,92 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
                     تم الإغلاق من قبل الإدارة
                   </p>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Rating Interface for Buyers */}
+          {isBuyer && isClosed && !chat.hasRated && !showRatingForm && (
+            <div className="p-4 rounded-lg bg-violet-500/10 border border-violet-400/30" data-testid="section-rating-prompt">
+              <div className="text-center space-y-3">
+                <div className="flex items-center justify-center gap-2">
+                  <Star className="w-5 h-5 text-violet-400" />
+                  <p className="text-sm font-semibold text-violet-200">
+                    قيّم تجربتك مع البائع
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setShowRatingForm(true)}
+                  className="w-full bg-violet-600 hover:bg-violet-700"
+                  data-testid="button-show-rating-form"
+                >
+                  تقييم البائع
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Rating Form */}
+          {isBuyer && isClosed && !chat.hasRated && showRatingForm && (
+            <div className="p-4 rounded-lg bg-violet-500/10 border border-violet-400/30 space-y-4" data-testid="form-rating">
+              <div className="text-center">
+                <p className="text-sm font-semibold text-violet-200 mb-3">
+                  كيف كانت تجربتك مع البائع؟
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <Button
+                    onClick={() => ratingMutation.mutate('excellent')}
+                    disabled={ratingMutation.isPending}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                    data-testid="button-rate-excellent"
+                  >
+                    <ThumbsUp className="w-4 h-4 ml-2" />
+                    ممتاز
+                  </Button>
+                  <Button
+                    onClick={() => ratingMutation.mutate('bad')}
+                    disabled={ratingMutation.isPending}
+                    variant="destructive"
+                    className="flex-1"
+                    data-testid="button-rate-bad"
+                  >
+                    <ThumbsDown className="w-4 h-4 ml-2" />
+                    سيئ
+                  </Button>
+                </div>
+              </div>
+              <div>
+                <Textarea
+                  value={ratingComment}
+                  onChange={(e) => setRatingComment(e.target.value)}
+                  placeholder="تعليق اختياري..."
+                  className="bg-zinc-800/50 border-violet-500/30 text-violet-50 placeholder:text-violet-300/40 focus:border-violet-400 resize-none"
+                  rows={3}
+                  data-testid="textarea-rating-comment"
+                />
+              </div>
+              <Button
+                onClick={() => {
+                  setShowRatingForm(false);
+                  setRatingComment("");
+                }}
+                variant="outline"
+                className="w-full"
+                data-testid="button-cancel-rating"
+              >
+                إلغاء
+              </Button>
+            </div>
+          )}
+
+          {/* Already Rated Notice */}
+          {isBuyer && isClosed && chat.hasRated && (
+            <div className="p-4 rounded-lg bg-green-500/10 border border-green-400/30" data-testid="notice-already-rated">
+              <div className="text-center flex items-center justify-center gap-2">
+                <Star className="w-4 h-4 text-green-400" />
+                <p className="text-sm text-green-200">
+                  تم تقييم البائع بنجاح
+                </p>
               </div>
             </div>
           )}
