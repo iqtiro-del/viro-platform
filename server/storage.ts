@@ -152,15 +152,43 @@ export class DatabaseStorage implements IStorage {
 
   // Products
   async getAllProducts(): Promise<ProductWithSeller[]> {
+    const now = new Date();
+    
+    // Get all products with their active promotions
     const results = await db
-      .select()
+      .select({
+        product: products,
+        seller: users,
+        promotion: promotions,
+      })
       .from(products)
       .leftJoin(users, eq(products.sellerId, users.id))
-      .orderBy(desc(products.createdAt));
+      .leftJoin(
+        promotions,
+        and(
+          eq(products.id, promotions.productId),
+          eq(promotions.isActive, true),
+          sql`${promotions.endDate} > ${now}`
+        )
+      )
+      .orderBy(
+        // First, order by promotion tier (nulls last)
+        // top_3 comes first, then top_5, then top_10, then no promotion
+        sql`
+          CASE 
+            WHEN ${promotions.tier} = 'top_3' THEN 1
+            WHEN ${promotions.tier} = 'top_5' THEN 2
+            WHEN ${promotions.tier} = 'top_10' THEN 3
+            ELSE 4
+          END
+        `,
+        // Then by creation date for products in same tier
+        desc(products.createdAt)
+      );
     
     return results.map(row => ({
-      ...row.products,
-      seller: row.users!
+      ...row.product,
+      seller: row.seller!
     }));
   }
 

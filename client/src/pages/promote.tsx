@@ -99,7 +99,7 @@ export function PromotePage() {
       icon: Crown,
       color: "text-yellow-500",
       glowClass: "neon-glow-primary",
-      duration: 7,
+      duration: 3,
       benefits: [
         t("promote.benefit1Top3"),
         t("promote.benefit2Top3"),
@@ -117,7 +117,7 @@ export function PromotePage() {
       icon: Star,
       color: "text-primary",
       glowClass: "neon-glow-secondary",
-      duration: 5,
+      duration: 2,
       benefits: [
         t("promote.benefit1Top5"),
         t("promote.benefit2Top5"),
@@ -135,7 +135,7 @@ export function PromotePage() {
       icon: TrendingUp,
       color: "text-secondary",
       glowClass: "border-secondary/30",
-      duration: 3,
+      duration: 1,
       benefits: [
         t("promote.benefit1Top10"),
         t("promote.benefit2Top10"),
