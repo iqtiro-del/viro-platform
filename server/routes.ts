@@ -876,14 +876,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
-      // Validate rating data
-      const validatedData = insertReviewSchema.parse({
-        chatId,
-        ratingType,
-        comment: comment || '',
-      });
-
-      // Get the chat
+      // Get the chat first to get productId, buyerId, sellerId
       const chat = await storage.getChat(chatId);
       if (!chat) {
         return res.status(404).json({ error: "Chat not found" });
@@ -899,6 +892,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "You have already rated this seller" });
       }
 
+      // Validate rating data with all required fields
+      const validatedData = insertReviewSchema.parse({
+        chatId,
+        productId: chat.productId,
+        buyerId: chat.buyerId,
+        sellerId: chat.sellerId,
+        ratingType,
+        comment: comment || '',
+      });
+
       // Get the seller to update their rating
       const seller = await storage.getUser(chat.sellerId);
       if (!seller) {
@@ -911,14 +914,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newTotalReviews = (seller.totalReviews || 0) + 1;
 
       // Create the review
-      const review = await storage.createReview({
-        chatId,
-        productId: chat.productId,
-        buyerId: userId,
-        sellerId: chat.sellerId,
-        ratingType: validatedData.ratingType,
-        comment: validatedData.comment || '',
-      });
+      const review = await storage.createReview(validatedData);
 
       // Update seller's rating and review count
       await storage.updateUserRating(chat.sellerId, newRating.toFixed(2), newTotalReviews);
