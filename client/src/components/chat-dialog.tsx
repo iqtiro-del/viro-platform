@@ -137,21 +137,6 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
     }
   }, [messages]);
 
-  // Debug: Log chat state changes
-  useEffect(() => {
-    if (chat) {
-      console.log('[ChatDialog] Chat state updated:', {
-        status: chat.status,
-        hasRated: chat.hasRated,
-        isBuyer,
-        isSeller,
-        isActive,
-        isClosed,
-        shouldShowRatingPrompt: isBuyer && isClosed && !chat.hasRated && !showRatingForm
-      });
-    }
-  }, [chat, isBuyer, isSeller, isActive, isClosed, showRatingForm]);
-
   if (!chat) return null;
 
   const isSeller = currentUser.id === chat.sellerId;
