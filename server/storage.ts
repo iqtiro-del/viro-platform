@@ -41,6 +41,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, data: Partial<User>): Promise<User | undefined>;
+  updateUserRating(userId: string, newRating: string, totalReviews: number): Promise<void>;
 
   // Products
   getAllProducts(): Promise<ProductWithSeller[]>;
@@ -83,6 +84,7 @@ export interface IStorage {
   refundPaymentToBuyer(chatId: string): Promise<{ success: boolean; error?: string }>;
   checkExpiredChats(): Promise<void>;
   processScheduledPayments(): Promise<void>;
+  markChatAsRated(chatId: string): Promise<void>;
   
   // Messages
   getMessagesByChat(chatId: string): Promise<MessageWithSender[]>;
@@ -136,6 +138,16 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user || undefined;
+  }
+
+  async updateUserRating(userId: string, newRating: string, totalReviews: number): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        rating: newRating,
+        totalReviews 
+      })
+      .where(eq(users.id, userId));
   }
 
   // Products
@@ -846,6 +858,13 @@ export class DatabaseStorage implements IStorage {
     // DISABLED: Payment processing is now manual via admin panel
     // Admin must manually release payment to seller or refund to buyer
     // This prevents automatic payment release and ensures admin oversight
+  }
+
+  async markChatAsRated(chatId: string): Promise<void> {
+    await db
+      .update(chats)
+      .set({ hasRated: true })
+      .where(eq(chats.id, chatId));
   }
 
   // Messages

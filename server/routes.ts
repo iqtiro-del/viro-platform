@@ -23,6 +23,23 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB max file size
 });
 
+// Rating calculation helper function
+function calculateNewRating(currentRating: number, ratingType: 'excellent' | 'bad'): number {
+  const adjustmentFactor = 0.2;
+  let newRating: number;
+
+  if (ratingType === 'excellent') {
+    // Excellent: new_rating = current_rating + adjustment_factor * ((5 - current_rating) / 5)
+    newRating = currentRating + adjustmentFactor * ((5 - currentRating) / 5);
+  } else {
+    // Bad: new_rating = current_rating - adjustment_factor * (current_rating / 4)
+    newRating = currentRating - adjustmentFactor * (currentRating / 4);
+  }
+
+  // Clamp rating between 0.0 and 5.0
+  return Math.max(0.0, Math.min(5.0, newRating));
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.post("/api/auth/register", async (req, res) => {
@@ -844,6 +861,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const message = await storage.createMessage(data);
       res.json(message);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Rating submission endpoint
+  app.post("/api/chats/:chatId/rate", async (req, res) => {
+    try {
+      const { chatId } = req.params;
+      const userId = req.headers['x-user-id'] as string;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Validate rating data
+      const validatedData = insertReviewSchema.parse({
+        ...req.body,
+        chatId,
+      });
+
+      // Get the chat
+      const chat = await storage.getChat(chatId);
+      if (!chat) {
+        return res.status(404).json({ error: "Chat not found" });
+      }
+
+      // Verify requester is the buyer
+      if (chat.buyerId !== userId) {
+        return res.status(403).json({ error: "Only the buyer can rate this seller" });
+      }
+
+      // Check if already rated
+      if (chat.hasRated) {
+        return res.status(400).json({ error: "You have already rated this seller" });
+      }
+
+      // Get the seller to update their rating
+      const seller = await storage.getUser(chat.sellerId);
+      if (!seller) {
+        return res.status(404).json({ error: "Seller not found" });
+      }
+
+      // Calculate new rating
+      const currentRating = parseFloat(seller.rating || '0');
+      const newRating = calculateNewRating(currentRating, validatedData.ratingType);
+      const newTotalReviews = (seller.totalReviews || 0) + 1;
+
+      // Create the review
+      const review = await storage.createReview({
+        chatId,
+        productId: chat.productId,
+        buyerId: userId,
+        sellerId: chat.sellerId,
+        ratingType: validatedData.ratingType,
+        comment: validatedData.comment || '',
+      });
+
+      // Update seller's rating and review count
+      await storage.updateUserRating(chat.sellerId, newRating.toFixed(2), newTotalReviews);
+
+      // Mark chat as rated
+      await storage.markChatAsRated(chatId);
+
+      res.json({ 
+        success: true, 
+        review,
+        newRating: newRating.toFixed(2),
+        totalReviews: newTotalReviews
+      });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
