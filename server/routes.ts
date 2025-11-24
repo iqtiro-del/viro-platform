@@ -870,7 +870,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/chats/:chatId/rate", async (req, res) => {
     try {
       const { chatId } = req.params;
-      const userId = req.headers['x-user-id'] as string;
+      const { userId, ratingType, comment } = req.body;
       
       if (!userId) {
         return res.status(401).json({ error: "Unauthorized" });
@@ -878,8 +878,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validate rating data
       const validatedData = insertReviewSchema.parse({
-        ...req.body,
         chatId,
+        ratingType,
+        comment: comment || '',
       });
 
       // Get the chat

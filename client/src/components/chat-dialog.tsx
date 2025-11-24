@@ -108,6 +108,7 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
   const ratingMutation = useMutation({
     mutationFn: (ratingType: 'excellent' | 'bad') =>
       apiRequest('POST', `/api/chats/${chatId}/rate`, {
+        userId: currentUser.id,
         ratingType,
         comment: ratingComment,
       }),
