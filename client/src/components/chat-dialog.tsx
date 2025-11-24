@@ -1,6 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -26,6 +36,8 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
   const [message, setMessage] = useState("");
   const [ratingComment, setRatingComment] = useState("");
   const [showRatingForm, setShowRatingForm] = useState(false);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+  const [pendingCloseRole, setPendingCloseRole] = useState<'seller' | 'buyer' | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   
   // Fetch chat details
@@ -60,19 +72,35 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
 
   // Close chat mutation
   const closeChatMutation = useMutation({
-    mutationFn: (role: 'seller' | 'buyer') =>
-      apiRequest('POST', `/api/chats/${chatId}/close`, {
+    mutationFn: async (role: 'seller' | 'buyer') => {
+      console.log('[ChatDialog] Closing chat:', { chatId, role, userId: currentUser.id });
+      const result = await apiRequest('POST', `/api/chats/${chatId}/close`, {
         userId: currentUser.id,
         role,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/chats', chatId] });
+      });
+      console.log('[ChatDialog] Close chat response:', result);
+      return result;
+    },
+    onSuccess: async (data) => {
+      console.log('[ChatDialog] Close chat mutation succeeded, refetching...');
+      // Force immediate refetch of chat data to show updated status
+      await queryClient.refetchQueries({ queryKey: ['/api/chats', chatId] });
+      console.log('[ChatDialog] Refetch completed');
       // Invalidate all chats queries including my-chats page
-      queryClient.invalidateQueries({ 
+      await queryClient.invalidateQueries({ 
         queryKey: ['/api/chats'],
         refetchType: 'all'
       });
-      onOpenChange(false);
+      // Don't close the dialog - let buyers see the rating prompt
+      // Sellers can manually close the dialog after closing the chat
+    },
+    onError: (error) => {
+      console.error('[ChatDialog] Close chat mutation failed:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل إغلاق المحادثة",
+        variant: "destructive",
+      });
     },
   });
 
@@ -108,6 +136,21 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Debug: Log chat state changes
+  useEffect(() => {
+    if (chat) {
+      console.log('[ChatDialog] Chat state updated:', {
+        status: chat.status,
+        hasRated: chat.hasRated,
+        isBuyer,
+        isSeller,
+        isActive,
+        isClosed,
+        shouldShowRatingPrompt: isBuyer && isClosed && !chat.hasRated && !showRatingForm
+      });
+    }
+  }, [chat, isBuyer, isSeller, isActive, isClosed, showRatingForm]);
 
   if (!chat) return null;
 
@@ -148,12 +191,15 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
 
   const handleCloseChat = () => {
     const role = isSeller ? 'seller' : 'buyer';
-    const confirmMessage = isSeller 
-      ? "هل أنت متأكد من إغلاق المحادثة لصالح المشتري؟ سيتم استرداد المبلغ كاملاً للمشتري فوراً." 
-      : "هل أنت متأكد من إغلاق المحادثة لصالح البائع؟ سيتم إطلاق الدفع للبائع بعد 10 ساعات.";
-    
-    if (confirm(confirmMessage)) {
-      closeChatMutation.mutate(role);
+    setPendingCloseRole(role);
+    setShowCloseConfirm(true);
+  };
+
+  const confirmCloseChat = () => {
+    if (pendingCloseRole) {
+      closeChatMutation.mutate(pendingCloseRole);
+      setShowCloseConfirm(false);
+      setPendingCloseRole(null);
     }
   };
 
@@ -510,6 +556,32 @@ export function ChatDialog({ open, onOpenChange, chatId, currentUser }: ChatDial
           )}
         </div>
       </DialogContent>
+
+      {/* Close Chat Confirmation AlertDialog */}
+      <AlertDialog open={showCloseConfirm} onOpenChange={setShowCloseConfirm}>
+        <AlertDialogContent className="glass-morphism-strong border-border/50">
+          <AlertDialogHeader>
+            <AlertDialogTitle>تأكيد إغلاق المحادثة</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingCloseRole === 'seller' 
+                ? "هل أنت متأكد من إغلاق المحادثة لصالح المشتري؟ سيتم استرداد المبلغ كاملاً للمشتري فوراً." 
+                : "هل أنت متأكد من إغلاق المحادثة لصالح البائع؟ سيتم إطلاق الدفع للبائع بعد 10 ساعات."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-close-confirm">
+              إلغاء
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmCloseChat}
+              disabled={closeChatMutation.isPending}
+              data-testid="button-confirm-close"
+            >
+              {closeChatMutation.isPending ? "جاري الإغلاق..." : "تأكيد"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
