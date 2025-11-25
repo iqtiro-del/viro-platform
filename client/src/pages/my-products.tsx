@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useCallback, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -64,6 +64,296 @@ import { useLanguage } from "@/lib/language-context";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { type Product, type InsertProduct, insertProductSchema } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+
+// Precompute resolver once at module level for better performance
+const productFormResolver = zodResolver(insertProductSchema);
+
+// Category values (static, used for form)
+const CATEGORY_VALUES = [
+  "Design",
+  "Development", 
+  "Marketing",
+  "Writing",
+  "Video & Animation",
+  "Music & Audio",
+  "Instagram",
+  "TikTok",
+] as const;
+
+// Memoized ProductForm component - extracted outside to prevent re-creation on parent re-renders
+interface ProductFormProps {
+  product?: Product;
+  userId: string;
+  onSubmit: (data: InsertProduct) => void;
+  isPending: boolean;
+  t: (key: string) => string;
+}
+
+const ProductForm = memo(function ProductForm({ 
+  product, 
+  userId, 
+  onSubmit, 
+  isPending,
+  t 
+}: ProductFormProps) {
+  const form = useForm<InsertProduct>({
+    resolver: productFormResolver,
+    defaultValues: product ? {
+      sellerId: product.sellerId,
+      title: product.title,
+      description: product.description,
+      price: product.price.toString(),
+      oldPrice: product.oldPrice ? product.oldPrice.toString() : "",
+      category: product.category,
+      imageUrl: product.imageUrl,
+      isActive: product.isActive,
+      accountUsername: product.accountUsername || "",
+      accountPassword: product.accountPassword || "",
+      accountEmail: product.accountEmail || "",
+      accountEmailPassword: product.accountEmailPassword || "",
+    } : {
+      sellerId: userId,
+      title: "",
+      description: "",
+      price: "",
+      oldPrice: "",
+      category: "",
+      imageUrl: "",
+      isActive: true,
+      accountUsername: "",
+      accountPassword: "",
+      accountEmail: "",
+      accountEmailPassword: "",
+    },
+  });
+
+  const selectedCategory = form.watch("category");
+  const showAccountFields = selectedCategory === "Instagram" || selectedCategory === "TikTok";
+
+  // Get translated category labels
+  const categories = useMemo(() => [
+    { value: "Design", label: t("services.categories.design") },
+    { value: "Development", label: t("services.categories.development") },
+    { value: "Marketing", label: t("services.categories.marketing") },
+    { value: "Writing", label: t("services.categories.writing") },
+    { value: "Video & Animation", label: t("services.categories.videoAnimation") },
+    { value: "Music & Audio", label: t("services.categories.musicAudio") },
+    { value: "Instagram", label: t("services.categories.instagram") },
+    { value: "TikTok", label: t("services.categories.tiktok") },
+  ], [t]);
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("myProducts.serviceTitle")}</FormLabel>
+              <FormControl>
+                <Input 
+                  {...field}
+                  placeholder={t("myProducts.titlePlaceholder")}
+                  className="glass-morphism border-border/50"
+                  data-testid="input-product-title"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("myProducts.description")}</FormLabel>
+              <FormControl>
+                <Textarea 
+                  {...field}
+                  placeholder={t("myProducts.descriptionPlaceholder")}
+                  className="glass-morphism border-border/50 min-h-[100px]"
+                  data-testid="input-product-description"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="category"
+          render={({ field }) => {
+            const selectedCat = categories.find(c => c.value === field.value);
+            return (
+              <FormItem>
+                <FormLabel>{t("myProducts.category")}</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="glass-morphism border-border/50" data-testid="select-product-category">
+                      <SelectValue placeholder={t("myProducts.selectCategory")}>
+                        {selectedCat?.label || t("myProducts.selectCategory")}
+                      </SelectValue>
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="glass-morphism-strong border-border/50">
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="oldPrice"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>السعر القديم (قبل التخفيض)</FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field}
+                    type="number" 
+                    placeholder="مثال: 150"
+                    className="glass-morphism border-border/50"
+                    data-testid="input-product-old-price"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>السعر الجديد (بعد التخفيض)</FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field}
+                    type="number" 
+                    placeholder={t("myProducts.pricePlaceholder")}
+                    className="glass-morphism border-border/50"
+                    data-testid="input-product-price"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {showAccountFields && (
+          <div className="space-y-4 pt-4 border-t border-border/50">
+            <h3 className="text-sm font-medium text-foreground">{t("myProducts.accountDetails")}</h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="accountUsername"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("myProducts.accountUsername")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        placeholder={t("myProducts.usernamePlaceholder")}
+                        className="glass-morphism border-border/50"
+                        data-testid="input-account-username"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="accountPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("myProducts.accountPassword")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        type="password"
+                        placeholder={t("myProducts.passwordPlaceholder")}
+                        className="glass-morphism border-border/50"
+                        data-testid="input-account-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="accountEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("myProducts.accountEmail")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        type="email"
+                        placeholder={t("myProducts.emailPlaceholder")}
+                        className="glass-morphism border-border/50"
+                        data-testid="input-account-email"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="accountEmailPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("myProducts.accountEmailPassword")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        type="password"
+                        placeholder={t("myProducts.emailPasswordPlaceholder")}
+                        className="glass-morphism border-border/50"
+                        data-testid="input-account-email-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        )}
+
+        <Button 
+          type="submit"
+          className="w-full neon-glow-primary" 
+          disabled={isPending}
+          data-testid={product ? "button-update-product" : "button-create-product"}
+        >
+          {isPending ? t("myProducts.saving") : product ? t("myProducts.updateService") : t("myProducts.createServiceBtn")}
+        </Button>
+      </form>
+    </Form>
+  );
+});
 
 export function MyProductsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -149,273 +439,16 @@ export function MyProductsPage() {
     },
   });
 
-  // Category mappings - value is what's stored in DB, label is translation key
-  const categories = [
-    { value: "Design", label: t("services.categories.design") },
-    { value: "Development", label: t("services.categories.development") },
-    { value: "Marketing", label: t("services.categories.marketing") },
-    { value: "Writing", label: t("services.categories.writing") },
-    { value: "Video & Animation", label: t("services.categories.videoAnimation") },
-    { value: "Music & Audio", label: t("services.categories.musicAudio") },
-    { value: "Instagram", label: t("services.categories.instagram") },
-    { value: "TikTok", label: t("services.categories.tiktok") },
-  ];
+  // Memoized handlers for the ProductForm
+  const handleCreateProduct = useCallback((data: InsertProduct) => {
+    createMutation.mutate(data);
+  }, [createMutation]);
 
-  const ProductForm = ({ product, onClose }: { product?: Product; onClose: () => void }) => {
-    const form = useForm<InsertProduct>({
-      resolver: zodResolver(insertProductSchema),
-      defaultValues: product ? {
-        sellerId: product.sellerId,
-        title: product.title,
-        description: product.description,
-        price: product.price.toString(),
-        oldPrice: product.oldPrice ? product.oldPrice.toString() : "",
-        category: product.category,
-        imageUrl: product.imageUrl,
-        isActive: product.isActive,
-        accountUsername: product.accountUsername || "",
-        accountPassword: product.accountPassword || "",
-        accountEmail: product.accountEmail || "",
-        accountEmailPassword: product.accountEmailPassword || "",
-      } : {
-        sellerId: user?.id || "",
-        title: "",
-        description: "",
-        price: "",
-        oldPrice: "",
-        category: "",
-        imageUrl: "",
-        isActive: true,
-        accountUsername: "",
-        accountPassword: "",
-        accountEmail: "",
-        accountEmailPassword: "",
-      },
-    });
-
-    const selectedCategory = form.watch("category");
-    const showAccountFields = selectedCategory === "Instagram" || selectedCategory === "TikTok";
-
-    const onSubmit = (data: InsertProduct) => {
-      if (product) {
-        updateMutation.mutate({ id: product.id, data });
-      } else {
-        createMutation.mutate(data);
-      }
-    };
-
-    return (
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("myProducts.serviceTitle")}</FormLabel>
-                <FormControl>
-                  <Input 
-                    {...field}
-                    placeholder={t("myProducts.titlePlaceholder")}
-                    className="glass-morphism border-border/50"
-                    data-testid="input-product-title"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("myProducts.description")}</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    {...field}
-                    placeholder={t("myProducts.descriptionPlaceholder")}
-                    className="glass-morphism border-border/50 min-h-[100px]"
-                    data-testid="input-product-description"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => {
-              const selectedCategory = categories.find(c => c.value === field.value);
-              return (
-                <FormItem>
-                  <FormLabel>{t("myProducts.category")}</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="glass-morphism border-border/50" data-testid="select-product-category">
-                        <SelectValue placeholder={t("myProducts.selectCategory")}>
-                          {selectedCategory?.label || t("myProducts.selectCategory")}
-                        </SelectValue>
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="glass-morphism-strong border-border/50">
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
-
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="oldPrice"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>السعر القديم (قبل التخفيض)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      {...field}
-                      type="number" 
-                      placeholder="مثال: 150"
-                      className="glass-morphism border-border/50"
-                      data-testid="input-product-old-price"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>السعر الجديد (بعد التخفيض)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      {...field}
-                      type="number" 
-                      placeholder={t("myProducts.pricePlaceholder")}
-                      className="glass-morphism border-border/50"
-                      data-testid="input-product-price"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {showAccountFields && (
-            <div className="space-y-4 pt-4 border-t border-border/50">
-              <h3 className="text-sm font-medium text-foreground">{t("myProducts.accountDetails")}</h3>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="accountUsername"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("myProducts.accountUsername")}</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field}
-                          placeholder={t("myProducts.usernamePlaceholder")}
-                          className="glass-morphism border-border/50"
-                          data-testid="input-account-username"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="accountPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("myProducts.accountPassword")}</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field}
-                          type="password"
-                          placeholder={t("myProducts.passwordPlaceholder")}
-                          className="glass-morphism border-border/50"
-                          data-testid="input-account-password"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="accountEmail"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("myProducts.accountEmail")}</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field}
-                          type="email"
-                          placeholder={t("myProducts.emailPlaceholder")}
-                          className="glass-morphism border-border/50"
-                          data-testid="input-account-email"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="accountEmailPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("myProducts.accountEmailPassword")}</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field}
-                          type="password"
-                          placeholder={t("myProducts.emailPasswordPlaceholder")}
-                          className="glass-morphism border-border/50"
-                          data-testid="input-account-email-password"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-          )}
-
-          <Button 
-            type="submit"
-            className="w-full neon-glow-primary" 
-            disabled={createMutation.isPending || updateMutation.isPending}
-            data-testid={product ? "button-update-product" : "button-create-product"}
-          >
-            {(createMutation.isPending || updateMutation.isPending) ? t("myProducts.saving") : product ? t("myProducts.updateService") : t("myProducts.createServiceBtn")}
-          </Button>
-        </form>
-      </Form>
-    );
-  };
+  const handleUpdateProduct = useCallback((data: InsertProduct) => {
+    if (editingProduct) {
+      updateMutation.mutate({ id: editingProduct.id, data });
+    }
+  }, [editingProduct, updateMutation]);
 
   if (isLoading) {
     return (
@@ -480,7 +513,12 @@ export function MyProductsPage() {
                   </DialogDescription>
                 </DialogHeader>
                 <ScrollArea className="max-h-[calc(90vh-120px)] px-6 pb-6">
-                  <ProductForm onClose={() => setIsAddDialogOpen(false)} />
+                  <ProductForm 
+                    userId={user?.id || ""} 
+                    onSubmit={handleCreateProduct}
+                    isPending={createMutation.isPending}
+                    t={t}
+                  />
                 </ScrollArea>
               </DialogContent>
             </Dialog>
@@ -623,7 +661,13 @@ export function MyProductsPage() {
                           </DialogDescription>
                         </DialogHeader>
                         <ScrollArea className="max-h-[calc(90vh-120px)] px-6 pb-6">
-                          <ProductForm product={product} onClose={() => setEditingProduct(null)} />
+                          <ProductForm 
+                            product={product}
+                            userId={user?.id || ""} 
+                            onSubmit={handleUpdateProduct}
+                            isPending={updateMutation.isPending}
+                            t={t}
+                          />
                         </ScrollArea>
                       </DialogContent>
                     </Dialog>
@@ -724,7 +768,13 @@ export function MyProductsPage() {
                           </DialogDescription>
                         </DialogHeader>
                         <ScrollArea className="max-h-[calc(90vh-120px)] px-6 pb-6">
-                          <ProductForm product={product} onClose={() => setEditingProduct(null)} />
+                          <ProductForm 
+                            product={product}
+                            userId={user?.id || ""} 
+                            onSubmit={handleUpdateProduct}
+                            isPending={updateMutation.isPending}
+                            t={t}
+                          />
                         </ScrollArea>
                       </DialogContent>
                     </Dialog>
