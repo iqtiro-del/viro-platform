@@ -362,6 +362,18 @@ export function MyProductsPage() {
   const { t } = useLanguage();
   const { toast } = useToast();
 
+  // Category mappings for display - memoized for performance
+  const categories = useMemo(() => [
+    { value: "Design", label: t("services.categories.design") },
+    { value: "Development", label: t("services.categories.development") },
+    { value: "Marketing", label: t("services.categories.marketing") },
+    { value: "Writing", label: t("services.categories.writing") },
+    { value: "Video & Animation", label: t("services.categories.videoAnimation") },
+    { value: "Music & Audio", label: t("services.categories.musicAudio") },
+    { value: "Instagram", label: t("services.categories.instagram") },
+    { value: "TikTok", label: t("services.categories.tiktok") },
+  ], [t]);
+
   // Fetch user's products
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ['/api/users', user?.id, 'products'],
