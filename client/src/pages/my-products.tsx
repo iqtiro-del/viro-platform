@@ -144,7 +144,7 @@ const ProductForm = memo(function ProductForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         <FormField
           control={form.control}
           name="title"
@@ -155,7 +155,7 @@ const ProductForm = memo(function ProductForm({
                 <Input 
                   {...field}
                   placeholder={t("myProducts.titlePlaceholder")}
-                  className="glass-morphism border-border/50"
+                  className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
                   data-testid="input-product-title"
                 />
               </FormControl>
@@ -174,7 +174,7 @@ const ProductForm = memo(function ProductForm({
                 <Textarea 
                   {...field}
                   placeholder={t("myProducts.descriptionPlaceholder")}
-                  className="glass-morphism border-border/50 min-h-[100px]"
+                  className="glass-morphism border-border/50 min-h-[100px] text-base touch-manipulation"
                   data-testid="input-product-description"
                 />
               </FormControl>
@@ -193,7 +193,7 @@ const ProductForm = memo(function ProductForm({
                 <FormLabel>{t("myProducts.category")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger className="glass-morphism border-border/50" data-testid="select-product-category">
+                    <SelectTrigger className="glass-morphism border-border/50 h-12 text-base touch-manipulation" data-testid="select-product-category">
                       <SelectValue placeholder={t("myProducts.selectCategory")}>
                         {selectedCat?.label || t("myProducts.selectCategory")}
                       </SelectValue>
@@ -201,7 +201,7 @@ const ProductForm = memo(function ProductForm({
                   </FormControl>
                   <SelectContent className="glass-morphism-strong border-border/50">
                     {categories.map((cat) => (
-                      <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                      <SelectItem key={cat.value} value={cat.value} className="h-11 touch-manipulation">{cat.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -222,8 +222,9 @@ const ProductForm = memo(function ProductForm({
                   <Input 
                     {...field}
                     type="number" 
+                    inputMode="decimal"
                     placeholder="مثال: 150"
-                    className="glass-morphism border-border/50"
+                    className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
                     data-testid="input-product-old-price"
                   />
                 </FormControl>
@@ -242,8 +243,9 @@ const ProductForm = memo(function ProductForm({
                   <Input 
                     {...field}
                     type="number" 
+                    inputMode="decimal"
                     placeholder={t("myProducts.pricePlaceholder")}
-                    className="glass-morphism border-border/50"
+                    className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
                     data-testid="input-product-price"
                   />
                 </FormControl>
@@ -254,7 +256,7 @@ const ProductForm = memo(function ProductForm({
         </div>
 
         {showAccountFields && (
-          <div className="space-y-4 pt-4 border-t border-border/50">
+          <div className="space-y-5 pt-4 border-t border-border/50">
             <h3 className="text-sm font-medium text-foreground">{t("myProducts.accountDetails")}</h3>
             
             <div className="grid grid-cols-2 gap-4">
@@ -268,7 +270,7 @@ const ProductForm = memo(function ProductForm({
                       <Input 
                         {...field}
                         placeholder={t("myProducts.usernamePlaceholder")}
-                        className="glass-morphism border-border/50"
+                        className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
                         data-testid="input-account-username"
                       />
                     </FormControl>
@@ -288,7 +290,7 @@ const ProductForm = memo(function ProductForm({
                         {...field}
                         type="password"
                         placeholder={t("myProducts.passwordPlaceholder")}
-                        className="glass-morphism border-border/50"
+                        className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
                         data-testid="input-account-password"
                       />
                     </FormControl>
@@ -309,8 +311,9 @@ const ProductForm = memo(function ProductForm({
                       <Input 
                         {...field}
                         type="email"
+                        inputMode="email"
                         placeholder={t("myProducts.emailPlaceholder")}
-                        className="glass-morphism border-border/50"
+                        className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
                         data-testid="input-account-email"
                       />
                     </FormControl>
@@ -330,7 +333,7 @@ const ProductForm = memo(function ProductForm({
                         {...field}
                         type="password"
                         placeholder={t("myProducts.emailPasswordPlaceholder")}
-                        className="glass-morphism border-border/50"
+                        className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
                         data-testid="input-account-email-password"
                       />
                     </FormControl>
@@ -344,7 +347,7 @@ const ProductForm = memo(function ProductForm({
 
         <Button 
           type="submit"
-          className="w-full neon-glow-primary" 
+          className="w-full neon-glow-primary h-12 text-base touch-manipulation" 
           disabled={isPending}
           data-testid={product ? "button-update-product" : "button-create-product"}
         >
@@ -517,21 +520,21 @@ export function MyProductsPage() {
                   {t("myProducts.addNewService")}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="glass-morphism-strong border-border/50 max-w-lg max-h-[90vh] p-0">
+              <DialogContent className="glass-morphism-strong border-border/50 max-w-lg max-h-[90vh] p-0 overflow-hidden">
                 <DialogHeader className="px-6 pt-6 pb-2">
                   <DialogTitle>{t("myProducts.addNewService")}</DialogTitle>
                   <DialogDescription>
                     {t("myProducts.createService")}
                   </DialogDescription>
                 </DialogHeader>
-                <ScrollArea className="max-h-[calc(90vh-120px)] px-6 pb-6">
+                <div className="overflow-y-auto max-h-[calc(90vh-120px)] px-6 pb-6 overscroll-contain touch-pan-y">
                   <ProductForm 
                     userId={user?.id || ""} 
                     onSubmit={handleCreateProduct}
                     isPending={createMutation.isPending}
                     t={t}
                   />
-                </ScrollArea>
+                </div>
               </DialogContent>
             </Dialog>
           ) : null}
@@ -665,14 +668,14 @@ export function MyProductsPage() {
                           {t("common.edit")}
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="glass-morphism-strong border-border/50 max-w-lg max-h-[90vh] p-0">
+                      <DialogContent className="glass-morphism-strong border-border/50 max-w-lg max-h-[90vh] p-0 overflow-hidden">
                         <DialogHeader className="px-6 pt-6 pb-2">
                           <DialogTitle>{t("myProducts.editService")}</DialogTitle>
                           <DialogDescription>
                             {t("myProducts.updateDetails")}
                           </DialogDescription>
                         </DialogHeader>
-                        <ScrollArea className="max-h-[calc(90vh-120px)] px-6 pb-6">
+                        <div className="overflow-y-auto max-h-[calc(90vh-120px)] px-6 pb-6 overscroll-contain touch-pan-y">
                           <ProductForm 
                             product={product}
                             userId={user?.id || ""} 
@@ -680,7 +683,7 @@ export function MyProductsPage() {
                             isPending={updateMutation.isPending}
                             t={t}
                           />
-                        </ScrollArea>
+                        </div>
                       </DialogContent>
                     </Dialog>
 
@@ -772,14 +775,14 @@ export function MyProductsPage() {
                           <Edit className="w-4 h-4" />
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="glass-morphism-strong border-border/50 max-w-lg max-h-[90vh] p-0">
+                      <DialogContent className="glass-morphism-strong border-border/50 max-w-lg max-h-[90vh] p-0 overflow-hidden">
                         <DialogHeader className="px-6 pt-6 pb-2">
                           <DialogTitle>{t("myProducts.editService")}</DialogTitle>
                           <DialogDescription>
                             {t("myProducts.updateDetails")}
                           </DialogDescription>
                         </DialogHeader>
-                        <ScrollArea className="max-h-[calc(90vh-120px)] px-6 pb-6">
+                        <div className="overflow-y-auto max-h-[calc(90vh-120px)] px-6 pb-6 overscroll-contain touch-pan-y">
                           <ProductForm 
                             product={product}
                             userId={user?.id || ""} 
@@ -787,7 +790,7 @@ export function MyProductsPage() {
                             isPending={updateMutation.isPending}
                             t={t}
                           />
-                        </ScrollArea>
+                        </div>
                       </DialogContent>
                     </Dialog>
 
