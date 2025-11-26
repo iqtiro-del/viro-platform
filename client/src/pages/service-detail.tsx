@@ -71,6 +71,7 @@ export function ServiceDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/user'] });
       queryClient.invalidateQueries({ queryKey: ['/api/products', productId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] }); // Refresh homepage stats (total sales)
       toast({
         title: t("services.purchaseSuccess"),
         description: t("services.purchaseSuccess.description"),

@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useLocation } from "wouter";
 import type { User } from "@shared/schema";
+import { queryClient } from "./queryClient";
 
 type AuthUser = Omit<User, 'password'>;
 
@@ -63,6 +64,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const userData = await response.json();
     setUser(userData);
     localStorage.setItem("tiro-user", JSON.stringify(userData));
+    
+    // Instantly refresh dashboard stats (verified sellers count)
+    queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
+    
     setLocation("/");
   };
 

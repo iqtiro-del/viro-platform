@@ -861,6 +861,7 @@ function DepositsManagement({ adminId }: { adminId: string }) {
       // Invalidate deposit queries
       queryClient.invalidateQueries({ queryKey: ['/api/admin/transactions?type=deposit'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] }); // Refresh homepage stats (total sales)
       
       // CRITICAL: Invalidate all user queries so wallet balances update
       queryClient.invalidateQueries({ queryKey: ['/api/users'] });
@@ -1058,6 +1059,7 @@ function WithdrawalsManagement({ adminId }: { adminId: string }) {
       // Invalidate withdrawal queries
       queryClient.invalidateQueries({ queryKey: ['/api/admin/transactions?type=withdraw'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] }); // Refresh homepage stats
       
       // CRITICAL: Invalidate all user queries so wallet balances update
       queryClient.invalidateQueries({ queryKey: ['/api/users'] });
