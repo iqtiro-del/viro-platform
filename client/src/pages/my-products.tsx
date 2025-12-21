@@ -78,6 +78,7 @@ const CATEGORY_VALUES = [
   "Music & Audio",
   "Instagram",
   "TikTok",
+  "Netflix",
 ] as const;
 
 // Memoized ProductForm component - extracted outside to prevent re-creation on parent re-renders
@@ -111,6 +112,7 @@ const ProductForm = memo(function ProductForm({
       accountPassword: product.accountPassword || "",
       accountEmail: product.accountEmail || "",
       accountEmailPassword: product.accountEmailPassword || "",
+      subscriptionDuration: product.subscriptionDuration || "",
     } : {
       sellerId: userId,
       title: "",
@@ -124,11 +126,13 @@ const ProductForm = memo(function ProductForm({
       accountPassword: "",
       accountEmail: "",
       accountEmailPassword: "",
+      subscriptionDuration: "",
     },
   });
 
   const selectedCategory = form.watch("category");
   const showAccountFields = selectedCategory === "Instagram" || selectedCategory === "TikTok";
+  const showNetflixFields = selectedCategory === "Netflix";
 
   // Get translated category labels
   const categories = useMemo(() => [
@@ -140,6 +144,7 @@ const ProductForm = memo(function ProductForm({
     { value: "Music & Audio", label: t("services.categories.musicAudio") },
     { value: "Instagram", label: t("services.categories.instagram") },
     { value: "TikTok", label: t("services.categories.tiktok") },
+    { value: "Netflix", label: t("services.categories.netflix") },
   ], [t]);
 
   return (
@@ -345,6 +350,79 @@ const ProductForm = memo(function ProductForm({
           </div>
         )}
 
+        {showNetflixFields && (
+          <div className="space-y-5 pt-4 border-t border-border/50">
+            <h3 className="text-sm font-medium text-foreground">{t("myProducts.netflixDetails")}</h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="accountEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("myProducts.accountEmail")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        type="email"
+                        inputMode="email"
+                        placeholder={t("myProducts.emailPlaceholder")}
+                        className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
+                        data-testid="input-netflix-email"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="accountPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("myProducts.accountPassword")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        type="password"
+                        placeholder={t("myProducts.passwordPlaceholder")}
+                        className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
+                        data-testid="input-netflix-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="subscriptionDuration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("myProducts.subscriptionDuration")}</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <FormControl>
+                      <SelectTrigger className="glass-morphism border-border/50 h-12 text-base touch-manipulation" data-testid="select-subscription-duration">
+                        <SelectValue placeholder={t("myProducts.selectDuration")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="glass-morphism-strong border-border/50">
+                      <SelectItem value="1_month" className="h-11 touch-manipulation">{t("myProducts.1month")}</SelectItem>
+                      <SelectItem value="3_months" className="h-11 touch-manipulation">{t("myProducts.3months")}</SelectItem>
+                      <SelectItem value="6_months" className="h-11 touch-manipulation">{t("myProducts.6months")}</SelectItem>
+                      <SelectItem value="12_months" className="h-11 touch-manipulation">{t("myProducts.12months")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
+
         <Button 
           type="submit"
           className="w-full neon-glow-primary h-12 text-base touch-manipulation" 
@@ -375,6 +453,7 @@ export function MyProductsPage() {
     { value: "Music & Audio", label: t("services.categories.musicAudio") },
     { value: "Instagram", label: t("services.categories.instagram") },
     { value: "TikTok", label: t("services.categories.tiktok") },
+    { value: "Netflix", label: t("services.categories.netflix") },
   ], [t]);
 
   // Fetch user's products

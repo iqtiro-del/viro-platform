@@ -27,6 +27,11 @@ export const categoryImages: Record<string, string> = {
 export const fixedImageCategories = ["Netflix"];
 
 export function getProductImage(category: string, customImageUrl?: string | null): string {
+  // For fixed image categories (like Netflix), always use the category image
+  if (fixedImageCategories.includes(category)) {
+    return categoryImages[category] || categoryImages["Design"];
+  }
+  
   // If custom image URL exists and is not empty, use it
   if (customImageUrl && customImageUrl.trim() !== "") {
     return customImageUrl;
