@@ -138,6 +138,7 @@ export function ServicesPage() {
     { value: "Music & Audio", label: t("services.musicAudio") },
     { value: "Instagram", label: t("services.instagram") },
     { value: "TikTok", label: t("services.tiktok") },
+    { value: "Netflix", label: t("services.netflix") },
   ];
 
   const priceRanges = [
