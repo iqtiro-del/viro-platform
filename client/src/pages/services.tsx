@@ -139,6 +139,7 @@ export function ServicesPage() {
     { value: "Instagram", label: t("services.instagram") },
     { value: "TikTok", label: t("services.tiktok") },
     { value: "Netflix", label: t("services.netflix") },
+    { value: "YouTube", label: t("services.youtube") },
   ];
 
   const priceRanges = [

@@ -79,6 +79,7 @@ const CATEGORY_VALUES = [
   "Instagram",
   "TikTok",
   "Netflix",
+  "YouTube",
 ] as const;
 
 // Memoized ProductForm component - extracted outside to prevent re-creation on parent re-renders
@@ -133,6 +134,7 @@ const ProductForm = memo(function ProductForm({
   const selectedCategory = form.watch("category");
   const showAccountFields = selectedCategory === "Instagram" || selectedCategory === "TikTok";
   const showNetflixFields = selectedCategory === "Netflix";
+  const showYouTubeFields = selectedCategory === "YouTube";
 
   // Get translated category labels
   const categories = useMemo(() => [
@@ -145,6 +147,7 @@ const ProductForm = memo(function ProductForm({
     { value: "Instagram", label: t("services.categories.instagram") },
     { value: "TikTok", label: t("services.categories.tiktok") },
     { value: "Netflix", label: t("services.categories.netflix") },
+    { value: "YouTube", label: t("services.categories.youtube") },
   ], [t]);
 
   return (
@@ -423,6 +426,55 @@ const ProductForm = memo(function ProductForm({
           </div>
         )}
 
+        {showYouTubeFields && (
+          <div className="space-y-5 pt-4 border-t border-border/50">
+            <h3 className="text-sm font-medium text-foreground">{t("myProducts.youtubeDetails")}</h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="accountEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("myProducts.accountEmail")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        type="email"
+                        inputMode="email"
+                        placeholder={t("myProducts.emailPlaceholder")}
+                        className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
+                        data-testid="input-youtube-email"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="accountPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("myProducts.accountPassword")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        type="password"
+                        placeholder={t("myProducts.passwordPlaceholder")}
+                        className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
+                        data-testid="input-youtube-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        )}
+
         <Button 
           type="submit"
           className="w-full neon-glow-primary h-12 text-base touch-manipulation" 
@@ -454,6 +506,7 @@ export function MyProductsPage() {
     { value: "Instagram", label: t("services.categories.instagram") },
     { value: "TikTok", label: t("services.categories.tiktok") },
     { value: "Netflix", label: t("services.categories.netflix") },
+    { value: "YouTube", label: t("services.categories.youtube") },
   ], [t]);
 
   // Fetch user's products
