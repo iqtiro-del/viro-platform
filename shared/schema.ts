@@ -62,6 +62,7 @@ export const products = pgTable("products", {
   accountPassword: text("account_password").default(''),
   accountEmail: text("account_email").default(''),
   accountEmailPassword: text("account_email_password").default(''),
+  subscriptionDuration: text("subscription_duration").default(''),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -268,6 +269,7 @@ export const insertProductSchema = createInsertSchema(products).omit({
   accountPassword: z.string().optional(),
   accountEmail: z.string().optional(),
   accountEmailPassword: z.string().optional(),
+  subscriptionDuration: z.string().optional(),
 });
 
 export const updateProductSchema = insertProductSchema.partial().extend({
