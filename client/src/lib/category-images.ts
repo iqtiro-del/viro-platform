@@ -9,6 +9,7 @@ import videoImg from '@assets/كمنتالبيسشسيبلاتنم_1762929251207
 import musicImg from '@assets/ثقفغعهخحخهعغفقث_1762929435287.jpg';
 import netflixImg from '@assets/IMG_3421_1766299780162.jpeg';
 import youtubeImg from '@assets/IMG_3420_1766308410139.jpeg';
+import spotifyImg from '@assets/IMG_3441_1766385418310.jpeg';
 
 // Default category images mapping - Professional stock images
 export const categoryImages: Record<string, string> = {
@@ -23,10 +24,11 @@ export const categoryImages: Record<string, string> = {
   "Video & Animation": videoImg,
   "Netflix": netflixImg,
   "YouTube": youtubeImg,
+  "Spotify": spotifyImg,
 };
 
 // Categories with fixed images that sellers cannot change
-export const fixedImageCategories = ["Netflix", "YouTube"];
+export const fixedImageCategories = ["Netflix", "YouTube", "Spotify"];
 
 export function getProductImage(category: string, customImageUrl?: string | null): string {
   // For fixed image categories (like Netflix), always use the category image

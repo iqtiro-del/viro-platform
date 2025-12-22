@@ -80,6 +80,7 @@ const CATEGORY_VALUES = [
   "TikTok",
   "Netflix",
   "YouTube",
+  "Spotify",
 ] as const;
 
 // Memoized ProductForm component - extracted outside to prevent re-creation on parent re-renders
@@ -135,6 +136,7 @@ const ProductForm = memo(function ProductForm({
   const showAccountFields = selectedCategory === "Instagram" || selectedCategory === "TikTok";
   const showNetflixFields = selectedCategory === "Netflix";
   const showYouTubeFields = selectedCategory === "YouTube";
+  const showSpotifyFields = selectedCategory === "Spotify";
 
   // Get translated category labels
   const categories = useMemo(() => [
@@ -148,6 +150,7 @@ const ProductForm = memo(function ProductForm({
     { value: "TikTok", label: t("services.categories.tiktok") },
     { value: "Netflix", label: t("services.categories.netflix") },
     { value: "YouTube", label: t("services.categories.youtube") },
+    { value: "Spotify", label: t("services.categories.spotify") },
   ], [t]);
 
   return (
@@ -475,6 +478,79 @@ const ProductForm = memo(function ProductForm({
           </div>
         )}
 
+        {showSpotifyFields && (
+          <div className="space-y-5 pt-4 border-t border-border/50">
+            <h3 className="text-sm font-medium text-foreground">{t("myProducts.spotifyDetails")}</h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="accountEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("myProducts.accountEmail")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        type="email"
+                        inputMode="email"
+                        placeholder={t("myProducts.emailPlaceholder")}
+                        className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
+                        data-testid="input-spotify-email"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="accountPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("myProducts.accountPassword")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        type="password"
+                        placeholder={t("myProducts.passwordPlaceholder")}
+                        className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
+                        data-testid="input-spotify-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="subscriptionDuration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("myProducts.subscriptionDuration")}</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <FormControl>
+                      <SelectTrigger className="glass-morphism border-border/50 h-12 text-base touch-manipulation" data-testid="select-spotify-duration">
+                        <SelectValue placeholder={t("myProducts.selectDuration")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="glass-morphism-strong border-border/50">
+                      <SelectItem value="1_month" className="h-11 touch-manipulation">{t("myProducts.1month")}</SelectItem>
+                      <SelectItem value="3_months" className="h-11 touch-manipulation">{t("myProducts.3months")}</SelectItem>
+                      <SelectItem value="6_months" className="h-11 touch-manipulation">{t("myProducts.6months")}</SelectItem>
+                      <SelectItem value="12_months" className="h-11 touch-manipulation">{t("myProducts.12months")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
+
         <Button 
           type="submit"
           className="w-full neon-glow-primary h-12 text-base touch-manipulation" 
@@ -507,6 +583,7 @@ export function MyProductsPage() {
     { value: "TikTok", label: t("services.categories.tiktok") },
     { value: "Netflix", label: t("services.categories.netflix") },
     { value: "YouTube", label: t("services.categories.youtube") },
+    { value: "Spotify", label: t("services.categories.spotify") },
   ], [t]);
 
   // Fetch user's products

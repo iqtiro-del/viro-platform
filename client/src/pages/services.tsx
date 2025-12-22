@@ -140,6 +140,7 @@ export function ServicesPage() {
     { value: "TikTok", label: t("services.tiktok") },
     { value: "Netflix", label: t("services.netflix") },
     { value: "YouTube", label: t("services.youtube") },
+    { value: "Spotify", label: t("services.spotify") },
   ];
 
   const priceRanges = [
