@@ -63,6 +63,7 @@ export const products = pgTable("products", {
   accountEmail: text("account_email").default(''),
   accountEmailPassword: text("account_email_password").default(''),
   subscriptionDuration: text("subscription_duration").default(''),
+  telegramPhoneNumber: text("telegram_phone_number").default(''),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
