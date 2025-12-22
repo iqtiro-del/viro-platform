@@ -81,6 +81,7 @@ const CATEGORY_VALUES = [
   "Netflix",
   "YouTube",
   "Spotify",
+  "Telegram Numbers",
 ] as const;
 
 // Memoized ProductForm component - extracted outside to prevent re-creation on parent re-renders
@@ -115,6 +116,7 @@ const ProductForm = memo(function ProductForm({
       accountEmail: product.accountEmail || "",
       accountEmailPassword: product.accountEmailPassword || "",
       subscriptionDuration: product.subscriptionDuration || "",
+      telegramPhoneNumber: product.telegramPhoneNumber || "",
     } : {
       sellerId: userId,
       title: "",
@@ -129,6 +131,7 @@ const ProductForm = memo(function ProductForm({
       accountEmail: "",
       accountEmailPassword: "",
       subscriptionDuration: "",
+      telegramPhoneNumber: "",
     },
   });
 
@@ -137,6 +140,7 @@ const ProductForm = memo(function ProductForm({
   const showNetflixFields = selectedCategory === "Netflix";
   const showYouTubeFields = selectedCategory === "YouTube";
   const showSpotifyFields = selectedCategory === "Spotify";
+  const showTelegramNumbersFields = selectedCategory === "Telegram Numbers";
 
   // Get translated category labels
   const categories = useMemo(() => [
@@ -151,6 +155,7 @@ const ProductForm = memo(function ProductForm({
     { value: "Netflix", label: t("services.categories.netflix") },
     { value: "YouTube", label: t("services.categories.youtube") },
     { value: "Spotify", label: t("services.categories.spotify") },
+    { value: "Telegram Numbers", label: t("services.categories.telegramNumbers") },
   ], [t]);
 
   return (
@@ -551,6 +556,34 @@ const ProductForm = memo(function ProductForm({
           </div>
         )}
 
+        {showTelegramNumbersFields && (
+          <div className="space-y-5 pt-4 border-t border-border/50">
+            <h3 className="text-sm font-medium text-foreground">{t("myProducts.telegramNumbersDetails")}</h3>
+            
+            <FormField
+              control={form.control}
+              name="telegramPhoneNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("myProducts.telegramPhoneNumber")}</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field}
+                      value={field.value || ""}
+                      type="tel"
+                      inputMode="tel"
+                      placeholder={t("myProducts.telegramPhonePlaceholder")}
+                      className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
+                      data-testid="input-telegram-phone"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
+
         <Button 
           type="submit"
           className="w-full neon-glow-primary h-12 text-base touch-manipulation" 
@@ -584,6 +617,7 @@ export function MyProductsPage() {
     { value: "Netflix", label: t("services.categories.netflix") },
     { value: "YouTube", label: t("services.categories.youtube") },
     { value: "Spotify", label: t("services.categories.spotify") },
+    { value: "Telegram Numbers", label: t("services.categories.telegramNumbers") },
   ], [t]);
 
   // Fetch user's products

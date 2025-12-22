@@ -730,6 +730,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // For Telegram Numbers category, add delivery time message
+      if (chat && product.category === "Telegram Numbers") {
+        const telegramDeliveryMessage = "⏰ تنبيه هام:\n\nبعد الشراء، يجب على البائع تسليم رقم التليجرام خلال 5 ساعات.\n\n📱 رقم التليجرام سيتم تسليمه من قبل البائع مباشرة في هذه المحادثة.";
+        
+        await storage.createMessage({
+          chatId: chat.id,
+          senderId: null, // System message
+          senderType: 'system',
+          message: telegramDeliveryMessage,
+          isPinned: true,
+        });
+      }
+
       res.json({ 
         success: true, 
         transaction: result.transaction,
