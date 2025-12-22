@@ -142,6 +142,7 @@ export function ServicesPage() {
     { value: "YouTube", label: t("services.youtube") },
     { value: "Spotify", label: t("services.spotify") },
     { value: "Telegram Numbers", label: t("services.telegramNumbers") },
+    { value: "Subscriptions", label: t("services.subscriptions") },
   ];
 
   const priceRanges = [

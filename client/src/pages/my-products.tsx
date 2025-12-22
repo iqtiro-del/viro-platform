@@ -141,6 +141,7 @@ const ProductForm = memo(function ProductForm({
   const showYouTubeFields = selectedCategory === "YouTube";
   const showSpotifyFields = selectedCategory === "Spotify";
   const showTelegramNumbersFields = selectedCategory === "Telegram Numbers";
+  const showSubscriptionsFields = selectedCategory === "Subscriptions";
 
   // Get translated category labels
   const categories = useMemo(() => [
@@ -156,6 +157,7 @@ const ProductForm = memo(function ProductForm({
     { value: "YouTube", label: t("services.categories.youtube") },
     { value: "Spotify", label: t("services.categories.spotify") },
     { value: "Telegram Numbers", label: t("services.categories.telegramNumbers") },
+    { value: "Subscriptions", label: t("services.categories.subscriptions") },
   ], [t]);
 
   return (
@@ -584,6 +586,55 @@ const ProductForm = memo(function ProductForm({
           </div>
         )}
 
+        {showSubscriptionsFields && (
+          <div className="space-y-5 pt-4 border-t border-border/50">
+            <h3 className="text-sm font-medium text-foreground">{t("myProducts.subscriptionsDetails")}</h3>
+            
+            <FormField
+              control={form.control}
+              name="accountEmail"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("myProducts.subscriptionEmail")}</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field}
+                      value={field.value || ""}
+                      type="email"
+                      inputMode="email"
+                      placeholder={t("myProducts.emailPlaceholder")}
+                      className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
+                      data-testid="input-subscription-email"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="accountPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("myProducts.subscriptionCode")}</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field}
+                      value={field.value || ""}
+                      type="text"
+                      placeholder={t("myProducts.passwordPlaceholder")}
+                      className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
+                      data-testid="input-subscription-code"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
+
         <Button 
           type="submit"
           className="w-full neon-glow-primary h-12 text-base touch-manipulation" 
@@ -618,6 +669,7 @@ export function MyProductsPage() {
     { value: "YouTube", label: t("services.categories.youtube") },
     { value: "Spotify", label: t("services.categories.spotify") },
     { value: "Telegram Numbers", label: t("services.categories.telegramNumbers") },
+    { value: "Subscriptions", label: t("services.categories.subscriptions") },
   ], [t]);
 
   // Fetch user's products
