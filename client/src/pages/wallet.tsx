@@ -403,12 +403,12 @@ export function WalletPage() {
                           </div>
                           <div className="flex justify-between gap-3 text-sm">
                             <span className="text-muted-foreground flex-shrink-0">{t("wallet.processingFee")}</span>
-                            <span className="font-medium text-yellow-500 break-all text-right min-w-0">-${(parseFloat(depositAmount) * 0.10).toFixed(2)}</span>
+                            <span className="font-medium text-yellow-500 break-all text-right min-w-0">-${(parseFloat(depositAmount) * 0.05).toFixed(2)}</span>
                           </div>
                           <div className="h-px bg-border/50 my-2"></div>
                           <div className="flex justify-between gap-3">
                             <span className="font-semibold text-foreground flex-shrink-0">{t("wallet.youWillReceive")}</span>
-                            <span className="font-bold text-primary text-base md:text-lg break-all text-right min-w-0">${(parseFloat(depositAmount) * 0.90).toFixed(2)}</span>
+                            <span className="font-bold text-primary text-base md:text-lg break-all text-right min-w-0">${(parseFloat(depositAmount) * 0.95).toFixed(2)}</span>
                           </div>
                         </div>
                       )}
@@ -508,12 +508,12 @@ export function WalletPage() {
                           </div>
                           <div className="flex justify-between gap-3 text-sm">
                             <span className="text-muted-foreground flex-shrink-0">{t("wallet.processingFee")}</span>
-                            <span className="font-medium text-yellow-500 break-all text-right min-w-0">-${(parseFloat(withdrawAmount) * 0.10).toFixed(2)}</span>
+                            <span className="font-medium text-yellow-500 break-all text-right min-w-0">-${(parseFloat(withdrawAmount) * 0.05).toFixed(2)}</span>
                           </div>
                           <div className="h-px bg-border/50 my-2"></div>
                           <div className="flex justify-between gap-3">
                             <span className="font-semibold text-foreground flex-shrink-0">{t("wallet.youWillReceive")}</span>
-                            <span className="font-bold text-primary text-base md:text-lg break-all text-right min-w-0">${(parseFloat(withdrawAmount) * 0.90).toFixed(2)}</span>
+                            <span className="font-bold text-primary text-base md:text-lg break-all text-right min-w-0">${(parseFloat(withdrawAmount) * 0.95).toFixed(2)}</span>
                           </div>
                         </div>
                       )}

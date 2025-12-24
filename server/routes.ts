@@ -535,8 +535,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Apply 10% fee on deposit (user receives 90% of deposited amount)
-      const feeRate = 0.10;
+      // Apply 5% fee on deposit (user receives 95% of deposited amount)
+      const feeRate = 0.05;
       const feeAmount = depositAmount * feeRate;
       const amountAfterFee = depositAmount - feeAmount;
       
@@ -597,8 +597,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Amount must be greater than 0" });
       }
 
-      // Apply 10% fee on withdrawal (user receives 90% of requested amount)
-      const feeRate = 0.10;
+      // Apply 5% fee on withdrawal (user receives 95% of requested amount)
+      const feeRate = 0.05;
       const feeAmount = withdrawAmount * feeRate;
       const amountToReceive = withdrawAmount - feeAmount;
       
@@ -1273,7 +1273,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const user = await storage.getUser(transaction.userId);
         if (user) {
           const depositAmount = parseFloat(transaction.amount);
-          const feeRate = 0.10;
+          const feeRate = 0.05;
           const amountAfterFee = depositAmount - (depositAmount * feeRate);
           const currentBalance = parseFloat(user.balance);
           const newBalance = currentBalance + amountAfterFee;
