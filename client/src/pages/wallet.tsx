@@ -321,44 +321,17 @@ export function WalletPage() {
                             <SelectValue placeholder={t("wallet.selectMethod")} />
                           </SelectTrigger>
                           <SelectContent className="glass-morphism-strong border-border/50">
-                            <SelectItem value="Zain Cash">{t("wallet.zainCash")}</SelectItem>
+                            <SelectItem value="Zain Cash" disabled className="opacity-50">
+                              <div className="flex flex-col">
+                                <span>{t("wallet.zainCash")}</span>
+                                <span className="text-xs text-yellow-500">تحت الصيانة</span>
+                              </div>
+                            </SelectItem>
                             <SelectItem value="Al-Rafidain QiServices">{t("wallet.alRafidain")}</SelectItem>
                             <SelectItem value="FIB">{t("wallet.fib")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                      
-                      {/* Conditional fields for Zain Cash */}
-                      {depositMethod === "Zain Cash" && (
-                        <div className="space-y-4 p-4 bg-primary/5 border border-primary/20 rounded-md">
-                          <div>
-                            <Label>{t("wallet.platformZainNumber")}</Label>
-                            <Input 
-                              type="text"
-                              value="07708917002"
-                              readOnly
-                              className="glass-morphism border-border/50 mt-2 bg-muted/50 cursor-not-allowed"
-                              data-testid="input-platform-zain-number"
-                            />
-                            <p className="text-xs text-muted-foreground mt-1">{t("wallet.transferToThisNumber")}</p>
-                          </div>
-                          <div>
-                            <Label htmlFor="user-wallet-number">
-                              {t("wallet.yourWalletNumber")} <span className="text-destructive">*</span>
-                            </Label>
-                            <Input 
-                              id="user-wallet-number"
-                              type="text"
-                              placeholder={t("wallet.enterWalletNumber")}
-                              value={userPaymentNumber}
-                              onChange={(e) => setUserPaymentNumber(e.target.value)}
-                              className="glass-morphism border-border/50 mt-2"
-                              data-testid="input-user-wallet-number"
-                            />
-                            <p className="text-xs text-muted-foreground mt-1">{t("wallet.walletNumberHint")}</p>
-                          </div>
-                        </div>
-                      )}
                       
                       {/* Conditional fields for Rafidain Services */}
                       {depositMethod === "Al-Rafidain QiServices" && (
@@ -448,7 +421,7 @@ export function WalletPage() {
                           !depositMethod || 
                           !depositScreenshot ||
                           depositMutation.isPending ||
-                          ((depositMethod === "Zain Cash" || depositMethod === "Al-Rafidain QiServices") && !userPaymentNumber)
+                          (depositMethod === "Al-Rafidain QiServices" && !userPaymentNumber)
                         }
                       >
                         {depositMutation.isPending ? t("wallet.processing") : t("wallet.confirmDeposit")}
@@ -491,7 +464,12 @@ export function WalletPage() {
                             <SelectValue placeholder={t("wallet.selectWithdrawMethod")} />
                           </SelectTrigger>
                           <SelectContent className="glass-morphism-strong border-border/50">
-                            <SelectItem value="Zain Cash">{t("wallet.zainCash")}</SelectItem>
+                            <SelectItem value="Zain Cash" disabled className="opacity-50">
+                              <div className="flex flex-col">
+                                <span>{t("wallet.zainCash")}</span>
+                                <span className="text-xs text-yellow-500">تحت الصيانة</span>
+                              </div>
+                            </SelectItem>
                             <SelectItem value="Al-Rafidain QiServices">{t("wallet.alRafidain")}</SelectItem>
                             <SelectItem value="FIB">{t("wallet.fib")}</SelectItem>
                           </SelectContent>
