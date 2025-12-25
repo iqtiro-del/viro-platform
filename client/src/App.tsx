@@ -13,6 +13,7 @@ import { PageTransition } from "@/components/page-transition";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import FloatingSupport from "@/components/FloatingSupport";
+import { TelegramDialog } from "@/components/telegram-dialog";
 import NotFound from "@/pages/not-found";
 import { Dashboard } from "@/pages/dashboard";
 import { AuthPage } from "@/pages/auth";
@@ -164,6 +165,7 @@ function App() {
             <TooltipProvider>
               <Toaster />
               <FloatingSupport />
+              <TelegramDialog />
               <Router />
             </TooltipProvider>
           </ThemeProvider>

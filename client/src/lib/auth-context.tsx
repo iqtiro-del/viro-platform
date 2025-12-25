@@ -13,6 +13,8 @@ interface AuthContextType {
   logout: () => void;
   refreshUser: () => Promise<void>;
   isLoading: boolean;
+  showTelegramDialog: boolean;
+  setShowTelegramDialog: (show: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,6 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showTelegramDialog, setShowTelegramDialog] = useState(false);
   const [, setLocation] = useLocation();
 
   useEffect(() => {
@@ -46,6 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const userData = await response.json();
     setUser(userData);
     localStorage.setItem("tiro-user", JSON.stringify(userData));
+    setShowTelegramDialog(true);
     setLocation("/");
   };
 
@@ -68,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Instantly refresh dashboard stats (verified sellers count)
     queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
     
+    setShowTelegramDialog(true);
     setLocation("/");
   };
 
@@ -108,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser: updateUser, login, register, logout, refreshUser, isLoading }}>
+    <AuthContext.Provider value={{ user, setUser: updateUser, login, register, logout, refreshUser, isLoading, showTelegramDialog, setShowTelegramDialog }}>
       {children}
     </AuthContext.Provider>
   );
