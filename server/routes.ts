@@ -1389,7 +1389,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Payment Gateway Callback endpoint
+  // Payment Gateway Callback endpoint (supports both GET and POST)
+  app.get("/api/payment/callback", async (req, res) => {
+    res.json({ status: "ok", message: "Callback endpoint is active" });
+  });
+
   app.post("/api/payment/callback", async (req, res) => {
     try {
       const data = req.body;
