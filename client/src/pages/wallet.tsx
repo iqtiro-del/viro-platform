@@ -34,7 +34,14 @@ import { useLanguage } from "@/lib/language-context";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Transaction } from "@shared/schema";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { CreditCard } from "lucide-react";
+
+declare global {
+  interface Window {
+    SP_SUCCESSFUL_PAYMENT?: (paymentCode: string) => void;
+  }
+}
 
 export function WalletPage() {
   const { user, setUser, refreshUser } = useAuth();
@@ -50,6 +57,11 @@ export function WalletPage() {
   const [accountNumberError, setAccountNumberError] = useState("");
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
+  const [onlinePaymentDialogOpen, setOnlinePaymentDialogOpen] = useState(false);
+  const [onlinePaymentAmount, setOnlinePaymentAmount] = useState("");
+  const [isProcessingOnlinePayment, setIsProcessingOnlinePayment] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const spaceremitFormRef = useRef<HTMLFormElement>(null);
   
   // Refresh user data when wallet page loads to get latest balance
   useEffect(() => {
@@ -219,6 +231,61 @@ export function WalletPage() {
         variant: "destructive"
       });
     }
+  });
+
+  const verifyPaymentMutation = useMutation({
+    mutationFn: async (paymentCode: string) => {
+      const response = await apiRequest('POST', '/api/payments/verify', {
+        userId: user?.id,
+        paymentCode,
+        amount: onlinePaymentAmount
+      });
+      return response.json();
+    },
+    onSuccess: async (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id, 'transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users', user?.id] });
+      await refreshUser();
+      
+      setPaymentSuccess(true);
+      toast({
+        title: "تم الإيداع بنجاح",
+        description: `تم إضافة $${data.amountCredited} إلى رصيدك`,
+        duration: 5000
+      });
+      
+      setTimeout(() => {
+        setOnlinePaymentDialogOpen(false);
+        setOnlinePaymentAmount("");
+        setPaymentSuccess(false);
+        setIsProcessingOnlinePayment(false);
+      }, 2000);
+    },
+    onError: (error: any) => {
+      setIsProcessingOnlinePayment(false);
+      toast({
+        title: "فشل التحقق من الدفع",
+        description: error.message || "حدث خطأ أثناء التحقق من الدفع",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleSpaceremitPayment = useCallback((paymentCode: string) => {
+    console.log("Payment successful, code:", paymentCode);
+    verifyPaymentMutation.mutate(paymentCode);
+  }, [verifyPaymentMutation]);
+
+  useEffect(() => {
+    window.SP_SUCCESSFUL_PAYMENT = handleSpaceremitPayment;
+    return () => {
+      delete window.SP_SUCCESSFUL_PAYMENT;
+    };
+  }, [handleSpaceremitPayment]);
+
+  const { data: spaceremitConfig } = useQuery<{ publicKey: string }>({
+    queryKey: ['/api/payments/config'],
+    enabled: onlinePaymentDialogOpen
   });
 
   const getTransactionIcon = (type: string) => {
@@ -427,6 +494,119 @@ export function WalletPage() {
                         {depositMutation.isPending ? t("wallet.processing") : t("wallet.confirmDeposit")}
                       </Button>
                     </div>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Online Payment Button */}
+                <Dialog open={onlinePaymentDialogOpen} onOpenChange={(open) => {
+                  setOnlinePaymentDialogOpen(open);
+                  if (!open) {
+                    setOnlinePaymentAmount("");
+                    setIsProcessingOnlinePayment(false);
+                    setPaymentSuccess(false);
+                  }
+                }}>
+                  <DialogTrigger asChild>
+                    <Button variant="secondary" className="flex-1" data-testid="button-online-payment">
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      دفع إلكتروني
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="glass-morphism-strong border-border/50 max-h-[90vh] flex flex-col">
+                    <DialogHeader className="flex-shrink-0">
+                      <DialogTitle>الدفع الإلكتروني</DialogTitle>
+                      <DialogDescription>
+                        ادفع بطريقة آمنة عبر بوابة Spaceremit
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    {paymentSuccess ? (
+                      <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                        <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
+                          <ArrowDownRight className="w-8 h-8 text-green-500" />
+                        </div>
+                        <p className="text-lg font-semibold text-green-500">تم الدفع بنجاح!</p>
+                        <p className="text-muted-foreground text-center">
+                          تم إضافة الرصيد إلى محفظتك
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4 pt-4 overflow-y-auto flex-1 px-1">
+                        <div>
+                          <Label htmlFor="online-payment-amount">المبلغ (USD)</Label>
+                          <Input 
+                            id="online-payment-amount" 
+                            type="number" 
+                            placeholder="أدخل المبلغ بالدولار"
+                            value={onlinePaymentAmount}
+                            onChange={(e) => setOnlinePaymentAmount(e.target.value)}
+                            className="glass-morphism border-border/50 mt-2"
+                            disabled={isProcessingOnlinePayment}
+                            data-testid="input-online-payment-amount"
+                          />
+                        </div>
+                        
+                        {onlinePaymentAmount && parseFloat(onlinePaymentAmount) > 0 && (
+                          <div className="p-4 bg-primary/5 border border-primary/20 rounded-md space-y-2">
+                            <div className="flex justify-between gap-3 text-sm">
+                              <span className="text-muted-foreground">المبلغ المدفوع</span>
+                              <span className="font-medium">${parseFloat(onlinePaymentAmount).toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between gap-3 text-sm">
+                              <span className="text-muted-foreground">رسوم المنصة (5%)</span>
+                              <span className="font-medium text-yellow-500">-${(parseFloat(onlinePaymentAmount) * 0.05).toFixed(2)}</span>
+                            </div>
+                            <div className="h-px bg-border/50 my-2"></div>
+                            <div className="flex justify-between gap-3">
+                              <span className="font-semibold">ستحصل على</span>
+                              <span className="font-bold text-primary">${(parseFloat(onlinePaymentAmount) * 0.95).toFixed(2)}</span>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {spaceremitConfig?.publicKey && onlinePaymentAmount && parseFloat(onlinePaymentAmount) > 0 && (
+                          <form 
+                            ref={spaceremitFormRef}
+                            id="spaceremit-payment-form"
+                            className="space-y-4"
+                          >
+                            <input type="hidden" name="amount" value={onlinePaymentAmount} />
+                            <input type="hidden" name="currency" value="USD" />
+                            <input type="hidden" name="buyer_name" value={user?.username || ''} />
+                            <input type="hidden" name="buyer_email" value={`${user?.username}@viroi.net`} />
+                            <input type="hidden" name="public_key" value={spaceremitConfig.publicKey} />
+                            <input type="hidden" name="order_id" value={`DEP-${user?.id}-${Date.now()}`} />
+                            
+                            <Button 
+                              type="button"
+                              className="w-full neon-glow-primary" 
+                              data-testid="button-start-online-payment"
+                              onClick={() => {
+                                setIsProcessingOnlinePayment(true);
+                                const form = spaceremitFormRef.current;
+                                if (form) {
+                                  const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                                  form.dispatchEvent(submitEvent);
+                                }
+                              }}
+                              disabled={isProcessingOnlinePayment || verifyPaymentMutation.isPending}
+                            >
+                              {isProcessingOnlinePayment ? "جاري المعالجة..." : "ادفع الآن"}
+                            </Button>
+                          </form>
+                        )}
+                        
+                        {!spaceremitConfig?.publicKey && onlinePaymentAmount && parseFloat(onlinePaymentAmount) > 0 && (
+                          <div className="text-center py-4">
+                            <p className="text-muted-foreground">جاري تحميل بوابة الدفع...</p>
+                          </div>
+                        )}
+                        
+                        <p className="text-xs text-muted-foreground text-center">
+                          الدفع الآمن عبر بوابة Spaceremit - يدعم البطاقات البنكية والمحافظ الإلكترونية
+                        </p>
+                      </div>
+                    )}
                   </DialogContent>
                 </Dialog>
 
