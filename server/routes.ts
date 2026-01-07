@@ -1389,6 +1389,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Payment Gateway Callback endpoint
+  app.post("/api/payment/callback", async (req, res) => {
+    try {
+      const data = req.body;
+      console.log("Payment callback received:", JSON.stringify(data, null, 2));
+      res.json({ status: "received" });
+    } catch (error: any) {
+      console.error("Payment callback error:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Test endpoint for Telegram connection
   app.get("/api/test-telegram", async (req, res) => {
     try {
