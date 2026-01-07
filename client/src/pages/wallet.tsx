@@ -568,7 +568,7 @@ export function WalletPage() {
                           <form 
                             ref={spaceremitFormRef}
                             id="spaceremit-payment-form"
-                            className="space-y-4"
+                            className="spaceremit-payment space-y-4"
                           >
                             <input type="hidden" name="amount" value={onlinePaymentAmount} />
                             <input type="hidden" name="currency" value="USD" />
@@ -578,16 +578,14 @@ export function WalletPage() {
                             <input type="hidden" name="order_id" value={`DEP-${user?.id}-${Date.now()}`} />
                             
                             <Button 
-                              type="button"
+                              type="submit"
                               className="w-full neon-glow-primary" 
                               data-testid="button-start-online-payment"
                               onClick={() => {
                                 setIsProcessingOnlinePayment(true);
-                                const form = spaceremitFormRef.current;
-                                if (form) {
-                                  const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-                                  form.dispatchEvent(submitEvent);
-                                }
+                                setTimeout(() => {
+                                  setIsProcessingOnlinePayment(false);
+                                }, 30000);
                               }}
                               disabled={isProcessingOnlinePayment || verifyPaymentMutation.isPending}
                             >
