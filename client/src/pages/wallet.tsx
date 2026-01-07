@@ -279,7 +279,7 @@ export function WalletPage() {
   useEffect(() => {
     window.SP_SUCCESSFUL_PAYMENT = handleSpaceremitPayment;
     return () => {
-      delete window.SP_SUCCESSFUL_PAYMENT;
+      window.SP_SUCCESSFUL_PAYMENT = undefined;
     };
   }, [handleSpaceremitPayment]);
 
