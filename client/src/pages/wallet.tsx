@@ -40,6 +40,9 @@ import { CreditCard } from "lucide-react";
 declare global {
   interface Window {
     SP_SUCCESSFUL_PAYMENT?: (paymentCode: string) => void;
+    handleSpaceremitSuccess?: (paymentCode: string) => void;
+    handleSpaceremitFailed?: () => void;
+    SP_PUBLIC_KEY?: string;
   }
 }
 
@@ -276,17 +279,38 @@ export function WalletPage() {
     verifyPaymentMutation.mutate(paymentCode);
   }, [verifyPaymentMutation]);
 
+  const handleSpaceremitFailed = useCallback(() => {
+    console.log("Payment failed");
+    setIsProcessingOnlinePayment(false);
+    toast({
+      title: "فشل الدفع",
+      description: "حدث خطأ أثناء عملية الدفع. يرجى المحاولة مرة أخرى.",
+      variant: "destructive"
+    });
+  }, [toast]);
+
   useEffect(() => {
-    window.SP_SUCCESSFUL_PAYMENT = handleSpaceremitPayment;
+    // Set up global callbacks for Spaceremit SDK
+    window.handleSpaceremitSuccess = handleSpaceremitPayment;
+    window.handleSpaceremitFailed = handleSpaceremitFailed;
+    
     return () => {
-      window.SP_SUCCESSFUL_PAYMENT = undefined;
+      window.handleSpaceremitSuccess = undefined;
+      window.handleSpaceremitFailed = undefined;
     };
-  }, [handleSpaceremitPayment]);
+  }, [handleSpaceremitPayment, handleSpaceremitFailed]);
 
   const { data: spaceremitConfig } = useQuery<{ publicKey: string }>({
     queryKey: ['/api/payments/config'],
     enabled: onlinePaymentDialogOpen
   });
+
+  // Update SP_PUBLIC_KEY when config is loaded
+  useEffect(() => {
+    if (spaceremitConfig?.publicKey) {
+      window.SP_PUBLIC_KEY = spaceremitConfig.publicKey;
+    }
+  }, [spaceremitConfig]);
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
@@ -567,15 +591,32 @@ export function WalletPage() {
                         {spaceremitConfig?.publicKey && onlinePaymentAmount && parseFloat(onlinePaymentAmount) > 0 && (
                           <form 
                             ref={spaceremitFormRef}
-                            id="spaceremit-payment-form"
-                            className="spaceremit-payment space-y-4"
+                            id="spaceremit-form"
+                            className="space-y-4"
+                            style={{ width: '100%' }}
                           >
                             <input type="hidden" name="amount" value={onlinePaymentAmount} />
                             <input type="hidden" name="currency" value="USD" />
-                            <input type="hidden" name="buyer_name" value={user?.username || ''} />
-                            <input type="hidden" name="buyer_email" value={`${user?.username}@viroi.net`} />
-                            <input type="hidden" name="public_key" value={spaceremitConfig.publicKey} />
-                            <input type="hidden" name="order_id" value={`DEP-${user?.id}-${Date.now()}`} />
+                            <input type="hidden" name="fullname" value={user?.username || ''} />
+                            <input type="hidden" name="email" value={`${user?.username}@viroi.net`} />
+                            <input type="hidden" name="phone" value="" />
+                            <input type="hidden" name="notes" value={`DEP-${user?.id}-${Date.now()}`} />
+                            
+                            <div className="sp-one-type-select">
+                              <input type="radio" name="sp-pay-type-radio" value="local-methods-pay" id="sp_local_methods_radio" defaultChecked />
+                              <label htmlFor="sp_local_methods_radio" className="block p-3 border border-border/50 rounded-md cursor-pointer hover:bg-primary/5 mb-2">
+                                <div className="text-sm font-medium">طرق الدفع المحلية</div>
+                              </label>
+                              <div id="spaceremit-local-methods-pay" className="mt-2"></div>
+                            </div>
+                            
+                            <div className="sp-one-type-select">
+                              <input type="radio" name="sp-pay-type-radio" value="card-pay" id="sp_card_radio" />
+                              <label htmlFor="sp_card_radio" className="block p-3 border border-border/50 rounded-md cursor-pointer hover:bg-primary/5 mb-2">
+                                <div className="text-sm font-medium">الدفع بالبطاقة</div>
+                              </label>
+                              <div id="spaceremit-card-pay" className="mt-2"></div>
+                            </div>
                             
                             <Button 
                               type="submit"
