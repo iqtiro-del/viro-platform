@@ -13,40 +13,6 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- Spaceremit Payment Gateway Configuration -->
-    <script>
-      // Spaceremit SDK Configuration - MUST be before the SDK script
-      var SP_PUBLIC_KEY = "";  // Will be set dynamically from backend
-      var SP_FORM_ID = "#spaceremit-form";
-      var SP_SELECT_RADIO_NAME = "sp-pay-type-radio";
-      var LOCAL_METHODS_BOX_STATUS = true;
-      var LOCAL_METHODS_PARENT_ID = "#spaceremit-local-methods-pay";
-      var CARD_BOX_STATUS = true;
-      var CARD_BOX_PARENT_ID = "#spaceremit-card-pay";
-      var SP_FORM_AUTO_SUBMIT_WHEN_GET_CODE = false;
-      
-      // Callback functions
-      function SP_SUCCESSFUL_PAYMENT(spaceremit_code) {
-        console.log("Spaceremit payment successful, code:", spaceremit_code);
-        if (window.handleSpaceremitSuccess) {
-          window.handleSpaceremitSuccess(spaceremit_code);
-        }
-      }
-      function SP_FAILD_PAYMENT() {
-        console.log("Spaceremit payment failed");
-        if (window.handleSpaceremitFailed) {
-          window.handleSpaceremitFailed();
-        }
-      }
-      function SP_RECIVED_MESSAGE(message) {
-        console.log("Spaceremit message:", message);
-      }
-      function SP_NEED_AUTH(target_auth_link) {
-        console.log("Spaceremit needs auth:", target_auth_link);
-        window.open(target_auth_link, '_blank');
-      }
-    </script>
-    <!-- Spaceremit Payment Gateway SDK -->
-    <script src="https://spaceremit.com/api/v2/js_script/spaceremit.js"></script>
+    <!-- Spaceremit Payment Gateway - Loaded dynamically by React component -->
   </body>
 </html>

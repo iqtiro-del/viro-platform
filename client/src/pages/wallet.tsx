@@ -40,9 +40,19 @@ import { CreditCard } from "lucide-react";
 declare global {
   interface Window {
     SP_SUCCESSFUL_PAYMENT?: (paymentCode: string) => void;
+    SP_FAILD_PAYMENT?: () => void;
+    SP_RECIVED_MESSAGE?: (message: string) => void;
+    SP_NEED_AUTH?: (target_auth_link: string) => void;
     handleSpaceremitSuccess?: (paymentCode: string) => void;
     handleSpaceremitFailed?: () => void;
     SP_PUBLIC_KEY?: string;
+    SP_FORM_ID?: string;
+    SP_SELECT_RADIO_NAME?: string;
+    LOCAL_METHODS_BOX_STATUS?: boolean;
+    LOCAL_METHODS_PARENT_ID?: string;
+    CARD_BOX_STATUS?: boolean;
+    CARD_BOX_PARENT_ID?: string;
+    SP_FORM_AUTO_SUBMIT_WHEN_GET_CODE?: boolean;
   }
 }
 
@@ -64,6 +74,8 @@ export function WalletPage() {
   const [onlinePaymentAmount, setOnlinePaymentAmount] = useState("");
   const [isProcessingOnlinePayment, setIsProcessingOnlinePayment] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [spaceremitLoaded, setSpaceremitLoaded] = useState(false);
+  const [spaceremitReady, setSpaceremitReady] = useState(false);
   const spaceremitFormRef = useRef<HTMLFormElement>(null);
   
   // Refresh user data when wallet page loads to get latest balance
@@ -305,12 +317,98 @@ export function WalletPage() {
     enabled: onlinePaymentDialogOpen
   });
 
-  // Update SP_PUBLIC_KEY when config is loaded
+  // Load Spaceremit SDK dynamically when dialog opens and form is ready
   useEffect(() => {
-    if (spaceremitConfig?.publicKey) {
-      window.SP_PUBLIC_KEY = spaceremitConfig.publicKey;
+    if (!onlinePaymentDialogOpen || !spaceremitConfig?.publicKey || !onlinePaymentAmount || parseFloat(onlinePaymentAmount) <= 0) {
+      return;
     }
-  }, [spaceremitConfig]);
+
+    // Small delay to ensure form is rendered
+    const timer = setTimeout(() => {
+      const form = document.querySelector('#spaceremit-form');
+      if (!form) {
+        console.log('Spaceremit form not found yet');
+        return;
+      }
+
+      // Remove any existing SDK elements
+      const existingScript = document.getElementById('spaceremit-sdk-script');
+      if (existingScript) {
+        existingScript.remove();
+      }
+      
+      // Clear existing iframes from previous loads
+      const existingIframes = form.querySelectorAll('iframe');
+      existingIframes.forEach(iframe => iframe.remove());
+      
+      // Clear global popup container if exists
+      const existingPopup = document.getElementById('local_ways_spaceremit_section');
+      if (existingPopup) {
+        existingPopup.remove();
+      }
+
+      // Set up global configuration BEFORE loading SDK
+      window.SP_PUBLIC_KEY = spaceremitConfig.publicKey;
+      window.SP_FORM_ID = '#spaceremit-form';
+      window.SP_SELECT_RADIO_NAME = 'sp-pay-type-radio';
+      window.LOCAL_METHODS_BOX_STATUS = true;
+      window.LOCAL_METHODS_PARENT_ID = '#spaceremit-local-methods-pay';
+      window.CARD_BOX_STATUS = true;
+      window.CARD_BOX_PARENT_ID = '#spaceremit-card-pay';
+      window.SP_FORM_AUTO_SUBMIT_WHEN_GET_CODE = false;
+
+      // Set up callback functions
+      window.SP_SUCCESSFUL_PAYMENT = (code: string) => {
+        console.log('Spaceremit payment successful:', code);
+        if (window.handleSpaceremitSuccess) {
+          window.handleSpaceremitSuccess(code);
+        }
+      };
+      window.SP_FAILD_PAYMENT = () => {
+        console.log('Spaceremit payment failed');
+        if (window.handleSpaceremitFailed) {
+          window.handleSpaceremitFailed();
+        }
+      };
+      window.SP_RECIVED_MESSAGE = (message: string) => {
+        console.log('Spaceremit message:', message);
+      };
+      window.SP_NEED_AUTH = (target: string) => {
+        console.log('Spaceremit needs auth:', target);
+      };
+
+      // Load SDK script dynamically
+      const script = document.createElement('script');
+      script.id = 'spaceremit-sdk-script';
+      script.src = 'https://spaceremit.com/api/v2/js_script/spaceremit.js';
+      script.onload = () => {
+        console.log('Spaceremit SDK loaded successfully');
+        setSpaceremitReady(true);
+        setIsProcessingOnlinePayment(false);
+      };
+      script.onerror = () => {
+        console.error('Failed to load Spaceremit SDK');
+        setIsProcessingOnlinePayment(false);
+        toast({
+          title: "خطأ في تحميل بوابة الدفع",
+          description: "يرجى إعادة المحاولة",
+          variant: "destructive"
+        });
+      };
+      document.body.appendChild(script);
+      setSpaceremitLoaded(true);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [onlinePaymentDialogOpen, spaceremitConfig?.publicKey, onlinePaymentAmount, toast]);
+
+  // Reset state when dialog closes
+  useEffect(() => {
+    if (!onlinePaymentDialogOpen) {
+      setSpaceremitLoaded(false);
+      setSpaceremitReady(false);
+    }
+  }, [onlinePaymentDialogOpen]);
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
@@ -622,15 +720,9 @@ export function WalletPage() {
                               type="submit"
                               className="w-full neon-glow-primary" 
                               data-testid="button-start-online-payment"
-                              onClick={() => {
-                                setIsProcessingOnlinePayment(true);
-                                setTimeout(() => {
-                                  setIsProcessingOnlinePayment(false);
-                                }, 30000);
-                              }}
-                              disabled={isProcessingOnlinePayment || verifyPaymentMutation.isPending}
+                              disabled={!spaceremitReady || verifyPaymentMutation.isPending}
                             >
-                              {isProcessingOnlinePayment ? "جاري المعالجة..." : "ادفع الآن"}
+                              {!spaceremitReady ? "جاري تحميل بوابة الدفع..." : verifyPaymentMutation.isPending ? "جاري التحقق..." : "ادفع الآن"}
                             </Button>
                           </form>
                         )}
