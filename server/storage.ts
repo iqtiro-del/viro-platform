@@ -754,23 +754,40 @@ export class DatabaseStorage implements IStorage {
   }
 
   async checkExpiredChats(): Promise<void> {
-    // Find chats that are active but expired
-    const expiredChats = await db
-      .select()
-      .from(chats)
-      .where(
-        and(
-          eq(chats.status, 'active'),
-          sql`${chats.expiresAt} < NOW()`
-        )
-      );
+    try {
+      // Build the WHERE condition with validation
+      const statusCondition = eq(chats.status, 'active');
+      const expiryCondition = sql`${chats.expiresAt} < NOW()`;
+      const whereCondition = and(statusCondition, expiryCondition);
+      
+      // Guard: Ensure whereCondition is not undefined before executing query
+      if (!whereCondition) {
+        console.error('[checkExpiredChats] WHERE condition is undefined, skipping query');
+        return;
+      }
 
-    // Update them to under_review status
-    for (const chat of expiredChats) {
-      await db
-        .update(chats)
-        .set({ status: 'under_review' })
-        .where(eq(chats.id, chat.id));
+      // Find chats that are active but expired
+      const expiredChats = await db
+        .select()
+        .from(chats)
+        .where(whereCondition);
+
+      // Update them to under_review status
+      for (const chat of expiredChats) {
+        // Guard: Ensure chat.id is valid before updating
+        if (!chat.id) {
+          console.error('[checkExpiredChats] Chat ID is undefined, skipping update');
+          continue;
+        }
+        
+        await db
+          .update(chats)
+          .set({ status: 'under_review' })
+          .where(eq(chats.id, chat.id));
+      }
+    } catch (error) {
+      console.error('[checkExpiredChats] Error checking expired chats:', error);
+      // Fail safely - don't crash the application
     }
   }
 
