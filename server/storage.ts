@@ -66,7 +66,7 @@ export interface IStorage {
   getAllTransactions(): Promise<Transaction[]>;
   getTransactionsByUser(userId: string): Promise<Transaction[]>;
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
-  updateTransaction(id: string, status: string): Promise<Transaction | undefined>;
+  updateTransaction(id: string, data: { status?: string; description?: string }): Promise<Transaction | undefined>;
   
   // Product Purchase
   purchaseProduct(buyerId: string, productId: string): Promise<{ success: boolean; transaction?: Transaction; error?: string }>;
@@ -374,10 +374,14 @@ export class DatabaseStorage implements IStorage {
     return newTransaction;
   }
 
-  async updateTransaction(id: string, status: string): Promise<Transaction | undefined> {
+  async updateTransaction(id: string, data: { status?: string; description?: string }): Promise<Transaction | undefined> {
+    const updateData: any = {};
+    if (data.status) updateData.status = data.status;
+    if (data.description) updateData.description = data.description;
+    
     const [transaction] = await db
       .update(transactions)
-      .set({ status: status as any })
+      .set(updateData)
       .where(eq(transactions.id, id))
       .returning();
     return transaction || undefined;
@@ -664,7 +668,7 @@ export class DatabaseStorage implements IStorage {
           });
 
           // Update transaction status
-          await this.updateTransaction(transaction.id, 'failed');
+          await this.updateTransaction(transaction.id, { status: 'failed' });
 
           // Decrement product sales since this was a refund
           await this.updateProduct(chatDetails.productId, {
@@ -719,7 +723,7 @@ export class DatabaseStorage implements IStorage {
           });
 
           // Update transaction status
-          await this.updateTransaction(transaction.id, 'completed');
+          await this.updateTransaction(transaction.id, { status: 'completed' });
 
           // Create seller transaction
           await this.createTransaction({
@@ -740,7 +744,7 @@ export class DatabaseStorage implements IStorage {
           });
 
           // Update transaction status
-          await this.updateTransaction(transaction.id, 'failed');
+          await this.updateTransaction(transaction.id, { status: 'failed' });
 
           // Decrement product sales since this was a refund
           await this.updateProduct(chatDetails.productId, {
@@ -822,7 +826,7 @@ export class DatabaseStorage implements IStorage {
         totalEarnings: (sellerEarnings + productPrice).toFixed(2)
       });
 
-      await this.updateTransaction(transaction.id, 'completed');
+      await this.updateTransaction(transaction.id, { status: 'completed' });
 
       await this.createTransaction({
         userId: chatDetails.sellerId,
@@ -877,7 +881,7 @@ export class DatabaseStorage implements IStorage {
         balance: (buyerBalance + productPrice).toFixed(2)
       });
 
-      await this.updateTransaction(transaction.id, 'failed');
+      await this.updateTransaction(transaction.id, { status: 'failed' });
 
       await this.updateProduct(chatDetails.productId, {
         sales: Math.max(0, chatDetails.product.sales - 1)

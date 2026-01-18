@@ -16,6 +16,7 @@ import { encryptCredentials, decryptCredentials, encrypt, decrypt } from "./cryp
 import { sendDepositScreenshotToTelegram } from "./telegram";
 import multer from "multer";
 import { Scheduler } from "./scheduler";
+import { createInvoice, verifyIPNSignature } from "./nowpayments";
 
 // Configure multer for memory storage (no file saved to disk)
 const upload = multer({ 
@@ -1397,52 +1398,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Payment Gateway Callback endpoint (supports both GET and POST)
-  // NOWPayments Webhook
+  // NOWPayments - Create crypto deposit invoice
+  app.post("/api/crypto/create-invoice", async (req, res) => {
+    try {
+      const { userId, amount, payCurrency } = req.body;
+      
+      if (!userId || !amount) {
+        return res.status(400).json({ error: "userId and amount are required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const parsedAmount = parseFloat(amount);
+      if (isNaN(parsedAmount) || parsedAmount <= 0) {
+        return res.status(400).json({ error: "Invalid amount" });
+      }
+
+      // Determine base URL for callbacks
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://viroi.net' 
+        : `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`;
+
+      const orderId = `DEP-${userId}-${Date.now()}`;
+      
+      const invoiceParams = {
+        price_amount: parsedAmount,
+        price_currency: 'USD',
+        order_id: orderId,
+        order_description: `Deposit to VIRO wallet - $${parsedAmount}`,
+        ipn_callback_url: `${baseUrl}/api/nowpayments/webhook`,
+        success_url: `${baseUrl}/wallet?payment=success&order_id=${orderId}`,
+        cancel_url: `${baseUrl}/wallet?payment=cancelled`,
+        ...(payCurrency && { pay_currency: payCurrency })
+      };
+
+      console.log("[NOWPayments] Creating invoice:", invoiceParams);
+      
+      const invoice = await createInvoice(invoiceParams);
+      
+      console.log("[NOWPayments] Invoice created:", invoice);
+
+      // Create a pending transaction record
+      await storage.createTransaction({
+        userId,
+        type: 'deposit',
+        amount: parsedAmount.toFixed(2),
+        description: `Crypto Deposit (Pending) - ${orderId}`,
+        status: 'pending'
+      });
+
+      res.json({
+        success: true,
+        invoiceUrl: invoice.invoice_url,
+        invoiceId: invoice.id,
+        orderId: orderId
+      });
+    } catch (error: any) {
+      console.error("[NOWPayments] Create invoice error:", error);
+      res.status(500).json({ error: error.message || "Failed to create payment invoice" });
+    }
+  });
+
+  // NOWPayments Webhook - Payment status notifications
   app.post("/api/nowpayments/webhook", async (req, res) => {
     try {
       const payload = req.body;
+      const signature = req.headers['x-nowpayments-sig'] as string;
+      
       console.log("[NOWPayments Webhook received]:", JSON.stringify(payload, null, 2));
 
-      // NOWPayments sends various payment statuses
-      // We should check for 'finished' or 'confirmed' to credit the user
-      // Payload example: { payment_id, payment_status, pay_amount, price_amount, order_id, ... }
-      
-      const { payment_status, order_id, pay_amount } = payload;
+      // Verify IPN signature if secret is configured
+      if (process.env.NOWPAYMENTS_IPN_SECRET && signature) {
+        const isValid = verifyIPNSignature(payload, signature);
+        if (!isValid) {
+          console.error("[NOWPayments] Invalid IPN signature");
+          return res.status(400).send("Invalid signature");
+        }
+        console.log("[NOWPayments] IPN signature verified");
+      }
 
-      if ((payment_status === 'finished' || payment_status === 'confirmed') && order_id) {
-        // order_id should contain userId (e.g., "DEP-userId-timestamp")
+      const { payment_status, order_id, price_amount, payment_id } = payload;
+
+      // Handle different payment statuses
+      if (order_id) {
         const userId = order_id.split('-')[1];
         
         if (userId) {
           const user = await storage.getUser(userId);
+          
           if (user) {
-            const amount = parseFloat(pay_amount || "0");
-            
             // Check if this payment was already processed
             const existingTransactions = await storage.getTransactionsByUser(userId);
-            const isDuplicate = existingTransactions.some(
-              t => t.type === 'deposit' && t.status === 'completed' && t.description?.includes(payload.payment_id)
+            const completedTransaction = existingTransactions.find(
+              t => t.type === 'deposit' && t.status === 'completed' && t.description?.includes(String(payment_id))
             );
 
-            if (!isDuplicate && amount > 0) {
-              // Apply 5% fee
-              const feeAmount = amount * 0.05;
-              const creditAmount = amount - feeAmount;
+            if (completedTransaction) {
+              console.log("[NOWPayments] Payment already processed:", payment_id);
+              return res.status(200).send("OK");
+            }
 
-              await storage.updateUser(userId, {
-                balance: (parseFloat(user.balance) + creditAmount).toFixed(2)
-              });
+            // Find the pending transaction for this order
+            const pendingTransaction = existingTransactions.find(
+              t => t.type === 'deposit' && t.status === 'pending' && t.description?.includes(order_id)
+            );
 
-              await storage.createTransaction({
-                userId,
-                type: 'deposit',
-                amount: amount.toFixed(2),
-                description: `NOWPayments Deposit - ${payload.payment_id}`,
-                status: 'completed'
-              });
+            if (payment_status === 'finished' || payment_status === 'confirmed') {
+              // Payment successful - credit user
+              const amount = parseFloat(price_amount || "0");
+              
+              if (amount > 0) {
+                // Apply 5% fee
+                const feeAmount = amount * 0.05;
+                const creditAmount = amount - feeAmount;
 
-              console.log(`[NOWPayments Success] Credited $${creditAmount.toFixed(2)} to user ${user.username}`);
+                await storage.updateUser(userId, {
+                  balance: (parseFloat(user.balance) + creditAmount).toFixed(2)
+                });
+
+                // Update or create completed transaction
+                if (pendingTransaction) {
+                  await storage.updateTransaction(pendingTransaction.id, {
+                    status: 'completed',
+                    description: `Crypto Deposit - ${payment_id}`
+                  });
+                } else {
+                  await storage.createTransaction({
+                    userId,
+                    type: 'deposit',
+                    amount: amount.toFixed(2),
+                    description: `Crypto Deposit - ${payment_id}`,
+                    status: 'completed'
+                  });
+                }
+
+                console.log(`[NOWPayments Success] Credited $${creditAmount.toFixed(2)} to user ${user.username}`);
+              }
+            } else if (payment_status === 'failed' || payment_status === 'expired' || payment_status === 'refunded') {
+              // Payment failed - update pending transaction
+              if (pendingTransaction) {
+                await storage.updateTransaction(pendingTransaction.id, {
+                  status: 'failed',
+                  description: `Crypto Deposit (${payment_status}) - ${payment_id || order_id}`
+                });
+              }
+              console.log(`[NOWPayments] Payment ${payment_status} for order ${order_id}`);
+            } else {
+              // Other statuses (waiting, confirming, sending, partially_paid)
+              console.log(`[NOWPayments] Payment status update: ${payment_status} for order ${order_id}`);
             }
           }
         }

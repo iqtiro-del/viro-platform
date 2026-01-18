@@ -8,7 +8,12 @@ import {
   ArrowUpRight, 
   ArrowDownRight,
   DollarSign,
-  Clock
+  Clock,
+  Bitcoin,
+  ExternalLink,
+  CheckCircle2,
+  XCircle,
+  Loader2
 } from "lucide-react";
 import {
   Dialog,
@@ -50,6 +55,33 @@ export function WalletPage() {
   const [accountNumberError, setAccountNumberError] = useState("");
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
+  const [cryptoDialogOpen, setCryptoDialogOpen] = useState(false);
+  const [cryptoAmount, setCryptoAmount] = useState("");
+  const [cryptoCurrency, setCryptoCurrency] = useState("");
+  
+  // Check URL for payment status
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get('payment');
+    const orderId = params.get('order_id');
+    
+    if (paymentStatus === 'success') {
+      toast({
+        title: "جاري معالجة الدفع",
+        description: "سيتم إضافة الرصيد تلقائياً بعد تأكيد الدفع على الشبكة",
+        duration: 8000
+      });
+      // Clean up URL
+      window.history.replaceState({}, '', '/wallet');
+    } else if (paymentStatus === 'cancelled') {
+      toast({
+        variant: "destructive",
+        title: "تم إلغاء الدفع",
+        description: "تم إلغاء عملية الدفع بالعملات الرقمية",
+      });
+      window.history.replaceState({}, '', '/wallet');
+    }
+  }, []);
   
   // Refresh user data when wallet page loads to get latest balance
   useEffect(() => {
@@ -170,6 +202,37 @@ export function WalletPage() {
     
     return true;
   };
+
+  // Crypto deposit mutation
+  const cryptoDepositMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/crypto/create-invoice', {
+        userId: user?.id,
+        amount: cryptoAmount,
+        payCurrency: cryptoCurrency || undefined
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.success && data.invoiceUrl) {
+        // Redirect to NOWPayments invoice page
+        window.location.href = data.invoiceUrl;
+      } else {
+        toast({
+          variant: "destructive",
+          title: "خطأ في إنشاء الفاتورة",
+          description: data.error || "حدث خطأ أثناء إنشاء فاتورة الدفع",
+        });
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "فشل إنشاء الفاتورة",
+        description: error.message || "حدث خطأ أثناء إنشاء فاتورة الدفع",
+      });
+    }
+  });
 
   const withdrawMutation = useMutation({
     mutationFn: async () => {
@@ -425,6 +488,101 @@ export function WalletPage() {
                         }
                       >
                         {depositMutation.isPending ? t("wallet.processing") : t("wallet.confirmDeposit")}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Crypto Deposit Button and Dialog */}
+                <Dialog open={cryptoDialogOpen} onOpenChange={setCryptoDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="flex-1 border-yellow-500/50 hover:border-yellow-500 text-yellow-500" data-testid="button-crypto-deposit">
+                      <Bitcoin className="w-4 h-4 mr-2" />
+                      كريبتو
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="glass-morphism-strong border-border/50 max-h-[90vh] flex flex-col">
+                    <DialogHeader className="flex-shrink-0">
+                      <DialogTitle className="flex items-center gap-2">
+                        <Bitcoin className="w-5 h-5 text-yellow-500" />
+                        إيداع بالعملات الرقمية
+                      </DialogTitle>
+                      <DialogDescription>
+                        أضف رصيداً إلى محفظتك باستخدام USDT
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-4 overflow-y-auto flex-1 px-1">
+                      <div>
+                        <Label htmlFor="crypto-amount">المبلغ بالدولار (USD)</Label>
+                        <Input 
+                          id="crypto-amount" 
+                          type="number" 
+                          placeholder="أدخل المبلغ المطلوب"
+                          value={cryptoAmount}
+                          onChange={(e) => setCryptoAmount(e.target.value)}
+                          className="glass-morphism border-border/50 mt-2"
+                          min="1"
+                          data-testid="input-crypto-amount"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="crypto-currency">اختر العملة (اختياري)</Label>
+                        <Select value={cryptoCurrency} onValueChange={setCryptoCurrency}>
+                          <SelectTrigger className="glass-morphism border-border/50 mt-2" data-testid="select-crypto-currency">
+                            <SelectValue placeholder="اختر الشبكة أو اتركه فارغاً للاختيار لاحقاً" />
+                          </SelectTrigger>
+                          <SelectContent className="glass-morphism-strong border-border/50">
+                            <SelectItem value="usdttrc20">USDT (TRC20 - Tron)</SelectItem>
+                            <SelectItem value="usdtbsc">USDT (BSC - BNB Chain)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          يمكنك اختيار الشبكة الآن أو تحديدها في صفحة الدفع
+                        </p>
+                      </div>
+
+                      {cryptoAmount && parseFloat(cryptoAmount) > 0 && (
+                        <div className="p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-md space-y-2">
+                          <div className="flex justify-between gap-3 text-sm">
+                            <span className="text-muted-foreground flex-shrink-0">مبلغ الإيداع:</span>
+                            <span className="font-medium">${parseFloat(cryptoAmount).toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between gap-3 text-sm">
+                            <span className="text-muted-foreground flex-shrink-0">رسوم المنصة (5%):</span>
+                            <span className="font-medium text-yellow-500">-${(parseFloat(cryptoAmount) * 0.05).toFixed(2)}</span>
+                          </div>
+                          <div className="h-px bg-border/50 my-2"></div>
+                          <div className="flex justify-between gap-3">
+                            <span className="font-semibold text-foreground flex-shrink-0">سيُضاف إلى رصيدك:</span>
+                            <span className="font-bold text-green-500 text-lg">${(parseFloat(cryptoAmount) * 0.95).toFixed(2)}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-md">
+                        <p className="text-sm text-blue-400">
+                          <strong>ملاحظة:</strong> بعد الضغط على "ادفع الآن"، سيتم توجيهك إلى صفحة الدفع الآمنة لإتمام العملية. سيُضاف الرصيد تلقائياً بعد تأكيد الدفع على الشبكة.
+                        </p>
+                      </div>
+
+                      <Button 
+                        className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold" 
+                        data-testid="button-confirm-crypto"
+                        onClick={() => cryptoDepositMutation.mutate()}
+                        disabled={!cryptoAmount || parseFloat(cryptoAmount) <= 0 || cryptoDepositMutation.isPending}
+                      >
+                        {cryptoDepositMutation.isPending ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            جاري إنشاء الفاتورة...
+                          </>
+                        ) : (
+                          <>
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            ادفع الآن
+                          </>
+                        )}
                       </Button>
                     </div>
                   </DialogContent>
