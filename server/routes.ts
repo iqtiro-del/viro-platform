@@ -578,7 +578,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/wallet/withdraw", async (req, res) => {
     try {
-      const { userId, amount, withdrawMethod, account_number } = req.body;
+      const { userId, amount, withdrawMethod, account_number, walletAddress, network } = req.body;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -586,19 +586,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Validate account number
-      if (!account_number || account_number.trim() === "") {
-        return res.status(400).json({ error: "Bank account number is required" });
-      }
+      if (withdrawMethod === "Crypto") {
+        if (!walletAddress || walletAddress.trim() === "") {
+          return res.status(400).json({ error: "Wallet address is required for Crypto withdrawal" });
+        }
+        if (!walletAddress.trim().startsWith("T")) {
+          return res.status(400).json({ error: "Wallet address must start with T (TRON network)" });
+        }
+        if (parseFloat(amount) < 10) {
+          return res.status(400).json({ error: "Minimum withdrawal amount for Crypto is 10 USDT" });
+        }
+      } else {
+        if (!account_number || account_number.trim() === "") {
+          return res.status(400).json({ error: "Bank account number is required" });
+        }
 
-      const accountNumberStr = account_number.trim();
-      const digitsOnly = /^\d+$/;
-      
-      if (!digitsOnly.test(accountNumberStr)) {
-        return res.status(400).json({ error: "Account number must contain only digits" });
-      }
-      
-      if (accountNumberStr.length < 6 || accountNumberStr.length > 34) {
-        return res.status(400).json({ error: "Account number must be between 6 and 34 digits" });
+        const accountNumberStr = account_number.trim();
+        const digitsOnly = /^\d+$/;
+        
+        if (!digitsOnly.test(accountNumberStr)) {
+          return res.status(400).json({ error: "Account number must contain only digits" });
+        }
+        
+        if (accountNumberStr.length < 6 || accountNumberStr.length > 34) {
+          return res.status(400).json({ error: "Account number must be between 6 and 34 digits" });
+        }
       }
 
       const withdrawAmount = parseFloat(amount);
@@ -617,8 +629,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Mask account number (keep only last 4 digits visible)
-      const last4Digits = accountNumberStr.slice(-4);
-      const maskedAccountNumber = '*'.repeat(accountNumberStr.length - 4) + last4Digits;
+      let maskedAccountNumber = null;
+      if (account_number) {
+        const accountNumberStr = account_number.trim();
+        const last4Digits = accountNumberStr.slice(-4);
+        maskedAccountNumber = '*'.repeat(accountNumberStr.length - 4) + last4Digits;
+      }
       
       // **NEW FLOW**: Deduct balance IMMEDIATELY when user requests withdrawal
       const newBalance = currentBalance - withdrawAmount;
@@ -642,7 +658,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: 'withdraw',
         amount: withdrawAmount.toFixed(2),
         description: `Withdrawal to ${withdrawMethod} (Pending approval)`,
-        accountNumber: maskedAccountNumber
+        accountNumber: maskedAccountNumber,
+        walletAddress: withdrawMethod === "Crypto" ? walletAddress : undefined,
+        network: withdrawMethod === "Crypto" ? "TRC20" : undefined
       });
       
       // Transaction stays in pending status until admin approves

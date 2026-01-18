@@ -100,6 +100,8 @@ export const transactions = pgTable("transactions", {
   description: text("description").default(''),
   accountNumber: varchar("account_number", { length: 50 }),
   payerReference: text("payer_reference").default(''), // Encrypted: User's wallet/account number for deposits
+  walletAddress: text("wallet_address"), // USDT TRC20 wallet address for withdrawals
+  network: text("network"), // Withdrawal network (e.g. TRC20)
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

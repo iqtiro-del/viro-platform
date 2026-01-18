@@ -52,7 +52,9 @@ export function WalletPage() {
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawMethod, setWithdrawMethod] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
+  const [walletAddress, setWalletAddress] = useState("");
   const [accountNumberError, setAccountNumberError] = useState("");
+  const [walletAddressError, setWalletAddressError] = useState("");
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
   const [cryptoDialogOpen, setCryptoDialogOpen] = useState(false);
@@ -203,6 +205,23 @@ export function WalletPage() {
     return true;
   };
 
+  const validateWalletAddress = (value: string): boolean => {
+    setWalletAddressError("");
+    if (!value || value.trim() === "") {
+      setWalletAddressError("عنوان المحفظة مطلوب");
+      return false;
+    }
+    if (!value.startsWith("T")) {
+      setWalletAddressError("يجب أن يبدأ العنوان بحرف T (شبكة TRON)");
+      return false;
+    }
+    if (value.length < 34) {
+      setWalletAddressError("عنوان المحفظة غير صحيح");
+      return false;
+    }
+    return true;
+  };
+
   // Crypto deposit mutation
   const cryptoDepositMutation = useMutation({
     mutationFn: async () => {
@@ -236,15 +255,26 @@ export function WalletPage() {
 
   const withdrawMutation = useMutation({
     mutationFn: async () => {
-      if (!validateAccountNumber(accountNumber)) {
-        throw new Error(accountNumberError || "رقم الحساب غير صحيح");
+      if (withdrawMethod === "Crypto") {
+        if (!validateWalletAddress(walletAddress)) {
+          throw new Error(walletAddressError || "عنوان المحفظة غير صحيح");
+        }
+        if (parseFloat(withdrawAmount) < 10) {
+          throw new Error("الحد الأدنى للسحب عبر الكريبتو هو 10 دولار");
+        }
+      } else {
+        if (!validateAccountNumber(accountNumber)) {
+          throw new Error(accountNumberError || "رقم الحساب غير صحيح");
+        }
       }
       
       const response = await apiRequest('POST', '/api/wallet/withdraw', {
         userId: user?.id,
         amount: withdrawAmount,
         withdrawMethod: withdrawMethod,
-        account_number: accountNumber
+        account_number: withdrawMethod === "Crypto" ? undefined : accountNumber,
+        walletAddress: withdrawMethod === "Crypto" ? walletAddress : undefined,
+        network: withdrawMethod === "Crypto" ? "TRC20" : undefined
       });
       return response.json();
     },
@@ -272,7 +302,9 @@ export function WalletPage() {
       setWithdrawAmount("");
       setWithdrawMethod("");
       setAccountNumber("");
+      setWalletAddress("");
       setAccountNumberError("");
+      setWalletAddressError("");
       setWithdrawDialogOpen(false);
     },
     onError: (error: any) => {
@@ -630,34 +662,75 @@ export function WalletPage() {
                             </SelectItem>
                             <SelectItem value="Al-Rafidain QiServices">{t("wallet.alRafidain")}</SelectItem>
                             <SelectItem value="FIB">{t("wallet.fib")}</SelectItem>
+                            <SelectItem value="Crypto">Crypto (USDT - TRC20)</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                      <div>
-                        <Label htmlFor="account-number">
-                          رقم الحساب البنكي <span className="text-destructive">*</span>
-                        </Label>
-                        <Input 
-                          id="account-number" 
-                          type="text" 
-                          placeholder="أدخل رقم الحساب البنكي (6-34 رقم)"
-                          value={accountNumber}
-                          onChange={(e) => {
-                            setAccountNumber(e.target.value);
-                            if (accountNumberError) {
-                              validateAccountNumber(e.target.value);
-                            }
-                          }}
-                          onBlur={() => validateAccountNumber(accountNumber)}
-                          className={`glass-morphism border-border/50 mt-2 ${accountNumberError ? 'border-destructive' : ''}`}
-                          data-testid="input-account-number"
-                        />
-                        {accountNumberError && (
-                          <p className="text-sm text-destructive mt-1" data-testid="error-account-number">
-                            {accountNumberError}
-                          </p>
-                        )}
-                      </div>
+
+                      {withdrawMethod === "Crypto" ? (
+                        <div className="space-y-4 p-4 bg-primary/5 border border-primary/20 rounded-md">
+                          <div>
+                            <Label>الشبكة</Label>
+                            <Input 
+                              value="TRC20" 
+                              readOnly 
+                              className="glass-morphism border-border/50 mt-2 bg-muted/50 cursor-not-allowed"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="wallet-address">
+                              عنوان المحفظة (USDT TRC20) <span className="text-destructive">*</span>
+                            </Label>
+                            <Input 
+                              id="wallet-address"
+                              placeholder="أدخل عنوان المحفظة الذي يبدأ بـ T"
+                              value={walletAddress}
+                              onChange={(e) => {
+                                setWalletAddress(e.target.value);
+                                if (walletAddressError) {
+                                  validateWalletAddress(e.target.value);
+                                }
+                              }}
+                              onBlur={() => validateWalletAddress(walletAddress)}
+                              className={`glass-morphism border-border/50 mt-2 ${walletAddressError ? "border-destructive" : ""}`}
+                            />
+                            {walletAddressError && (
+                              <p className="text-xs text-destructive mt-1">{walletAddressError}</p>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            * الحد الأدنى للسحب هو 10 USDT
+                          </div>
+                        </div>
+                      ) : (
+                        withdrawMethod && (
+                          <div>
+                            <Label htmlFor="account-number">
+                              رقم الحساب البنكي <span className="text-destructive">*</span>
+                            </Label>
+                            <Input 
+                              id="account-number" 
+                              type="text" 
+                              placeholder="أدخل رقم الحساب البنكي (6-34 رقم)"
+                              value={accountNumber}
+                              onChange={(e) => {
+                                setAccountNumber(e.target.value);
+                                if (accountNumberError) {
+                                  validateAccountNumber(e.target.value);
+                                }
+                              }}
+                              onBlur={() => validateAccountNumber(accountNumber)}
+                              className={`glass-morphism border-border/50 mt-2 ${accountNumberError ? 'border-destructive' : ''}`}
+                              data-testid="input-account-number"
+                            />
+                            {accountNumberError && (
+                              <p className="text-sm text-destructive mt-1" data-testid="error-account-number">
+                                {accountNumberError}
+                              </p>
+                            )}
+                          </div>
+                        )
+                      )}
                       {withdrawAmount && parseFloat(withdrawAmount) > 0 && (
                         <div className="p-4 bg-primary/5 border border-primary/20 rounded-md space-y-2" data-testid="breakdown-withdraw-fee">
                           <div className="flex justify-between gap-3 text-sm">
@@ -679,7 +752,12 @@ export function WalletPage() {
                         className="w-full neon-glow-primary" 
                         data-testid="button-confirm-withdraw"
                         onClick={() => withdrawMutation.mutate()}
-                        disabled={!withdrawAmount || !withdrawMethod || !accountNumber || withdrawMutation.isPending}
+                        disabled={
+                          !withdrawAmount || 
+                          !withdrawMethod || 
+                          (withdrawMethod === "Crypto" ? !walletAddress : !accountNumber) || 
+                          withdrawMutation.isPending
+                        }
                       >
                         {withdrawMutation.isPending ? t("wallet.processing") : t("wallet.confirmWithdrawal")}
                       </Button>
