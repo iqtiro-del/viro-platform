@@ -66,25 +66,42 @@ export async function createInvoice(params: CreateInvoiceParams): Promise<Invoic
   return response.json();
 }
 
-export function verifyIPNSignature(payload: any, signature: string): boolean {
+export function verifyIPNSignature(rawBody: string, signature: string): boolean {
   if (!NOWPAYMENTS_IPN_SECRET) {
-    console.warn('[NOWPayments] IPN Secret not configured, skipping verification');
-    return true;
+    console.error('[NOWPayments] CRITICAL: IPN Secret not configured - rejecting webhook for security');
+    return false;
+  }
+
+  if (!signature) {
+    console.error('[NOWPayments] No signature provided in webhook request');
+    return false;
   }
 
   try {
+    // NOWPayments signs the raw JSON body with HMAC-SHA512
+    // Parse and sort the JSON keys alphabetically as per NOWPayments spec
+    const payload = JSON.parse(rawBody);
     const sortedKeys = Object.keys(payload).sort();
     const sortedPayload: Record<string, any> = {};
     for (const key of sortedKeys) {
       sortedPayload[key] = payload[key];
     }
     
-    const payloadString = JSON.stringify(sortedPayload);
+    const sortedBodyString = JSON.stringify(sortedPayload);
     const hmac = crypto.createHmac('sha512', NOWPAYMENTS_IPN_SECRET);
-    hmac.update(payloadString);
+    hmac.update(sortedBodyString);
     const calculatedSignature = hmac.digest('hex');
     
-    return calculatedSignature === signature;
+    const isValid = calculatedSignature.toLowerCase() === signature.toLowerCase();
+    
+    if (!isValid) {
+      console.error('[NOWPayments] Signature mismatch:', {
+        received: signature.substring(0, 20) + '...',
+        calculated: calculatedSignature.substring(0, 20) + '...'
+      });
+    }
+    
+    return isValid;
   } catch (error) {
     console.error('[NOWPayments] IPN verification error:', error);
     return false;

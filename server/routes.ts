@@ -1463,22 +1463,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // NOWPayments Webhook - Payment status notifications
-  app.post("/api/nowpayments/webhook", async (req, res) => {
+  app.post("/api/nowpayments/webhook", async (req: any, res) => {
     try {
       const payload = req.body;
       const signature = req.headers['x-nowpayments-sig'] as string;
+      const rawBody = req.rawBody as string;
       
       console.log("[NOWPayments Webhook received]:", JSON.stringify(payload, null, 2));
 
-      // Verify IPN signature if secret is configured
-      if (process.env.NOWPAYMENTS_IPN_SECRET && signature) {
-        const isValid = verifyIPNSignature(payload, signature);
-        if (!isValid) {
-          console.error("[NOWPayments] Invalid IPN signature");
-          return res.status(400).send("Invalid signature");
-        }
-        console.log("[NOWPayments] IPN signature verified");
+      // Verify IPN signature - REQUIRED for security
+      if (!rawBody) {
+        console.error("[NOWPayments] Raw body not captured - cannot verify signature");
+        return res.status(400).send("Invalid request");
       }
+      
+      const isValid = verifyIPNSignature(rawBody, signature);
+      if (!isValid) {
+        console.error("[NOWPayments] Invalid IPN signature - rejecting webhook");
+        return res.status(400).send("Invalid signature");
+      }
+      console.log("[NOWPayments] IPN signature verified successfully");
 
       const { payment_status, order_id, price_amount, payment_id } = payload;
 

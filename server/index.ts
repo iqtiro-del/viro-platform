@@ -3,6 +3,15 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// Capture raw body for webhook signature verification
+app.use('/api/nowpayments/webhook', express.json({
+  verify: (req: any, res, buf) => {
+    req.rawBody = buf.toString('utf-8');
+  }
+}));
+
+// Default JSON parser for other routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

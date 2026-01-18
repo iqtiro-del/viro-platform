@@ -18,7 +18,9 @@ The platform features a responsive, mobile-first, Arabic-only (RTL) interface wi
 
 ### Feature Specifications
 - **Fee System**: A 5% fee applies to all deposits and withdrawals (manual processing only).
-- **Payment Methods**: Manual deposit/withdrawal only via bank transfer with screenshot upload (Zain Cash, Al-Rafidain QiServices, FIB). Spaceremit online payment gateway has been removed.
+- **Payment Methods**: 
+  - Manual deposit/withdrawal via bank transfer with screenshot upload (Zain Cash, Al-Rafidain QiServices, FIB)
+  - **NOWPayments Crypto Gateway**: Automated cryptocurrency deposits via USDT (TRC20, BSC). Creates invoices via API, redirects users to NOWPayments payment page, and auto-credits wallet upon webhook confirmation with 5% platform fee.
 - **Service Categories**: Supports diverse digital services, including secure credential delivery for account sales.
 - **Navigation**: Responsive desktop navbar and mobile slide-in drawer, supporting RTL.
 - **Authentication**: Public and protected routes with integrated login/signup dialogs.
