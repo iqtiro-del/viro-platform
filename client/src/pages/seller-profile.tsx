@@ -49,9 +49,10 @@ export function SellerProfilePage({ params }: { params?: { username?: string } }
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [purchasedChat, setPurchasedChat] = useState<Chat | null>(null);
 
-  const { data, isLoading } = useQuery<SellerProfileData>({ 
+  const { data, isLoading, isError } = useQuery<SellerProfileData>({ 
     queryKey: [`/api/sellers/${id}`],
-    enabled: !!id
+    enabled: !!id,
+    retry: false
   });
 
   const purchaseMutation = useMutation({
@@ -140,14 +141,14 @@ export function SellerProfilePage({ params }: { params?: { username?: string } }
     );
   }
 
-  if (!data) {
+  if (isError || !data) {
     return (
       <div className="min-h-screen pb-20 md:pb-8">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
-            <ShoppingBag className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+            <AlertCircle className="w-16 h-16 mx-auto text-destructive mb-4" />
             <h3 className="text-xl font-semibold text-foreground mb-2">البائع غير موجود</h3>
-            <p className="text-muted-foreground mb-6">لم يتم العثور على البائع المطلوب</p>
+            <p className="text-muted-foreground mb-6">لم يتم العثور على البائع المطلوب أو رابط غير صحيح</p>
             <Link href="/services">
               <Button variant="outline" className="border-border/50">
                 <ArrowLeft className="w-4 h-4 mr-2" />

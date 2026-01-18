@@ -140,7 +140,7 @@ function Router() {
                 </Route>
                 {/* Public profile route */}
                 <Route path="/@:username">
-                  {(params) => <SellerProfilePage params={params} />}
+                  {(params) => <SellerProfilePage params={{ username: params.username }} />}
                 </Route>
                 <Route component={NotFound} />
               </Switch>
