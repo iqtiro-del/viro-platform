@@ -17,7 +17,8 @@ The platform features a responsive, mobile-first, Arabic-only (RTL) interface wi
 - **Database**: Neon serverless PostgreSQL with Drizzle ORM. The schema includes `Users`, `Products`, `Reviews`, `Promotions`, and `Transactions` tables, with UUID primary keys and timestamp tracking. Product credentials are encrypted using AES-256-GCM.
 
 ### Feature Specifications
-- **Fee System**: A 10% fee applies to all deposits and withdrawals.
+- **Fee System**: A 5% fee applies to all deposits and withdrawals (manual processing only).
+- **Payment Methods**: Manual deposit/withdrawal only via bank transfer with screenshot upload (Zain Cash, Al-Rafidain QiServices, FIB). Spaceremit online payment gateway has been removed.
 - **Service Categories**: Supports diverse digital services, including secure credential delivery for account sales.
 - **Navigation**: Responsive desktop navbar and mobile slide-in drawer, supporting RTL.
 - **Authentication**: Public and protected routes with integrated login/signup dialogs.
