@@ -1390,8 +1390,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payment Gateway Callback endpoint (supports both GET and POST)
-  app.get("/api/payment/callback", async (req, res) => {
-    res.json({ status: "ok", message: "Callback endpoint is active" });
+  // NOWPayments Webhook
+  app.post("/api/nowpayments/webhook", async (req, res) => {
+    try {
+      const payload = req.body;
+      console.log("[NOWPayments Webhook received]:", JSON.stringify(payload, null, 2));
+
+      // NOWPayments sends various payment statuses
+      // We should check for 'finished' or 'confirmed' to credit the user
+      // Payload example: { payment_id, payment_status, pay_amount, price_amount, order_id, ... }
+      
+      const { payment_status, order_id, pay_amount } = payload;
+
+      if ((payment_status === 'finished' || payment_status === 'confirmed') && order_id) {
+        // order_id should contain userId (e.g., "DEP-userId-timestamp")
+        const userId = order_id.split('-')[1];
+        
+        if (userId) {
+          const user = await storage.getUser(userId);
+          if (user) {
+            const amount = parseFloat(pay_amount || "0");
+            
+            // Check if this payment was already processed
+            const existingTransactions = await storage.getTransactionsByUser(userId);
+            const isDuplicate = existingTransactions.some(
+              t => t.type === 'deposit' && t.status === 'completed' && t.description?.includes(payload.payment_id)
+            );
+
+            if (!isDuplicate && amount > 0) {
+              // Apply 5% fee
+              const feeAmount = amount * 0.05;
+              const creditAmount = amount - feeAmount;
+
+              await storage.updateUser(userId, {
+                balance: (parseFloat(user.balance) + creditAmount).toFixed(2)
+              });
+
+              await storage.createTransaction({
+                userId,
+                type: 'deposit',
+                amount: amount.toFixed(2),
+                description: `NOWPayments Deposit - ${payload.payment_id}`,
+                status: 'completed'
+              });
+
+              console.log(`[NOWPayments Success] Credited $${creditAmount.toFixed(2)} to user ${user.username}`);
+            }
+          }
+        }
+      }
+
+      res.status(200).send("OK");
+    } catch (error: any) {
+      console.error("NOWPayments webhook error:", error);
+      res.status(200).send("OK"); // Always return 200 to NOWPayments as per their docs
+    }
   });
 
   // Test endpoint for Telegram connection
