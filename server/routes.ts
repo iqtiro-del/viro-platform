@@ -223,12 +223,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Seller profile route - gets seller info and their products
   app.get("/api/sellers/:id", async (req, res) => {
     try {
-      const seller = await storage.getUser(req.params.id);
+      const { id } = req.params;
+      let seller;
+      
+      // Try to find by UUID first, then by username
+      seller = await storage.getUser(id);
+      if (!seller) {
+        seller = await storage.getUserByUsername(id);
+      }
+      
       if (!seller) {
         return res.status(404).json({ error: "Seller not found" });
       }
       
-      const products = await storage.getProductsBySeller(req.params.id);
+      const products = await storage.getProductsBySeller(seller.id);
       
       const { password, ...sellerWithoutPassword } = seller;
       res.json({

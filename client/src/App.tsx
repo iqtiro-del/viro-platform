@@ -138,6 +138,10 @@ function Router() {
                     <MyChatsPage />
                   </ProtectedRoute>
                 </Route>
+                {/* Public profile route */}
+                <Route path="/@:username">
+                  {(params) => <SellerProfilePage params={params} />}
+                </Route>
                 <Route component={NotFound} />
               </Switch>
             </PageTransition>

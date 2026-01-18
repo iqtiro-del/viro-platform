@@ -35,8 +35,9 @@ interface SellerProfileData {
   products: ProductWithSeller[];
 }
 
-export function SellerProfilePage() {
-  const { id } = useParams<{ id: string }>();
+export function SellerProfilePage({ params }: { params?: { username?: string } }) {
+  const { id: idParam } = useParams<{ id: string }>();
+  const id = params?.username || idParam;
   const { user, setUser } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();

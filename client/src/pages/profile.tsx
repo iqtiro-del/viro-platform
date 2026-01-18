@@ -22,7 +22,10 @@ import {
   TrendingUp,
   MessageCircle,
   ShieldCheck,
-  Upload
+  Upload,
+  Link as LinkIcon,
+  Copy,
+  Check
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
@@ -150,6 +153,21 @@ export function ProfilePage() {
       file: verifyFile,
       username: user.username,
       userId: user.id,
+    });
+  };
+
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = () => {
+    if (!userData?.username) return;
+    const url = `${window.location.protocol}//${window.location.host}/@${userData.username}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      toast({
+        title: "✅ تم النسخ",
+        description: "تم نسخ رابط ملفك الشخصي بنجاح",
+      });
+      setTimeout(() => setCopied(false), 2000);
     });
   };
 
@@ -435,6 +453,37 @@ export function ProfilePage() {
                   <span className="text-sm text-muted-foreground">{t("profile.accountType")}</span>
                   <Badge variant="secondary">{t("profile.seller")}</Badge>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Public Link Card */}
+            <Card className="glass-morphism border-border/30">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <LinkIcon className="w-5 h-5 text-primary" />
+                  رابطك الشخصي
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {userData.username ? (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">شارك رابط ملفك الشخصي مع الآخرين:</p>
+                    <div className="flex items-center gap-2 p-3 glass-morphism rounded-md border border-border/50">
+                      <code className="flex-1 text-sm font-medium truncate ltr" style={{ direction: 'ltr', textAlign: 'left' }}>
+                        {window.location.host}/@{userData.username}
+                      </code>
+                      <Button size="icon" variant="ghost" onClick={handleCopyLink} data-testid="button-copy-link">
+                        {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-md">
+                    <p className="text-sm text-yellow-500 font-medium">
+                      يرجى تعيين اسم مستخدم أولاً لتفعيل رابطك الشخصي.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

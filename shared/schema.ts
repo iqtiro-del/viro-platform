@@ -250,7 +250,11 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
   fullName: true,
 }).extend({
-  username: z.string().min(3, "Username must be at least 3 characters"),
+  username: z.string()
+    .min(3, "Username must be at least 3 characters")
+    .toLowerCase()
+    .regex(/^[a-z0-9_]+$/, "Username can only contain lowercase letters, numbers, and underscores")
+    .refine(val => !['admin', 'login', 'register', 'wallet', 'services', 'service', 'seller', 'profile', 'my-products', 'promote', 'my-chats', 'api', 'auth'].includes(val), "This username is reserved"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   fullName: z.string().min(2, "Full name is required"),
 });
