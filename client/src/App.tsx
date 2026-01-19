@@ -112,6 +112,9 @@ function Router() {
                 <Route path="/admin" component={AdminDashboard} />
                 <Route path="/services" component={ServicesPage} />
                 <Route path="/service/:id" component={ServiceDetailPage} />
+                <Route path="/@:username">
+                  {(params) => <SellerProfilePage params={{ username: params.username }} />}
+                </Route>
                 <Route path="/seller/:id" component={SellerProfilePage} />
                 <Route path="/wallet">
                   <ProtectedRoute>
@@ -137,10 +140,6 @@ function Router() {
                   <ProtectedRoute>
                     <MyChatsPage />
                   </ProtectedRoute>
-                </Route>
-                {/* Public profile route */}
-                <Route path="/@:username">
-                  {(params) => <SellerProfilePage params={{ username: params.username }} />}
                 </Route>
                 <Route component={NotFound} />
               </Switch>

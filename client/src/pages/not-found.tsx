@@ -1,10 +1,21 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Home, ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
+import { SellerProfilePage } from "./seller-profile";
 
 export default function NotFound() {
   const { t } = useLanguage();
+  const [location] = useLocation();
+  
+  // If the path starts with @, we might be here because of a routing race or refresh
+  // although App.tsx should handle it, this is a safety net
+  if (location.startsWith("/@")) {
+    const username = location.substring(2);
+    if (username) {
+      return <SellerProfilePage params={{ username }} />;
+    }
+  }
   
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
