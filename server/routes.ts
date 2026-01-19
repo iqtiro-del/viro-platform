@@ -473,10 +473,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Deposit screenshot is required" });
       }
 
-      // Validate payerReference for Zain Cash and Rafidain Services
+      // Validate payerReference for Rafidain Services
       let encryptedPayerReference = '';
       
-      if (paymentMethod === "Zain Cash" || paymentMethod === "Al-Rafidain QiServices") {
+      if (paymentMethod === "Al-Rafidain QiServices") {
         // Payment reference is required
         if (!payerReference || payerReference.trim() === '') {
           return res.status(400).json({ 
@@ -494,15 +494,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
         
-        // Validate length based on payment method
-        if (paymentMethod === "Zain Cash") {
-          // Zain Cash wallets: 10-15 digits
-          if (reference.length < 10 || reference.length > 15) {
-            return res.status(400).json({ 
-              error: "Zain Cash wallet number must be between 10 and 15 digits" 
-            });
-          }
-        } else if (paymentMethod === "Al-Rafidain QiServices") {
+        if (paymentMethod === "Al-Rafidain QiServices") {
           // Bank account numbers: 6-20 digits
           if (reference.length < 6 || reference.length > 20) {
             return res.status(400).json({ 

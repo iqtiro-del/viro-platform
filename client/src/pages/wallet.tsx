@@ -416,12 +416,6 @@ export function WalletPage() {
                             <SelectValue placeholder={t("wallet.selectMethod")} />
                           </SelectTrigger>
                           <SelectContent className="glass-morphism-strong border-border/50">
-                            <SelectItem value="Zain Cash" disabled className="opacity-50">
-                              <div className="flex flex-col">
-                                <span>{t("wallet.zainCash")}</span>
-                                <span className="text-xs text-yellow-500">تحت الصيانة</span>
-                              </div>
-                            </SelectItem>
                             <SelectItem value="Al-Rafidain QiServices">{t("wallet.alRafidain")}</SelectItem>
                             <SelectItem value="FIB">{t("wallet.fib")}</SelectItem>
                           </SelectContent>
