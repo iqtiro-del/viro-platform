@@ -648,7 +648,6 @@ export function WalletPage() {
                           </SelectTrigger>
                           <SelectContent className="glass-morphism-strong border-border/50">
                             <SelectItem value="Al-Rafidain QiServices">{t("wallet.alRafidain")}</SelectItem>
-                            <SelectItem value="FIB">{t("wallet.fib")}</SelectItem>
                             <SelectItem value="Crypto">Crypto (USDT - TRC20)</SelectItem>
                           </SelectContent>
                         </Select>
