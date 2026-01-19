@@ -267,7 +267,7 @@ export const insertProductSchema = createInsertSchema(products).omit({
   views: true,
   sales: true,
 }).extend({
-  title: z.string().min(5, "Title must be at least 5 characters"),
+  title: z.string().min(2, "Title must be at least 2 characters"),
   description: z.string().min(20, "Description must be at least 20 characters"),
   price: z.string().refine((val) => parseFloat(val) > 0, "Price must be greater than 0"),
   oldPrice: z.string().optional().refine((val) => !val || parseFloat(val) >= 0, "Old price must be 0 or greater"),
