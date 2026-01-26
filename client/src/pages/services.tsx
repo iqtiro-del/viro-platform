@@ -15,7 +15,8 @@ import {
   SlidersHorizontal,
   X,
   AlertCircle,
-  MessageCircle
+  MessageCircle,
+  BadgeCheck
 } from "lucide-react";
 import {
   Select,
@@ -321,177 +322,61 @@ export function ServicesPage() {
                 <p className="text-muted-foreground">{t("services.tryDifferent")}</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredProducts.map((product) => (
-                  <Card 
+                  <div 
                     key={product.id}
-                    className="glass-morphism border-border/30 hover:border-primary/50 transition-all hover-elevate group overflow-hidden rounded-3xl"
+                    className="group relative flex flex-col bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 hover:border-primary/30 rounded-2xl transition-all duration-500 overflow-hidden"
                     data-testid={`card-product-${product.id}`}
                   >
-                    {/* MOBILE LAYOUT - Horizontal */}
-                    <div className="flex md:hidden items-center gap-3 p-3">
-                      {/* Image on left - fixed size */}
-                      <div className="flex-shrink-0 w-24 h-24 relative overflow-hidden rounded-md">
-                        <img 
-                          src={getProductImage(product.category, product.imageUrl)} 
-                          alt={product.title}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                      </div>
+                    {/* Image Container - Square Aspect Ratio */}
+                    <Link href={`/service/${product.id}`} className="block relative aspect-square overflow-hidden bg-gradient-to-br from-primary/5 to-secondary/5">
+                      <img 
+                        src={getProductImage(product.category, product.imageUrl)} 
+                        alt={product.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      
+                      {/* Category Float */}
+                      <Badge className="absolute top-2 left-2 bg-background/60 backdrop-blur-md border-white/10 text-white px-2 py-0.5 text-[8px] rounded-full uppercase font-bold">
+                        {product.category}
+                      </Badge>
 
-                      {/* Text content in center - flexible */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm line-clamp-1 mb-1">
+                      {/* Price Overlay */}
+                      <div className="absolute bottom-2 right-2 bg-primary/90 text-white px-2 py-1 rounded-lg font-black text-xs shadow-lg">
+                        ${product.price}
+                      </div>
+                    </Link>
+
+                    <div className="p-3 flex flex-col gap-2">
+                      <Link href={`/service/${product.id}`}>
+                        <h3 className="text-xs font-bold line-clamp-2 leading-tight group-hover:text-primary transition-colors h-8">
                           {product.title}
                         </h3>
-                        
-                        {/* Seller Info - Mobile */}
-                        <Link href={`/seller/${product.seller.id}`}>
-                          <button 
-                            className="flex items-center gap-1.5 hover-elevate rounded-md p-0.5 -m-0.5 transition-all mb-1.5"
-                            data-testid={`link-seller-mobile-${product.seller.id}`}
-                          >
-                            <Avatar className="w-4 h-4 border border-primary/30">
-                              <AvatarImage src={getUserAvatar(product.seller.id)} />
-                              <AvatarFallback className="text-[8px] bg-primary/20">
-                                {product.seller.username.substring(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                              {product.seller.username}
-                            </span>
+                      </Link>
+                      
+                      <div className="flex items-center gap-2">
+                        <Avatar className="w-5 h-5 border border-primary/20">
+                          <AvatarImage src={getUserAvatar(product.seller.id)} />
+                          <AvatarFallback className="text-[8px] bg-primary/20">
+                            {product.seller.username.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1">
+                            <p className="font-bold text-[10px] truncate leading-none">{product.seller.username}</p>
                             {product.seller.isVerified && (
-                              <div className="w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
-                                <svg className="w-1.5 h-1.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                              </div>
+                              <BadgeCheck className="w-3 h-3 text-secondary" />
                             )}
-                          </button>
-                        </Link>
-                        
-                        <div className="flex items-center gap-2">
-                          {product.oldPrice && parseFloat(product.oldPrice) > 0 && (
-                            <span className="text-xs text-red-500 line-through">
-                              ${product.oldPrice}
-                            </span>
-                          )}
-                          <span className="text-sm font-bold text-primary">
-                            ${product.price}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Button on right - fixed width */}
-                      <div className="flex-shrink-0">
-                        <Button 
-                          size="sm"
-                          className="neon-glow-secondary text-xs px-3" 
-                          onClick={() => {
-                            setSelectedProduct(product);
-                            setPurchaseDialogOpen(true);
-                          }}
-                          disabled={!user || user.id === product.sellerId}
-                          data-testid={`button-buy-${product.id}`}
-                        >
-                          {!user ? t("services.loginToBuy") : (user.id === product.sellerId) ? t("services.yourProduct") : t("services.buyNow")}
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* DESKTOP LAYOUT - Vertical (unchanged) */}
-                    <div className="hidden md:block">
-                      {/* Service Image - Modern professional design with gradient overlay */}
-                      <div className="h-40 relative overflow-hidden rounded-t-md">
-                        <img 
-                          src={getProductImage(product.category, product.imageUrl)} 
-                          alt={product.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                        {/* Gradient overlay for better text readability and premium look */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-                        {/* Neon glow effect on hover */}
-                        <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-all duration-300 rounded-t-md"></div>
-                        <Badge className="absolute top-2 right-2 bg-primary/90 backdrop-blur-sm neon-glow-primary text-xs z-10">
-                          {product.category}
-                        </Badge>
-                      </div>
-
-                      {/* Card Header - Title and Seller Info */}
-                      <CardHeader className="pb-3 pt-6">
-                        {/* Title */}
-                        <CardTitle className="text-base mb-0">
-                          <span className="line-clamp-1">{product.title}</span>
-                        </CardTitle>
-                        
-                        {/* Seller Info */}
-                        <CardDescription className="flex items-center space-x-2 text-sm">
-                          <Link href={`/seller/${product.seller.id}`}>
-                            <button 
-                              className="flex items-center space-x-2 hover-elevate rounded-md p-1 -m-1 transition-all"
-                              data-testid={`link-seller-${product.seller.id}`}
-                            >
-                              <Avatar className="w-5 h-5 border border-primary/30">
-                                <AvatarImage src={getUserAvatar(product.seller.id)} />
-                                <AvatarFallback className="text-xs bg-primary/20">
-                                  {product.seller.username.substring(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="hover:text-primary transition-colors">{product.seller.username}</span>
-                            </button>
-                          </Link>
-                          {product.seller.isVerified && (
-                            <div className="w-3.5 h-3.5 bg-green-500 rounded-full flex items-center justify-center neon-glow-success">
-                              <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
-                            </div>
-                          )}
-                        </CardDescription>
-                      </CardHeader>
-
-                      <CardContent>
-                        {/* Description */}
-                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2 leading-relaxed">
-                          {product.description}
-                        </p>
-                        
-                        {/* Desktop-only pricing section - Rating and price on same line */}
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center space-x-1">
-                            <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
-                            <span className="text-sm font-semibold">{product.seller.rating || "0.00"}</span>
-                            <span className="text-xs text-muted-foreground">({product.seller.totalReviews || 0})</span>
                           </div>
-                          
-                          <div className="flex flex-col items-end gap-1">
-                            {product.oldPrice && parseFloat(product.oldPrice) > 0 && (
-                              <p className="text-sm text-red-500 line-through" data-testid={`text-old-price-${product.id}`}>
-                                ${product.oldPrice}
-                              </p>
-                            )}
-                            <p className="text-lg font-bold text-primary neon-text-glow" data-testid={`text-price-${product.id}`}>
-                              ${product.price}
-                            </p>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <Star className="w-2.5 h-2.5 fill-primary text-primary" />
+                            <span className="text-[8px] font-black">{product.seller.rating || "5.0"}</span>
                           </div>
                         </div>
-
-                        {/* Buy Button */}
-                        <Button 
-                          className="w-full neon-glow-secondary h-9 text-sm font-semibold" 
-                          onClick={() => {
-                            setSelectedProduct(product);
-                            setPurchaseDialogOpen(true);
-                          }}
-                          disabled={!user || user.id === product.sellerId}
-                          data-testid={`button-buy-${product.id}`}
-                        >
-                          {!user ? t("services.loginToBuy") : (user.id === product.sellerId) ? t("services.yourProduct") : t("services.buyNow")}
-                        </Button>
-                      </CardContent>
+                      </div>
                     </div>
-                  </Card>
+                  </div>
                 ))}
               </div>
             )}
