@@ -18,6 +18,7 @@ import { useLanguage } from "@/lib/language-context";
 import { useToast } from "@/hooks/use-toast";
 import type { ProductWithSeller } from "@shared/schema";
 import { NeonBackground } from "@/components/neon-background";
+import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -152,73 +153,77 @@ export function Dashboard() {
   return (
     <div className="min-h-screen pb-20 md:pb-8">
       {/* Modern Hero Section */}
-      <section className="relative overflow-hidden">
-        {/* Animated Neon Background */}
-        <div className="absolute inset-0 h-[600px]">
+      <section className="relative min-h-[85vh] flex flex-col items-center justify-center overflow-hidden">
+        {/* Animated Background - Built into layout but enhanced for hero */}
+        <div className="absolute inset-0 z-0">
           <NeonBackground />
-          <div className="absolute inset-0 bg-background/40" />
+          <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px]" />
+          
+          {/* Large space-themed glowing orbs */}
+          <div className="absolute top-[20%] left-[5%] w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute bottom-[10%] right-[5%] w-[500px] h-[500px] bg-secondary/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 container mx-auto px-4 pt-20 pb-32">
-          <div className="max-w-4xl mx-auto text-center">
+        <div className="relative z-10 container mx-auto px-4 text-center">
+          <div className="max-w-4xl mx-auto flex flex-col items-center">
             {/* Title with enhanced styling */}
-            <div className="mb-6">
-              <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
-                <Sparkles className="w-3 h-3 ml-1" />
+            <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+              <Badge className="py-1.5 px-4 bg-primary/15 text-primary border-primary/30 backdrop-blur-md neon-glow-primary">
+                <Sparkles className="w-4 h-4 ml-2" />
                 {t("home.subtitle")}
               </Badge>
             </div>
             
-            <h1 className="text-6xl md:text-8xl font-accent font-bold mb-6 neon-text-glow tracking-tight">
+            <h1 className="text-7xl md:text-9xl font-accent font-bold mb-8 neon-text-glow tracking-tighter leading-tight animate-in fade-in zoom-in-95 duration-1000">
               {t("home.title")}
             </h1>
             
-            <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-muted-foreground/90 mb-14 max-w-2xl mx-auto leading-relaxed font-medium animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-200">
               {t("home.description")}
             </p>
 
             {/* Auth Buttons for non-logged in users */}
             {!user ? (
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center w-full max-w-md animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
                 <Button 
                   size="lg" 
                   onClick={() => setLoginDialogOpen(true)}
-                  className="neon-glow-primary text-lg px-10 h-14 gap-2" 
+                  className="w-full sm:w-64 neon-glow-primary text-xl h-16 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95" 
                   data-testid="button-hero-login"
                 >
-                  <LogIn className="w-5 h-5" />
+                  <LogIn className="w-6 h-6 ml-2" />
                   {t("auth.login")}
                 </Button>
                 <Button 
                   size="lg" 
                   variant="outline"
                   onClick={() => setRegisterDialogOpen(true)}
-                  className="border-primary/30 hover:border-primary text-lg px-10 h-14 gap-2"
+                  className="w-full sm:w-64 border-primary/40 bg-background/5 text-xl h-16 rounded-2xl backdrop-blur-sm transition-all duration-300 hover:bg-primary/5 hover:border-primary active:scale-95"
                   data-testid="button-hero-signup"
                 >
-                  <UserPlus className="w-5 h-5" />
+                  <UserPlus className="w-6 h-6 ml-2" />
                   {t("auth.signUp")}
                 </Button>
               </div>
             ) : (
               /* Enhanced Search Bar for logged in users */
-              <div className="max-w-2xl mx-auto">
-                <div className="relative glass-morphism-strong border-2 border-primary/40 rounded-xl shadow-2xl neon-glow-primary">
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl" />
+              <div className="w-full max-w-3xl animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+                <div className="relative glass-morphism-strong border-2 border-primary/30 rounded-[2rem] shadow-2xl p-2 transition-all duration-500 hover:border-primary/50 group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 rounded-[2rem] opacity-50" />
                   <div className="relative flex items-center">
-                    <Search className="absolute left-6 w-5 h-5 text-muted-foreground" />
+                    <Search className="absolute left-6 w-6 h-6 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input 
                       placeholder={t("home.search.placeholder")} 
-                      className="pl-14 pr-40 h-16 bg-transparent border-0 text-lg focus-visible:ring-0 focus-visible:ring-offset-0"
+                      className="pl-16 pr-44 h-16 bg-transparent border-0 text-xl focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50"
                       data-testid="input-search"
                     />
                     <Button 
                       size="lg"
-                      className="absolute right-3 neon-glow-secondary h-12"
+                      className="absolute right-2 neon-glow-secondary h-12 px-8 rounded-3xl text-lg font-bold"
                       data-testid="button-search"
                     >
-                      <Zap className="w-4 h-4 ml-2" />
+                      <Zap className="w-5 h-5 ml-2" />
                       {t("home.search.button")}
                     </Button>
                   </div>
@@ -227,67 +232,35 @@ export function Dashboard() {
             )}
           </div>
         </div>
+      </section>
 
-        {/* Stats Cards - Professional Neon Style */}
-        <div className="relative z-20 container mx-auto px-4 -mt-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <Card 
-                  key={index}
-                  className="group relative overflow-hidden glass-morphism-strong border-2 hover:border-primary/40 transition-all duration-300 hover-elevate shadow-xl"
-                  style={{
-                    borderColor: index === 0 ? 'hsl(280 85% 65% / 0.3)' : index === 1 ? 'hsl(195 100% 55% / 0.3)' : 'hsl(330 85% 65% / 0.3)',
-                  }}
-                >
-                  {/* Neon glow effect */}
-                  <div 
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl -z-10"
-                    style={{
-                      background: index === 0 ? 'hsl(280 85% 65% / 0.15)' : index === 1 ? 'hsl(195 100% 55% / 0.15)' : 'hsl(330 85% 65% / 0.15)',
-                    }}
-                  />
-                  
-                  <CardContent className="p-8">
-                    <div className="flex items-start justify-between mb-6">
-                      {/* Icon with neon background */}
-                      <div 
-                        className="p-4 rounded-xl relative"
-                        style={{
-                          background: index === 0 
-                            ? 'linear-gradient(135deg, hsl(280 85% 65% / 0.15), hsl(280 85% 65% / 0.05))'
-                            : index === 1 
-                            ? 'linear-gradient(135deg, hsl(195 100% 55% / 0.15), hsl(195 100% 55% / 0.05))'
-                            : 'linear-gradient(135deg, hsl(330 85% 65% / 0.15), hsl(330 85% 65% / 0.05))',
-                        }}
-                      >
-                        <Icon className={`w-7 h-7 ${stat.iconColor}`} />
-                      </div>
+      {/* Modern Stats Cards Section */}
+      <section className="container mx-auto px-4 -mt-10 relative z-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {stats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <Card 
+                key={index}
+                className="group relative overflow-hidden glass-morphism-strong border-2 border-white/5 hover:border-primary/40 transition-all duration-500 hover:-translate-y-2 rounded-3xl"
+              >
+                <CardContent className="p-8">
+                  <div className="flex items-center gap-6">
+                    <div className={cn(
+                      "w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110",
+                      stat.iconBg
+                    )}>
+                      <Icon className={cn("w-8 h-8", stat.iconColor)} />
                     </div>
-                    
-                    {/* Value */}
-                    <p className="text-5xl font-bold text-foreground mb-3 tracking-tight">{stat.value}</p>
-                    
-                    {/* Label */}
-                    <p className="text-sm font-medium text-muted-foreground/80">{stat.label}</p>
-                    
-                    {/* Bottom accent line */}
-                    <div 
-                      className="absolute bottom-0 left-0 right-0 h-1 opacity-60"
-                      style={{
-                        background: index === 0 
-                          ? 'linear-gradient(90deg, hsl(280 85% 65% / 0.5), transparent)'
-                          : index === 1 
-                          ? 'linear-gradient(90deg, hsl(195 100% 55% / 0.5), transparent)'
-                          : 'linear-gradient(90deg, hsl(330 85% 65% / 0.5), transparent)',
-                      }}
-                    />
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                    <div>
+                      <p className="text-4xl font-bold tracking-tight mb-1">{stat.value}</p>
+                      <p className="text-muted-foreground font-medium">{stat.label}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </section>
 
