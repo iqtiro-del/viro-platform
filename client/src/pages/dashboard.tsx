@@ -265,125 +265,113 @@ export function Dashboard() {
       </section>
 
       {/* Featured Services - Modern Grid */}
-      <section className="container mx-auto px-4 py-24">
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-1 h-8 bg-gradient-to-b from-primary to-secondary rounded-full" />
-              <h2 className="text-4xl font-bold text-foreground">{t("home.featuredServices")}</h2>
-            </div>
+      <section className="container mx-auto px-4 py-24 relative">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-secondary/5 rounded-full blur-[100px] -z-10" />
+        <div className="mb-16 text-center md:text-right">
+          <Badge variant="outline" className="mb-4 border-secondary/30 text-secondary px-4 py-1">
+            {t("home.featuredServices.subtitle")}
+          </Badge>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <h2 className="text-5xl font-bold bg-gradient-to-l from-foreground to-foreground/60 bg-clip-text text-transparent">
+              {t("home.featuredServices")}
+            </h2>
             <Button 
-              variant="outline" 
-              className="border-primary/30 hover:border-primary neon-glow-primary gap-2" 
+              variant="ghost" 
+              className="group hover:bg-primary/10 text-primary gap-2 text-lg" 
               data-testid="button-view-all"
             >
               {t("home.viewAll")}
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-[-4px] transition-transform" />
             </Button>
           </div>
-          <p className="text-muted-foreground text-lg mr-12">{t("home.featuredServices.subtitle")}</p>
         </div>
 
-        {/* Product Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Product Grid with enhanced spacing and animations */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {productsLoading ? (
             Array.from({ length: 6 }).map((_, index) => (
-              <Card key={index} className="glass-morphism border-border/30 overflow-hidden">
-                <Skeleton className="h-56 rounded-t-lg" />
-                <CardHeader className="space-y-3">
-                  <Skeleton className="h-6 w-3/4" />
-                  <div className="flex items-center gap-3">
-                    <Skeleton className="w-8 h-8 rounded-full" />
-                    <Skeleton className="h-4 w-32" />
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-12 w-full rounded-lg" />
-                </CardContent>
+              <Card key={index} className="glass-morphism border-white/5 overflow-hidden h-[450px]">
+                <Skeleton className="h-full w-full" />
               </Card>
             ))
           ) : products.length === 0 ? (
             <div className="col-span-full">
-              <Card className="glass-morphism border-border/30">
-                <CardContent className="text-center py-20">
-                  <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                    <ShoppingBag className="w-10 h-10 text-primary/50" />
+              <Card className="glass-morphism border-white/5 bg-white/5">
+                <CardContent className="text-center py-24">
+                  <div className="w-24 h-24 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-8 border border-primary/20">
+                    <ShoppingBag className="w-12 h-12 text-primary/40" />
                   </div>
-                  <h3 className="text-2xl font-semibold text-foreground mb-2">{t("home.noServices")}</h3>
-                  <p className="text-muted-foreground">{t("home.noServices.description")}</p>
+                  <h3 className="text-3xl font-bold mb-4">{t("home.noServices")}</h3>
+                  <p className="text-muted-foreground text-lg">{t("home.noServices.description")}</p>
                 </CardContent>
               </Card>
             </div>
           ) : (
-            products.slice(0, 6).map((product) => (
+            products.slice(0, 6).map((product, idx) => (
               <Card 
                 key={product.id} 
-                className="glass-morphism border-border/30 hover:border-primary/50 transition-all hover-elevate group overflow-hidden"
+                className="group relative glass-morphism border-white/5 hover:border-primary/30 transition-all duration-500 hover:-translate-y-3 overflow-hidden rounded-[2.5rem] bg-gradient-to-b from-white/[0.03] to-transparent"
                 data-testid={`card-service-${product.id}`}
               >
-                {/* Image with overlay on hover */}
-                <div className="relative h-56 bg-gradient-to-br from-primary/20 to-secondary/20 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl" />
-                      <ShoppingBag className="relative w-20 h-20 text-primary/40" />
-                    </div>
+                {/* Image Section */}
+                <div className="relative h-64 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10" />
+                  <div className="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-700">
+                    <ShoppingBag className="w-24 h-24 text-white/5" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-60" />
                   </div>
                   
-                  {/* Category badge */}
-                  <Badge className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm border-primary/30 text-foreground shadow-lg">
-                    {getCategoryLabel(product.category)}
-                  </Badge>
+                  {/* Category Float */}
+                  <div className="absolute top-6 left-6">
+                    <Badge className="bg-background/40 backdrop-blur-xl border-white/10 text-white font-medium px-4 py-1.5 rounded-full">
+                      {getCategoryLabel(product.category)}
+                    </Badge>
+                  </div>
+
+                  {/* Price Tag */}
+                  <div className="absolute bottom-6 left-6">
+                    <div className="bg-primary/90 text-white px-5 py-2 rounded-2xl font-bold text-2xl shadow-xl neon-glow-primary">
+                      ${product.price}
+                    </div>
+                  </div>
                 </div>
 
-                <CardHeader className="space-y-3 pb-4">
-                  <CardTitle className="text-xl line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+                <CardHeader className="p-8 pb-4">
+                  <CardTitle className="text-2xl font-bold line-clamp-1 group-hover:text-primary transition-colors mb-4">
                     {product.title}
                   </CardTitle>
                   
-                  {/* Seller Info */}
-                  <div className="flex items-center gap-3">
-                    <Avatar className="w-8 h-8 border-2 border-primary/30 ring-2 ring-background">
-                      <AvatarImage src={product.seller.avatarUrl || undefined} />
-                      <AvatarFallback className="text-xs bg-primary/20 font-semibold">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="w-12 h-12 border-2 border-white/10 p-0.5">
+                      <AvatarImage src={product.seller.avatarUrl || undefined} className="rounded-full" />
+                      <AvatarFallback className="bg-secondary/20">
                         {product.seller.fullName.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{product.seller.fullName}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-lg leading-none">{product.seller.fullName}</p>
+                        {product.seller.isVerified && (
+                          <BadgeCheck className="w-5 h-5 text-secondary animate-pulse" />
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-1.5">
+                        <Star className="w-4 h-4 fill-primary text-primary" />
+                        <span className="text-sm font-bold text-foreground/80">{product.seller.rating || "5.0"}</span>
+                        <span className="text-xs text-muted-foreground">({product.seller.totalReviews || 0})</span>
+                      </div>
                     </div>
-                    {product.seller.isVerified && (
-                      <BadgeCheck className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    )}
                   </div>
                 </CardHeader>
 
-                <CardContent className="space-y-4">
-                  {/* Rating and Price */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                        <span className="font-bold text-sm">{product.seller.rating || "0.0"}</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">({product.seller.totalReviews || 0})</span>
-                    </div>
-                    <div className="text-left">
-                      <p className="text-xs text-muted-foreground">{t("home.startingAt")}</p>
-                      <p className="text-2xl font-bold text-primary">${product.price}</p>
-                    </div>
-                  </div>
-
-                  {/* Action Button */}
+                <CardContent className="p-8 pt-4">
                   <Link href={`/service/${product.id}`}>
                     <Button 
-                      className="w-full neon-glow-secondary group-hover:scale-[1.02] transition-transform" 
+                      className="w-full h-14 rounded-2xl bg-white/5 hover:bg-primary text-white border border-white/10 hover:border-primary transition-all duration-500 font-bold text-lg group/btn" 
                       data-testid={`button-view-service-${product.id}`}
                     >
                       {t("home.viewDetails")}
-                      <ArrowRight className="w-4 h-4 mr-2 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-5 h-5 mr-3 group-hover/btn:translate-x-[-4px] transition-transform" />
                     </Button>
                   </Link>
                 </CardContent>
@@ -393,53 +381,42 @@ export function Dashboard() {
         </div>
       </section>
 
-      {/* CTA Section - Modern Design */}
-      <section className="container mx-auto px-4 pb-24">
-        <div className="relative overflow-hidden rounded-3xl">
-          {/* Animated Background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-secondary/20" />
-          <div className="absolute inset-0">
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
-          </div>
-          
-          {/* Content */}
-          <Card className="glass-morphism-strong border-primary/30 neon-glow-primary relative">
-            <CardContent className="p-12 md:p-20 text-center">
-              <div className="max-w-3xl mx-auto space-y-8">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/10 border-2 border-primary/30 mb-4">
-                  <Zap className="w-10 h-10 text-primary" />
-                </div>
-                
-                <div className="space-y-4">
-                  <h2 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary via-foreground to-secondary bg-clip-text text-transparent">
-                    {t("home.cta.title")}
-                  </h2>
-                  <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                    {t("home.cta.description")}
-                  </p>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+      {/* Final CTA Section - Ultra Modern */}
+      <section className="container mx-auto px-4 pb-32">
+        <div className="relative group p-1 rounded-[3rem] overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent animate-gradient-x opacity-30 group-hover:opacity-100 transition-opacity duration-1000" />
+          <div className="relative bg-background rounded-[2.9rem] overflow-hidden">
+            <div className="absolute top-[-50%] left-[-20%] w-[100%] h-[200%] bg-primary/10 blur-[120px] rounded-full animate-pulse" />
+            <div className="relative z-10 px-8 py-24 md:py-32 text-center">
+              <div className="max-w-4xl mx-auto">
+                <Badge className="mb-8 bg-secondary/10 text-secondary border-secondary/20 px-6 py-2 rounded-full text-lg">
+                  {t("home.cta.getStarted")}
+                </Badge>
+                <h2 className="text-5xl md:text-8xl font-bold mb-10 tracking-tighter leading-none">
+                  {t("home.cta.title")}
+                </h2>
+                <p className="text-xl md:text-3xl text-muted-foreground/80 mb-14 leading-relaxed font-light">
+                  {t("home.cta.description")}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
                   <Button 
                     size="lg" 
-                    className="neon-glow-primary text-lg px-8 h-14 gap-2" 
+                    className="w-full sm:w-80 h-20 rounded-3xl bg-primary text-white text-2xl font-black shadow-[0_0_50px_-12px_rgba(168,85,247,0.5)] hover:shadow-primary/40 transition-all duration-500" 
                     data-testid="button-start-selling"
                   >
-                    <Zap className="w-5 h-5" />
                     {t("home.cta.getStarted")}
                   </Button>
                   <Button 
                     size="lg" 
                     variant="outline" 
-                    className="border-primary/30 hover:border-primary text-lg px-8 h-14"
+                    className="w-full sm:w-80 h-20 rounded-3xl border-white/10 bg-white/5 text-2xl font-bold backdrop-blur-xl hover:bg-white/10 transition-all"
                   >
                     {t("home.learnMore")}
                   </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </section>
 
