@@ -339,27 +339,51 @@ export function Dashboard() {
         </div>
       </section>
 
-      {/* 🌌 Gravity CTA Section */}
+      {/* 🌌 Gravity CTA Section - Replaced with Featured Sellers */}
       <section className="container mx-auto px-4 pb-20">
-        <div className="relative rounded-[2.5rem] overflow-hidden bg-white/[0.02] border border-white/5 p-8 md:p-16 text-center group">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.05)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-          
-          <div className="relative z-10 max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-5xl font-black mb-6 tracking-tighter">
-              {t("home.cta.title")}
+        <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 mb-12 text-center md:text-right">
+          <div>
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter mb-2">
+              أفضل البائعين
             </h2>
-            <p className="text-base md:text-xl text-muted-foreground/80 mb-10 leading-relaxed font-medium">
-              {t("home.cta.description")}
+            <p className="text-sm md:text-lg text-muted-foreground max-w-xl font-medium">
+              تواصل مع المحترفين الموثوقين في منصة فيرو
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button size="lg" className="h-14 px-10 rounded-2xl bg-primary text-white hover:scale-105 transition-all text-lg font-bold">
-                {t("home.cta.getStarted")}
-              </Button>
-              <Button size="lg" variant="outline" className="h-14 px-10 rounded-2xl border-white/10 bg-white/5 backdrop-blur-xl text-lg font-bold hover:bg-white/10 transition-all">
-                {t("home.learnMore")}
-              </Button>
-            </div>
           </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+          {productsLoading ? (
+            Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="h-48 rounded-3xl bg-white/5 animate-pulse" />
+            ))
+          ) : (
+            // Unique sellers from products
+            Array.from(new Map(products.map(p => [p.seller.id, p.seller])).values()).slice(0, 6).map((seller) => (
+              <Link key={seller.id} href={`/seller/${seller.id}`}>
+                <div className="group relative flex flex-col items-center p-6 bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 hover:border-primary/30 rounded-3xl transition-all duration-500 cursor-pointer">
+                  <div className="relative mb-4">
+                    <Avatar className="w-20 h-20 border-2 border-primary/20 group-hover:border-primary transition-colors">
+                      <AvatarImage src={seller.avatarUrl || undefined} />
+                      <AvatarFallback className="text-xl bg-primary/20">{seller.fullName[0]}</AvatarFallback>
+                    </Avatar>
+                    {seller.isVerified && (
+                      <div className="absolute -bottom-1 -right-1 bg-secondary rounded-full p-1 shadow-lg">
+                        <BadgeCheck className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="text-sm font-bold text-center truncate w-full mb-1 group-hover:text-primary transition-colors">
+                    {seller.fullName}
+                  </h3>
+                  <div className="flex items-center gap-1">
+                    <Star className="w-3 h-3 fill-primary text-primary" />
+                    <span className="text-[10px] font-black">{seller.rating || "5.0"}</span>
+                  </div>
+                </div>
+              </Link>
+            ))
+          )}
         </div>
       </section>
 
