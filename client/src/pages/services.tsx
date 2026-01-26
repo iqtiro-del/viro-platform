@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,7 +50,11 @@ import { getUserAvatar } from "@/lib/utils";
 import { getProductImage } from "@/lib/category-images";
 
 export function ServicesPage() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [location] = useLocation();
+  const searchParams = new URLSearchParams(location.split("?")[1]);
+  const initialSearch = searchParams.get("q") || "";
+  
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [priceRange, setPriceRange] = useState<string>("all");
   const [selectedProduct, setSelectedProduct] = useState<ProductWithSeller | null>(null);

@@ -113,7 +113,7 @@ function Router() {
                 <Route path="/services" component={ServicesPage} />
                 <Route path="/service/:id" component={ServiceDetailPage} />
                 <Route path="/@:username">
-                  {(params) => <SellerProfilePage params={{ username: params.username }} />}
+                  {(params: { username: string }) => <SellerProfilePage params={{ username: params.username }} />}
                 </Route>
                 <Route path="/seller/:id" component={SellerProfilePage} />
                 <Route path="/wallet">

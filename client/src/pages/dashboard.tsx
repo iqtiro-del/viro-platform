@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,9 +33,17 @@ export function Dashboard() {
   const { user, login, register: registerUser } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      setLocation(`/services?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   const { data: products = [], isLoading: productsLoading } = useQuery<ProductWithSeller[]>({ 
     queryKey: ['/api/products'] 
@@ -211,16 +219,28 @@ export function Dashboard() {
           ) : (
             <div className="w-full max-w-2xl">
               <div className="relative p-1 rounded-2xl bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20">
-                <div className="relative flex items-center bg-background/80 rounded-[0.9rem] p-2 backdrop-blur-xl">
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSearch();
+                  }}
+                  className="relative flex items-center bg-background/80 rounded-[0.9rem] p-2 backdrop-blur-xl"
+                >
                   <Search className="w-5 h-5 ml-3 text-primary" />
                   <Input 
                     placeholder={t("home.search.placeholder")} 
                     className="flex-1 h-12 bg-transparent border-0 text-lg focus-visible:ring-0 placeholder:text-muted-foreground/40"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                   />
-                  <Button size="lg" className="h-10 px-6 rounded-xl text-base font-bold bg-primary shadow-lg hover:scale-105 transition-all">
+                  <Button 
+                    type="submit"
+                    size="lg" 
+                    className="h-10 px-6 rounded-xl text-base font-bold bg-primary shadow-lg hover:scale-105 transition-all"
+                  >
                     {t("home.search.button")}
                   </Button>
-                </div>
+                </form>
               </div>
             </div>
           )}
