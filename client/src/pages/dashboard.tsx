@@ -151,49 +151,49 @@ export function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden rtl">
       {/* 🚀 New Futuristic Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20">
+      <section className="relative min-h-[85vh] flex items-center justify-center pt-24 overflow-hidden">
         {/* Background Layers */}
         <div className="absolute inset-0 z-0">
           <NeonBackground />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,hsl(var(--background))_70%)] opacity-80" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,hsl(var(--background))_80%)] opacity-95" />
           
           {/* Animated Grid Floor */}
-          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-[linear-gradient(to_bottom,transparent,hsl(var(--primary)/0.05))] [mask-image:radial-gradient(ellipse_at_center,black,transparent_80%)]">
-            <div className="absolute inset-0 bg-[grid-line] opacity-20" style={{ backgroundImage: 'linear-gradient(to right, hsl(var(--primary)/0.2) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--primary)/0.2) 1px, transparent 1px)', backgroundSize: '50px 50px' }} />
+          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-[linear-gradient(to_bottom,transparent,hsl(var(--primary)/0.05))] [mask-image:radial-gradient(ellipse_at_center,black,transparent_90%)]">
+            <div className="absolute inset-0 bg-[grid-line] opacity-20" style={{ backgroundImage: 'linear-gradient(to right, hsl(var(--primary)/0.2) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--primary)/0.2) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
           </div>
         </div>
 
-        <div className="container relative z-10 mx-auto px-4 flex flex-col items-center">
+        <div className="container relative z-10 mx-auto px-4 flex flex-col items-center py-16">
           {/* Floating Badge */}
-          <div className="mb-12 animate-bounce-slow">
-            <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-primary/30 bg-primary/5 backdrop-blur-xl shadow-[0_0_20px_rgba(168,85,247,0.2)]">
-              <Sparkles className="w-5 h-5 text-primary" />
-              <span className="text-sm font-bold tracking-widest uppercase text-primary/80">{t("home.subtitle")}</span>
+          <div className="mb-10 animate-bounce-slow">
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-primary/30 bg-primary/5 backdrop-blur-xl shadow-[0_0_20px_rgba(168,85,247,0.2)]">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-xs font-bold tracking-widest uppercase text-primary/80">{t("home.subtitle")}</span>
             </div>
           </div>
 
           {/* Epic Title */}
-          <div className="relative mb-10 group">
+          <div className="relative mb-10 group text-center">
             <div className="absolute -inset-4 bg-primary/20 blur-[100px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-            <h1 className="text-8xl md:text-[12rem] font-black tracking-tighter leading-[0.8] mb-4 bg-gradient-to-b from-white via-white/80 to-primary/50 bg-clip-text text-transparent animate-in fade-in zoom-in-90 duration-1000">
+            <h1 className="text-7xl md:text-[10rem] font-black tracking-tighter leading-none mb-6 bg-gradient-to-b from-white via-white/90 to-primary/40 bg-clip-text text-transparent drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]">
               فيرو
             </h1>
             <div className="h-2 w-48 mx-auto bg-gradient-to-r from-transparent via-primary to-transparent rounded-full shadow-[0_0_30px_rgba(168,85,247,0.8)]" />
           </div>
 
-          <p className="text-2xl md:text-3xl font-light text-muted-foreground/80 max-w-3xl text-center mb-16 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
+          <p className="text-xl md:text-3xl font-light text-muted-foreground/90 max-w-3xl text-center mb-16 leading-relaxed">
             {t("home.description")}
           </p>
 
           {/* Action Hub */}
           {!user ? (
-            <div className="flex flex-col md:flex-row gap-8 items-center w-full max-w-2xl animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+            <div className="flex flex-col sm:flex-row gap-6 items-center w-full max-w-2xl">
               <Button 
                 size="lg" 
                 onClick={() => setLoginDialogOpen(true)}
-                className="group relative h-20 w-full md:flex-1 rounded-2xl overflow-hidden bg-primary hover:bg-primary transition-all duration-500 shadow-[0_0_40px_-10px_rgba(168,85,247,0.5)]"
+                className="group relative h-20 w-full sm:flex-1 rounded-2xl overflow-hidden bg-primary hover:bg-primary transition-all duration-500 shadow-[0_0_40px_-10px_rgba(168,85,247,0.5)]"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 <span className="relative z-10 flex items-center gap-3 text-2xl font-black">
@@ -206,22 +206,22 @@ export function Dashboard() {
                 size="lg" 
                 variant="outline"
                 onClick={() => setRegisterDialogOpen(true)}
-                className="h-20 w-full md:flex-1 rounded-2xl border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-500 text-2xl font-bold"
+                className="h-20 w-full sm:flex-1 rounded-2xl border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-500 text-2xl font-bold"
               >
                 <UserPlus className="w-7 h-7 ml-3" />
                 {t("auth.signUp")}
               </Button>
             </div>
           ) : (
-            <div className="w-full max-w-4xl animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
-              <div className="relative p-1 rounded-[3rem] bg-gradient-to-r from-primary/30 via-secondary/30 to-primary/30">
-                <div className="relative flex items-center bg-background/90 rounded-[2.9rem] p-3 backdrop-blur-2xl">
-                  <Search className="w-8 h-8 ml-6 text-primary" />
+            <div className="w-full max-w-4xl">
+              <div className="relative p-1.5 rounded-[2.5rem] bg-gradient-to-r from-primary/30 via-secondary/30 to-primary/30">
+                <div className="relative flex items-center bg-background/90 rounded-[2.4rem] p-3 backdrop-blur-2xl">
+                  <Search className="w-8 h-8 ml-5 text-primary" />
                   <Input 
                     placeholder={t("home.search.placeholder")} 
-                    className="flex-1 h-20 bg-transparent border-0 text-2xl focus-visible:ring-0 placeholder:text-muted-foreground/40"
+                    className="flex-1 h-16 bg-transparent border-0 text-2xl focus-visible:ring-0 placeholder:text-muted-foreground/40"
                   />
-                  <Button size="lg" className="h-16 px-12 rounded-[2rem] text-xl font-black bg-primary shadow-lg hover:scale-105 active:scale-95 transition-all">
+                  <Button size="lg" className="h-14 px-10 rounded-[1.8rem] text-xl font-black bg-primary shadow-lg hover:scale-105 transition-all">
                     {t("home.search.button")}
                   </Button>
                 </div>
@@ -232,30 +232,29 @@ export function Dashboard() {
       </section>
 
       {/* 📊 Holographic Stats Section */}
-      <section className="container mx-auto px-4 -mt-32 relative z-20 pb-32">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto">
+      <section className="container mx-auto px-4 -mt-20 relative z-20 pb-32">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
               <div 
                 key={index}
-                className="group relative p-1 rounded-[2.5rem] bg-gradient-to-br from-white/10 to-transparent hover:from-primary/20 transition-all duration-700"
+                className="group relative p-px rounded-[2rem] bg-gradient-to-br from-white/10 to-transparent hover:from-primary/20 transition-all duration-700"
               >
-                <div className="relative h-full bg-background/40 backdrop-blur-3xl rounded-[2.4rem] p-10 overflow-hidden border border-white/5">
-                  {/* Holographic lines */}
-                  <div className="absolute inset-0 opacity-10 bg-[repeating-linear-gradient(transparent,transparent_2px,rgba(255,255,255,0.05)_3px)]" />
-                  
-                  <div className="relative flex flex-col items-center text-center">
+                <div className="relative h-full bg-background/60 backdrop-blur-3xl rounded-[1.95rem] p-10 overflow-hidden border border-white/5">
+                  <div className="relative flex items-center gap-8">
                     <div className={cn(
-                      "w-20 h-20 rounded-3xl flex items-center justify-center mb-8 rotate-3 group-hover:rotate-0 transition-transform duration-500 shadow-2xl",
+                      "w-16 h-16 rounded-2xl flex items-center justify-center transition-transform duration-500 shadow-2xl",
                       stat.iconBg
                     )}>
-                      <Icon className={cn("w-10 h-10", stat.iconColor)} />
+                      <Icon className={cn("w-8 h-8", stat.iconColor)} />
                     </div>
-                    <h3 className="text-6xl font-black tracking-tighter mb-2 bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
-                      {stat.value}
-                    </h3>
-                    <p className="text-lg font-bold uppercase tracking-widest text-muted-foreground/60">{stat.label}</p>
+                    <div>
+                      <h3 className="text-4xl font-black tracking-tight bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+                        {stat.value}
+                      </h3>
+                      <p className="text-base font-bold uppercase tracking-widest text-muted-foreground/60">{stat.label}</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -265,38 +264,38 @@ export function Dashboard() {
       </section>
 
       {/* 📦 Minimalist Modern Grid */}
-      <section className="container mx-auto px-4 py-32">
+      <section className="container mx-auto px-4 py-24">
         <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-20 border-b border-white/5 pb-10">
           <div>
-            <h2 className="text-6xl md:text-8xl font-black tracking-tighter mb-4">
+            <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-4">
               {t("home.featuredServices")}
             </h2>
-            <p className="text-2xl text-muted-foreground max-w-2xl font-light leading-relaxed">
+            <p className="text-xl text-muted-foreground max-w-2xl font-light leading-relaxed">
               {t("home.featuredServices.subtitle")}
             </p>
           </div>
-          <Button variant="ghost" className="h-20 px-10 text-2xl font-black group hover:bg-white/5 rounded-3xl">
+          <Button variant="ghost" className="h-16 px-10 text-2xl font-black group hover:bg-white/5 rounded-2xl">
             {t("home.viewAll")}
             <ArrowRight className="w-8 h-8 mr-4 group-hover:translate-x-[-8px] transition-transform" />
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {productsLoading ? (
             Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="h-[500px] rounded-[3rem] bg-white/5 animate-pulse" />
+              <div key={index} className="h-[450px] rounded-[2.5rem] bg-white/5 animate-pulse" />
             ))
           ) : (
             products.slice(0, 6).map((product) => (
               <div 
                 key={product.id} 
-                className="group relative flex flex-col bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 hover:border-primary/20 rounded-[3rem] transition-all duration-700 overflow-hidden h-full"
+                className="group relative flex flex-col bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 hover:border-primary/20 rounded-[2.5rem] transition-all duration-700 overflow-hidden h-full"
               >
                 {/* Image Container */}
-                <div className="relative h-72 overflow-hidden">
+                <div className="relative h-64 overflow-hidden">
                   <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <ShoppingBag className="w-32 h-32 text-white/5 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-700" />
+                    <ShoppingBag className="w-24 h-24 text-white/5 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-700" />
                   </div>
                   <Badge className="absolute top-8 left-8 bg-black/40 backdrop-blur-xl border-white/10 text-white px-5 py-2 text-sm rounded-full">
                     {getCategoryLabel(product.category)}
@@ -310,16 +309,16 @@ export function Dashboard() {
                     </h3>
                     
                     <div className="flex items-center gap-4 mb-8">
-                      <Avatar className="w-14 h-14 border-2 border-white/5">
+                      <Avatar className="w-12 h-12 border-2 border-white/5">
                         <AvatarImage src={product.seller.avatarUrl || undefined} />
                         <AvatarFallback>{product.seller.fullName[0]}</AvatarFallback>
                       </Avatar>
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="font-bold text-xl">{product.seller.fullName}</p>
+                          <p className="font-bold text-xl leading-none">{product.seller.fullName}</p>
                           {product.seller.isVerified && <BadgeCheck className="w-5 h-5 text-secondary" />}
                         </div>
-                        <div className="flex items-center gap-1 mt-1">
+                        <div className="flex items-center gap-1.5 mt-1.5">
                           <Star className="w-4 h-4 fill-primary text-primary" />
                           <span className="text-sm font-black">{product.seller.rating || "5.0"}</span>
                         </div>
@@ -330,11 +329,11 @@ export function Dashboard() {
                   <div className="flex items-center justify-between pt-8 border-t border-white/5">
                     <div className="flex flex-col">
                       <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold">{t("home.startingAt")}</span>
-                      <span className="text-4xl font-black text-white">${product.price}</span>
+                      <span className="text-3xl font-black text-white">${product.price}</span>
                     </div>
                     <Link href={`/service/${product.id}`}>
-                      <Button size="icon" className="w-16 h-16 rounded-2xl bg-white/5 hover:bg-primary transition-all duration-500">
-                        <ArrowRight className="w-8 h-8" />
+                      <Button size="icon" className="w-14 h-14 rounded-2xl bg-white/5 hover:bg-primary transition-all duration-500">
+                        <ArrowRight className="w-7 h-7" />
                       </Button>
                     </Link>
                   </div>
@@ -347,21 +346,21 @@ export function Dashboard() {
 
       {/* 🌌 Gravity CTA Section */}
       <section className="container mx-auto px-4 pb-48">
-        <div className="relative rounded-[4rem] overflow-hidden bg-white/[0.02] border border-white/5 p-12 md:p-32 text-center group">
+        <div className="relative rounded-[3.5rem] overflow-hidden bg-white/[0.02] border border-white/5 p-12 md:p-32 text-center group">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.1)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
           
           <div className="relative z-10 max-w-5xl mx-auto">
-            <h2 className="text-6xl md:text-9xl font-black mb-12 tracking-tighter leading-none">
+            <h2 className="text-5xl md:text-9xl font-black mb-12 tracking-tighter leading-none">
               {t("home.cta.title")}
             </h2>
             <p className="text-2xl md:text-3xl text-muted-foreground/80 mb-20 leading-relaxed font-light">
               {t("home.cta.description")}
             </p>
-            <div className="flex flex-col md:flex-row gap-10 justify-center items-center">
-              <Button size="lg" className="h-24 px-16 rounded-[2rem] bg-white text-black hover:bg-white/90 text-3xl font-black transition-all">
+            <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
+              <Button size="lg" className="h-20 px-16 rounded-3xl bg-white text-black hover:bg-white/90 text-2xl font-black transition-all">
                 {t("home.cta.getStarted")}
               </Button>
-              <Button size="lg" variant="outline" className="h-24 px-16 rounded-[2rem] border-white/10 bg-white/5 backdrop-blur-xl text-3xl font-bold hover:bg-white/10 transition-all">
+              <Button size="lg" variant="outline" className="h-20 px-16 rounded-3xl border-white/10 bg-white/5 backdrop-blur-xl text-2xl font-bold hover:bg-white/10 transition-all">
                 {t("home.learnMore")}
               </Button>
             </div>
