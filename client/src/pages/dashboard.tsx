@@ -276,62 +276,61 @@ export function Dashboard() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
           {productsLoading ? (
-            Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="h-96 rounded-3xl bg-white/5 animate-pulse" />
+            Array.from({ length: 12 }).map((_, index) => (
+              <div key={index} className="aspect-square rounded-2xl bg-white/5 animate-pulse" />
             ))
           ) : (
-            products.slice(0, 6).map((product) => (
+            products.slice(0, 12).map((product) => (
               <div 
                 key={product.id} 
-                className="group relative flex flex-col bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 hover:border-primary/30 rounded-[2rem] transition-all duration-500 overflow-hidden h-full"
+                className="group relative flex flex-col bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 hover:border-primary/30 rounded-2xl transition-all duration-500 overflow-hidden"
               >
-                {/* Image Container */}
-                <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/5 to-secondary/5">
-                  <div className="absolute inset-0 flex items-center justify-center opacity-20 group-hover:opacity-40 transition-opacity">
-                    <ShoppingBag className="w-20 h-20 text-white" />
-                  </div>
-                  <Badge className="absolute top-4 left-4 bg-background/60 backdrop-blur-md border-white/10 text-white px-3 py-1 text-[10px] rounded-full uppercase font-bold">
+                {/* Image Container - Square Aspect Ratio */}
+                <Link href={`/service/${product.id}`} className="block relative aspect-square overflow-hidden bg-gradient-to-br from-primary/5 to-secondary/5">
+                  {product.imageUrl ? (
+                    <img 
+                      src={product.imageUrl} 
+                      alt={product.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center opacity-20 group-hover:opacity-40 transition-opacity">
+                      <ShoppingBag className="w-12 h-12 text-white" />
+                    </div>
+                  )}
+                  
+                  {/* Category Float */}
+                  <Badge className="absolute top-2 left-2 bg-background/60 backdrop-blur-md border-white/10 text-white px-2 py-0.5 text-[8px] rounded-full uppercase font-bold">
                     {getCategoryLabel(product.category)}
                   </Badge>
-                </div>
 
-                <div className="flex-1 p-6 flex flex-col">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold mb-4 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+                  {/* Price Overlay */}
+                  <div className="absolute bottom-2 right-2 bg-primary/90 text-white px-2 py-1 rounded-lg font-black text-xs shadow-lg">
+                    ${product.price}
+                  </div>
+                </Link>
+
+                <div className="p-3 flex flex-col gap-2">
+                  <Link href={`/service/${product.id}`}>
+                    <h3 className="text-xs font-bold line-clamp-2 leading-tight group-hover:text-primary transition-colors h-8">
                       {product.title}
                     </h3>
-                    
-                    <div className="flex items-center gap-3 mb-6">
-                      <Avatar className="w-10 h-10 border-2 border-primary/20">
-                        <AvatarImage src={product.seller.avatarUrl || undefined} />
-                        <AvatarFallback className="bg-primary/20">{product.seller.fullName[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <p className="font-bold text-sm truncate">{product.seller.fullName}</p>
-                          {product.seller.isVerified && <BadgeCheck className="w-4 h-4 text-secondary" />}
-                        </div>
-                        <div className="flex items-center gap-1 mt-0.5">
-                          <Star className="w-3 h-3 fill-primary text-primary" />
-                          <span className="text-[10px] font-black">{product.seller.rating || "5.0"}</span>
-                          <span className="text-[10px] text-muted-foreground">({product.seller.totalReviews || 0})</span>
-                        </div>
+                  </Link>
+                  
+                  <div className="flex items-center gap-2">
+                    <Avatar className="w-5 h-5 border border-primary/20">
+                      <AvatarImage src={product.seller.avatarUrl || undefined} />
+                      <AvatarFallback className="text-[8px] bg-primary/20">{product.seller.fullName[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-[10px] truncate leading-none">{product.seller.fullName}</p>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <Star className="w-2.5 h-2.5 fill-primary text-primary" />
+                        <span className="text-[8px] font-black">{product.seller.rating || "5.0"}</span>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{t("home.startingAt")}</span>
-                      <span className="text-xl font-black text-white">${product.price}</span>
-                    </div>
-                    <Link href={`/service/${product.id}`}>
-                      <Button size="sm" className="h-10 px-4 rounded-xl bg-white/5 hover:bg-primary text-white border border-white/10 transition-all duration-300">
-                        <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    </Link>
                   </div>
                 </div>
               </div>
