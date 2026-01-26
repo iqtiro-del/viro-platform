@@ -151,77 +151,73 @@ export function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden rtl">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden rtl select-none">
       {/* 🚀 New Futuristic Hero Section */}
-      <section className="relative min-h-[85vh] flex items-center justify-center pt-24 overflow-hidden">
+      <section className="relative min-h-[70vh] flex items-center justify-center pt-24 overflow-hidden border-b border-primary/10">
         {/* Background Layers */}
         <div className="absolute inset-0 z-0">
           <NeonBackground />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,hsl(var(--background))_80%)] opacity-95" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,hsl(var(--background))_85%)] opacity-95" />
           
           {/* Animated Grid Floor */}
           <div className="absolute bottom-0 left-0 w-full h-1/2 bg-[linear-gradient(to_bottom,transparent,hsl(var(--primary)/0.05))] [mask-image:radial-gradient(ellipse_at_center,black,transparent_90%)]">
-            <div className="absolute inset-0 bg-[grid-line] opacity-20" style={{ backgroundImage: 'linear-gradient(to right, hsl(var(--primary)/0.2) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--primary)/0.2) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+            <div className="absolute inset-0 bg-[grid-line] opacity-10" style={{ backgroundImage: 'linear-gradient(to right, hsl(var(--primary)/0.2) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--primary)/0.2) 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
           </div>
         </div>
 
-        <div className="container relative z-10 mx-auto px-4 flex flex-col items-center py-16">
+        <div className="container relative z-10 mx-auto px-4 flex flex-col items-center text-center">
           {/* Floating Badge */}
-          <div className="mb-10 animate-bounce-slow">
-            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-primary/30 bg-primary/5 backdrop-blur-xl shadow-[0_0_20px_rgba(168,85,247,0.2)]">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-xs font-bold tracking-widest uppercase text-primary/80">{t("home.subtitle")}</span>
-            </div>
+          <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-1000">
+            <Badge className="px-4 py-1.5 bg-primary/10 text-primary border-primary/20 backdrop-blur-md rounded-full text-xs font-bold tracking-widest uppercase">
+              <Sparkles className="w-3.5 h-3.5 ml-2" />
+              {t("home.subtitle")}
+            </Badge>
           </div>
 
           {/* Epic Title */}
-          <div className="relative mb-10 group text-center">
-            <div className="absolute -inset-4 bg-primary/20 blur-[100px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-            <h1 className="text-7xl md:text-[10rem] font-black tracking-tighter leading-none mb-6 bg-gradient-to-b from-white via-white/90 to-primary/40 bg-clip-text text-transparent drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]">
+          <div className="relative mb-8 group">
+            <h1 className="text-6xl md:text-9xl font-black tracking-tighter leading-none bg-gradient-to-b from-white via-white/90 to-primary/40 bg-clip-text text-transparent drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]">
               فيرو
             </h1>
-            <div className="h-2 w-48 mx-auto bg-gradient-to-r from-transparent via-primary to-transparent rounded-full shadow-[0_0_30px_rgba(168,85,247,0.8)]" />
+            <div className="mt-4 h-1 w-32 mx-auto bg-gradient-to-r from-transparent via-primary to-transparent rounded-full shadow-[0_0_20px_rgba(168,85,247,0.6)]" />
           </div>
 
-          <p className="text-xl md:text-3xl font-light text-muted-foreground/90 max-w-3xl text-center mb-16 leading-relaxed">
+          <p className="text-base md:text-xl text-muted-foreground/80 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
             {t("home.description")}
           </p>
 
           {/* Action Hub */}
           {!user ? (
-            <div className="flex flex-col sm:flex-row gap-6 items-center w-full max-w-2xl">
+            <div className="flex flex-col sm:flex-row gap-4 items-center w-full max-w-md">
               <Button 
                 size="lg" 
                 onClick={() => setLoginDialogOpen(true)}
-                className="group relative h-20 w-full sm:flex-1 rounded-2xl overflow-hidden bg-primary hover:bg-primary transition-all duration-500 shadow-[0_0_40px_-10px_rgba(168,85,247,0.5)]"
+                className="group relative h-14 w-full sm:flex-1 rounded-2xl overflow-hidden bg-primary hover:bg-primary transition-all duration-300 shadow-xl"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                <span className="relative z-10 flex items-center gap-3 text-2xl font-black">
-                  <LogIn className="w-7 h-7" />
-                  {t("auth.login")}
-                </span>
+                <LogIn className="w-5 h-5 ml-2" />
+                <span className="text-lg font-bold">{t("auth.login")}</span>
               </Button>
               
               <Button 
                 size="lg" 
                 variant="outline"
                 onClick={() => setRegisterDialogOpen(true)}
-                className="h-20 w-full sm:flex-1 rounded-2xl border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-500 text-2xl font-bold"
+                className="h-14 w-full sm:flex-1 rounded-2xl border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 text-lg font-bold"
               >
-                <UserPlus className="w-7 h-7 ml-3" />
+                <UserPlus className="w-5 h-5 ml-2" />
                 {t("auth.signUp")}
               </Button>
             </div>
           ) : (
-            <div className="w-full max-w-4xl">
-              <div className="relative p-1.5 rounded-[2.5rem] bg-gradient-to-r from-primary/30 via-secondary/30 to-primary/30">
-                <div className="relative flex items-center bg-background/90 rounded-[2.4rem] p-3 backdrop-blur-2xl">
-                  <Search className="w-8 h-8 ml-5 text-primary" />
+            <div className="w-full max-w-2xl">
+              <div className="relative p-1 rounded-2xl bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20">
+                <div className="relative flex items-center bg-background/80 rounded-[0.9rem] p-2 backdrop-blur-xl">
+                  <Search className="w-5 h-5 ml-3 text-primary" />
                   <Input 
                     placeholder={t("home.search.placeholder")} 
-                    className="flex-1 h-16 bg-transparent border-0 text-2xl focus-visible:ring-0 placeholder:text-muted-foreground/40"
+                    className="flex-1 h-12 bg-transparent border-0 text-lg focus-visible:ring-0 placeholder:text-muted-foreground/40"
                   />
-                  <Button size="lg" className="h-14 px-10 rounded-[1.8rem] text-xl font-black bg-primary shadow-lg hover:scale-105 transition-all">
+                  <Button size="lg" className="h-10 px-6 rounded-xl text-base font-bold bg-primary shadow-lg hover:scale-105 transition-all">
                     {t("home.search.button")}
                   </Button>
                 </div>
@@ -232,28 +228,28 @@ export function Dashboard() {
       </section>
 
       {/* 📊 Holographic Stats Section */}
-      <section className="container mx-auto px-4 -mt-20 relative z-20 pb-32">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <section className="container mx-auto px-4 py-12 relative z-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
               <div 
                 key={index}
-                className="group relative p-px rounded-[2rem] bg-gradient-to-br from-white/10 to-transparent hover:from-primary/20 transition-all duration-700"
+                className="group relative p-px rounded-2xl bg-gradient-to-br from-white/10 to-transparent hover:from-primary/20 transition-all duration-500"
               >
-                <div className="relative h-full bg-background/60 backdrop-blur-3xl rounded-[1.95rem] p-10 overflow-hidden border border-white/5">
-                  <div className="relative flex items-center gap-8">
+                <div className="relative h-full bg-background/40 backdrop-blur-3xl rounded-[0.95rem] p-6 overflow-hidden border border-white/5">
+                  <div className="flex items-center gap-4">
                     <div className={cn(
-                      "w-16 h-16 rounded-2xl flex items-center justify-center transition-transform duration-500 shadow-2xl",
+                      "w-12 h-12 rounded-xl flex items-center justify-center shadow-lg",
                       stat.iconBg
                     )}>
-                      <Icon className={cn("w-8 h-8", stat.iconColor)} />
+                      <Icon className={cn("w-6 h-6", stat.iconColor)} />
                     </div>
                     <div>
-                      <h3 className="text-4xl font-black tracking-tight bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+                      <h3 className="text-2xl font-black tracking-tight text-white">
                         {stat.value}
                       </h3>
-                      <p className="text-base font-bold uppercase tracking-widest text-muted-foreground/60">{stat.label}</p>
+                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">{stat.label}</p>
                     </div>
                   </div>
                 </div>
@@ -264,76 +260,76 @@ export function Dashboard() {
       </section>
 
       {/* 📦 Minimalist Modern Grid */}
-      <section className="container mx-auto px-4 py-24">
-        <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-20 border-b border-white/5 pb-10">
+      <section className="container mx-auto px-4 py-16">
+        <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 mb-12 text-center md:text-right">
           <div>
-            <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-4">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter mb-2">
               {t("home.featuredServices")}
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl font-light leading-relaxed">
+            <p className="text-sm md:text-lg text-muted-foreground max-w-xl font-medium">
               {t("home.featuredServices.subtitle")}
             </p>
           </div>
-          <Button variant="ghost" className="h-16 px-10 text-2xl font-black group hover:bg-white/5 rounded-2xl">
+          <Button variant="ghost" className="h-12 px-6 text-lg font-bold group hover:bg-white/5 rounded-xl border border-white/5">
             {t("home.viewAll")}
-            <ArrowRight className="w-8 h-8 mr-4 group-hover:translate-x-[-8px] transition-transform" />
+            <ArrowRight className="w-5 h-5 mr-2 group-hover:translate-x-[-4px] transition-transform" />
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {productsLoading ? (
             Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="h-[450px] rounded-[2.5rem] bg-white/5 animate-pulse" />
+              <div key={index} className="h-96 rounded-3xl bg-white/5 animate-pulse" />
             ))
           ) : (
             products.slice(0, 6).map((product) => (
               <div 
                 key={product.id} 
-                className="group relative flex flex-col bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 hover:border-primary/20 rounded-[2.5rem] transition-all duration-700 overflow-hidden h-full"
+                className="group relative flex flex-col bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 hover:border-primary/30 rounded-[2rem] transition-all duration-500 overflow-hidden h-full"
               >
                 {/* Image Container */}
-                <div className="relative h-64 overflow-hidden">
-                  <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <ShoppingBag className="w-24 h-24 text-white/5 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-700" />
+                <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/5 to-secondary/5">
+                  <div className="absolute inset-0 flex items-center justify-center opacity-20 group-hover:opacity-40 transition-opacity">
+                    <ShoppingBag className="w-20 h-20 text-white" />
                   </div>
-                  <Badge className="absolute top-8 left-8 bg-black/40 backdrop-blur-xl border-white/10 text-white px-5 py-2 text-sm rounded-full">
+                  <Badge className="absolute top-4 left-4 bg-background/60 backdrop-blur-md border-white/10 text-white px-3 py-1 text-[10px] rounded-full uppercase font-bold">
                     {getCategoryLabel(product.category)}
                   </Badge>
                 </div>
 
-                <div className="flex-1 p-10 flex flex-col">
+                <div className="flex-1 p-6 flex flex-col">
                   <div className="flex-1">
-                    <h3 className="text-3xl font-bold mb-6 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+                    <h3 className="text-xl font-bold mb-4 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
                       {product.title}
                     </h3>
                     
-                    <div className="flex items-center gap-4 mb-8">
-                      <Avatar className="w-12 h-12 border-2 border-white/5">
+                    <div className="flex items-center gap-3 mb-6">
+                      <Avatar className="w-10 h-10 border-2 border-primary/20">
                         <AvatarImage src={product.seller.avatarUrl || undefined} />
-                        <AvatarFallback>{product.seller.fullName[0]}</AvatarFallback>
+                        <AvatarFallback className="bg-primary/20">{product.seller.fullName[0]}</AvatarFallback>
                       </Avatar>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-bold text-xl leading-none">{product.seller.fullName}</p>
-                          {product.seller.isVerified && <BadgeCheck className="w-5 h-5 text-secondary" />}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-bold text-sm truncate">{product.seller.fullName}</p>
+                          {product.seller.isVerified && <BadgeCheck className="w-4 h-4 text-secondary" />}
                         </div>
-                        <div className="flex items-center gap-1.5 mt-1.5">
-                          <Star className="w-4 h-4 fill-primary text-primary" />
-                          <span className="text-sm font-black">{product.seller.rating || "5.0"}</span>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <Star className="w-3 h-3 fill-primary text-primary" />
+                          <span className="text-[10px] font-black">{product.seller.rating || "5.0"}</span>
+                          <span className="text-[10px] text-muted-foreground">({product.seller.totalReviews || 0})</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-8 border-t border-white/5">
+                  <div className="flex items-center justify-between pt-4 border-t border-white/5">
                     <div className="flex flex-col">
-                      <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold">{t("home.startingAt")}</span>
-                      <span className="text-3xl font-black text-white">${product.price}</span>
+                      <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{t("home.startingAt")}</span>
+                      <span className="text-xl font-black text-white">${product.price}</span>
                     </div>
                     <Link href={`/service/${product.id}`}>
-                      <Button size="icon" className="w-14 h-14 rounded-2xl bg-white/5 hover:bg-primary transition-all duration-500">
-                        <ArrowRight className="w-7 h-7" />
+                      <Button size="sm" className="h-10 px-4 rounded-xl bg-white/5 hover:bg-primary text-white border border-white/10 transition-all duration-300">
+                        <ArrowRight className="w-4 h-4" />
                       </Button>
                     </Link>
                   </div>
@@ -345,22 +341,22 @@ export function Dashboard() {
       </section>
 
       {/* 🌌 Gravity CTA Section */}
-      <section className="container mx-auto px-4 pb-48">
-        <div className="relative rounded-[3.5rem] overflow-hidden bg-white/[0.02] border border-white/5 p-12 md:p-32 text-center group">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.1)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+      <section className="container mx-auto px-4 pb-20">
+        <div className="relative rounded-[2.5rem] overflow-hidden bg-white/[0.02] border border-white/5 p-8 md:p-16 text-center group">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.05)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
           
-          <div className="relative z-10 max-w-5xl mx-auto">
-            <h2 className="text-5xl md:text-9xl font-black mb-12 tracking-tighter leading-none">
+          <div className="relative z-10 max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-5xl font-black mb-6 tracking-tighter">
               {t("home.cta.title")}
             </h2>
-            <p className="text-2xl md:text-3xl text-muted-foreground/80 mb-20 leading-relaxed font-light">
+            <p className="text-base md:text-xl text-muted-foreground/80 mb-10 leading-relaxed font-medium">
               {t("home.cta.description")}
             </p>
-            <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
-              <Button size="lg" className="h-20 px-16 rounded-3xl bg-white text-black hover:bg-white/90 text-2xl font-black transition-all">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button size="lg" className="h-14 px-10 rounded-2xl bg-primary text-white hover:scale-105 transition-all text-lg font-bold">
                 {t("home.cta.getStarted")}
               </Button>
-              <Button size="lg" variant="outline" className="h-20 px-16 rounded-3xl border-white/10 bg-white/5 backdrop-blur-xl text-2xl font-bold hover:bg-white/10 transition-all">
+              <Button size="lg" variant="outline" className="h-14 px-10 rounded-2xl border-white/10 bg-white/5 backdrop-blur-xl text-lg font-bold hover:bg-white/10 transition-all">
                 {t("home.learnMore")}
               </Button>
             </div>
