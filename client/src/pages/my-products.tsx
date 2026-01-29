@@ -82,6 +82,7 @@ const CATEGORY_VALUES = [
   "YouTube",
   "Spotify",
   "Telegram Numbers",
+  "Courses",
 ] as const;
 
 // Memoized ProductForm component - extracted outside to prevent re-creation on parent re-renders
@@ -142,6 +143,7 @@ const ProductForm = memo(function ProductForm({
   const showSpotifyFields = selectedCategory === "Spotify";
   const showTelegramNumbersFields = selectedCategory === "Telegram Numbers";
   const showSubscriptionsFields = selectedCategory === "Subscriptions";
+  const showCoursesFields = selectedCategory === "Courses";
 
   // Get translated category labels
   const categories = useMemo(() => [
@@ -158,6 +160,7 @@ const ProductForm = memo(function ProductForm({
     { value: "Spotify", label: t("services.categories.spotify") },
     { value: "Telegram Numbers", label: t("services.categories.telegramNumbers") },
     { value: "Subscriptions", label: t("services.categories.subscriptions") },
+    { value: "Courses", label: t("services.categories.courses") },
   ], [t]);
 
   return (
@@ -272,6 +275,32 @@ const ProductForm = memo(function ProductForm({
             )}
           />
         </div>
+
+        {showCoursesFields && (
+          <div className="space-y-5 pt-4 border-t border-border/50">
+            <h3 className="text-sm font-medium text-foreground">{t("myProducts.courseUrl")}</h3>
+            
+            <FormField
+              control={form.control}
+              name="courseUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("myProducts.courseUrl")}</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field}
+                      value={field.value || ""}
+                      placeholder={t("myProducts.courseUrlPlaceholder")}
+                      className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
+                      data-testid="input-course-url"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
 
         {showAccountFields && (
           <div className="space-y-5 pt-4 border-t border-border/50">
