@@ -18,7 +18,8 @@ import {
   ShoppingBag, 
   Eye,
   ArrowRight,
-  ArrowLeft
+  ArrowLeft,
+  User
 } from "lucide-react";
 import type { ProductWithSeller } from "@shared/schema";
 
@@ -121,11 +122,11 @@ export function ServiceDetailPage() {
         {/* Back Button */}
         <Button
           variant="ghost"
-          className="mb-6 hover-elevate"
+          className="mb-6 hover-elevate hover-scale group"
           onClick={() => navigate("/services")}
           data-testid="button-back"
         >
-          {isRTL ? <ArrowRight className="w-4 h-4 ml-2" /> : <ArrowLeft className="w-4 h-4 mr-2" />}
+          {isRTL ? <ArrowRight className="w-4 h-4 ml-2 icon-animate" /> : <ArrowLeft className="w-4 h-4 mr-2 icon-animate" />}
           {t("common.back")}
         </Button>
 
@@ -133,12 +134,12 @@ export function ServiceDetailPage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Image */}
-            <Card className="glass-morphism overflow-hidden">
-              <div className="relative h-96">
+            <Card className="glass-morphism overflow-hidden hover-lift">
+              <div className="relative h-96 group">
                 <img 
                   src={getProductImage(product.category, product.imageUrl)}
                   alt={product.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                 <Badge className="absolute top-4 right-4 bg-primary/90 backdrop-blur-sm neon-glow-primary">
@@ -193,18 +194,21 @@ export function ServiceDetailPage() {
           {/* Sidebar - Seller and Purchase */}
           <div className="space-y-6">
             {/* Seller Card */}
-            <Card className="glass-morphism sticky top-20">
+            <Card className="glass-morphism sticky top-20 hover-lift">
               <CardHeader>
-                <CardTitle className="text-lg">{t("services.seller")}</CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2">
+                   <User className="w-5 h-5 text-primary icon-animate" />
+                   {t("services.seller")}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Seller Info */}
                 <Link href={`/seller/${product.seller.id}`}>
                   <button 
-                    className="flex items-center gap-3 w-full hover-elevate rounded-lg p-3 -m-3 transition-all"
+                    className="flex items-center gap-3 w-full hover-elevate rounded-lg p-3 -m-3 transition-all group"
                     data-testid="link-seller-profile"
                   >
-                    <Avatar className="w-16 h-16 border-2 border-primary/30 ring-2 ring-background">
+                    <Avatar className="w-16 h-16 border-2 border-primary/30 ring-2 ring-background group-hover:border-primary transition-colors">
                       <AvatarImage src={getUserAvatar(product.seller.id)} />
                       <AvatarFallback className="text-lg bg-primary/20">
                         {product.seller.username.substring(0, 2).toUpperCase()}
@@ -212,7 +216,7 @@ export function ServiceDetailPage() {
                     </Avatar>
                     <div className="flex-1 text-right">
                       <div className="flex items-center gap-2 justify-end mb-1">
-                        <h4 className="font-semibold">{product.seller.fullName}</h4>
+                        <h4 className="font-semibold group-hover:text-primary transition-colors">{product.seller.fullName}</h4>
                         {product.seller.isVerified && (
                           <BadgeCheck className="w-5 h-5 text-green-500 flex-shrink-0" />
                         )}
@@ -252,11 +256,12 @@ export function ServiceDetailPage() {
 
                 {/* Purchase Button */}
                 <Button
-                  className="w-full neon-glow-primary text-lg h-12"
+                  className="w-full neon-glow-primary text-lg h-12 btn-glow-primary hover-scale"
                   onClick={() => purchaseMutation.mutate(product.id)}
                   disabled={!canPurchase || purchaseMutation.isPending}
                   data-testid="button-purchase"
                 >
+                  <ShoppingBag className="w-5 h-5 ml-2 icon-animate" />
                   {purchaseMutation.isPending ? (
                     t("services.purchasing")
                   ) : !user ? (
