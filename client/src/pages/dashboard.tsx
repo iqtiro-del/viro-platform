@@ -255,15 +255,15 @@ export function Dashboard() {
             return (
               <div 
                 key={index}
-                className="group relative p-px rounded-2xl bg-gradient-to-br from-white/10 to-transparent hover:from-primary/20 transition-all duration-500"
+                className="group relative p-px rounded-2xl bg-gradient-to-br from-white/10 to-transparent hover:from-primary/20 transition-all duration-500 hover-lift hover-scale"
               >
-                <div className="relative h-full bg-background/40 backdrop-blur-3xl rounded-[0.95rem] p-6 overflow-hidden border border-white/5">
+                <div className="relative h-full glass-morphism rounded-[0.95rem] p-6 overflow-hidden border border-white/5">
                   <div className="flex items-center gap-4">
                     <div className={cn(
-                      "w-12 h-12 rounded-xl flex items-center justify-center shadow-lg",
+                      "w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3",
                       stat.iconBg
                     )}>
-                      <Icon className={cn("w-6 h-6", stat.iconColor)} />
+                      <Icon className={cn("w-6 h-6 icon-animate", stat.iconColor)} />
                     </div>
                     <div>
                       <h3 className="text-2xl font-black tracking-tight text-white">
@@ -307,7 +307,7 @@ export function Dashboard() {
             products.slice(0, 12).map((product) => (
               <div 
                 key={product.id} 
-                className="group relative flex flex-col bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 hover:border-primary/30 rounded-2xl transition-all duration-500 overflow-hidden"
+                className="group relative flex flex-col glass-morphism hover:bg-white/[0.05] border border-white/5 hover:border-primary/30 rounded-2xl transition-all duration-500 overflow-hidden hover-lift hover-scale"
               >
                 {/* Image Container - Square Aspect Ratio */}
                 <Link href={`/service/${product.id}`} className="block relative aspect-square overflow-hidden bg-gradient-to-br from-primary/5 to-secondary/5">
@@ -383,10 +383,10 @@ export function Dashboard() {
             // Unique sellers from products
             Array.from(new Map(products.map(p => [p.seller.id, p.seller])).values()).slice(0, 6).map((seller) => (
               <Link key={seller.id} href={`/seller/${seller.id}`}>
-                <div className="group relative flex flex-col items-center p-6 bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 hover:border-primary/30 rounded-3xl transition-all duration-500 cursor-pointer">
+                <div className="group relative flex flex-col items-center p-6 glass-morphism hover:bg-white/[0.05] border border-white/5 hover:border-primary/30 rounded-3xl transition-all duration-500 cursor-pointer hover-lift hover-scale">
                   <div className="relative mb-4">
-                    <Avatar className="w-20 h-20 border-2 border-primary/20 group-hover:border-primary transition-colors">
-                      <AvatarImage src={seller.avatarUrl || undefined} />
+                    <Avatar className="w-20 h-20 border-2 border-primary/20 group-hover:border-primary transition-colors hover-scale">
+                      <AvatarImage src={seller.avatarUrl || undefined} className="transition-transform duration-500 group-hover:scale-110" />
                       <AvatarFallback className="text-xl bg-primary/20">{seller.fullName[0]}</AvatarFallback>
                     </Avatar>
                     {seller.isVerified && (
