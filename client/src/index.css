@@ -427,33 +427,69 @@
 
   /* Glass morphism effect */
   .glass-morphism {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   }
 
   .dark .glass-morphism {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   :root:not(.dark) .glass-morphism {
-    background: rgba(0, 0, 0, 0.03);
+    background: rgba(255, 255, 255, 0.7);
     border: 1px solid rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   .glass-morphism-strong {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   }
 
   .dark .glass-morphism-strong {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.05);
   }
 
   :root:not(.dark) .glass-morphism-strong {
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  /* Micro-animations */
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10;
+  }
+
+  /* Smooth button glow */
+  .btn-glow-primary {
+    @apply relative overflow-hidden transition-all duration-300;
+  }
+
+  .btn-glow-primary::after {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+    background: radial-gradient(circle at center, hsl(var(--primary) / 0.4) 0%, transparent 70%);
+  }
+
+  .btn-glow-primary:hover::after {
+    @apply opacity-100;
+  }
+
+  /* Unified icon transitions */
+  .icon-animate {
+    @apply transition-transform duration-300 group-hover:rotate-12;
   }
 
   /* Page transition animations */

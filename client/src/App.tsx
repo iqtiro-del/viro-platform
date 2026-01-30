@@ -112,9 +112,7 @@ function Router() {
                 <Route path="/admin" component={AdminDashboard} />
                 <Route path="/services" component={ServicesPage} />
                 <Route path="/service/:id" component={ServiceDetailPage} />
-                <Route path="/@:username">
-                  {(params: { username: string }) => <SellerProfilePage params={{ username: params.username }} />}
-                </Route>
+                <Route path="/@:username" component={SellerProfilePage} />
                 <Route path="/seller/:id" component={SellerProfilePage} />
                 <Route path="/wallet">
                   <ProtectedRoute>
