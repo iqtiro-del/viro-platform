@@ -1,6 +1,11 @@
 import { useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 
-export function NeonBackground() {
+interface NeonBackgroundProps {
+  intensity?: "normal" | "high";
+}
+
+export function NeonBackground({ intensity = "normal" }: NeonBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -37,10 +42,13 @@ export function NeonBackground() {
       constructor() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
-        this.size = Math.random() * 20 + 15;
+        this.size = intensity === "high" ? Math.random() * 25 + 20 : Math.random() * 20 + 15;
         this.speedX = (Math.random() - 0.5) * 0.3;
         this.speedY = (Math.random() - 0.5) * 0.3;
-        this.opacity = Math.random() * 0.08 + 0.02;
+        // Higher base opacity for 'high' intensity
+        const baseOpacity = intensity === "high" ? 0.15 : 0.02;
+        const extraOpacity = intensity === "high" ? 0.1 : 0.08;
+        this.opacity = Math.random() * extraOpacity + baseOpacity;
         this.rotation = Math.random() * Math.PI * 2;
         this.rotationSpeed = (Math.random() - 0.5) * 0.005;
         
@@ -67,7 +75,7 @@ export function NeonBackground() {
         ctx.scale(this.size / 24, this.size / 24);
         ctx.translate(-12, -12);
         ctx.strokeStyle = `rgba(168, 85, 247, ${this.opacity})`;
-        ctx.lineWidth = 1.2;
+        ctx.lineWidth = intensity === "high" ? 1.5 : 1.2;
         ctx.stroke(this.path);
         ctx.restore();
       }
@@ -76,7 +84,8 @@ export function NeonBackground() {
     let particles: Particle[] = [];
     const init = () => {
       particles = [];
-      const numberOfParticles = Math.floor((width * height) / 50000);
+      const density = intensity === "high" ? 30000 : 50000;
+      const numberOfParticles = Math.floor((width * height) / density);
       for (let i = 0; i < numberOfParticles; i++) {
         particles.push(new Particle());
       }
@@ -107,7 +116,7 @@ export function NeonBackground() {
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animationFrameId);
     };
-  }, []);
+  }, [intensity]);
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
@@ -128,8 +137,11 @@ export function NeonBackground() {
       {/* Canvas for Floating Icons */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 opacity-60"
-        style={{ filter: "blur(0.3px)" }}
+        className={cn(
+          "absolute inset-0",
+          intensity === "high" ? "opacity-100" : "opacity-60"
+        )}
+        style={{ filter: intensity === "high" ? "none" : "blur(0.3px)" }}
       />
 
       {/* Very Soft Floating Orbs */}

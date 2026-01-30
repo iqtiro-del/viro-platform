@@ -164,7 +164,7 @@ export function Dashboard() {
       <section className="relative min-h-[70vh] flex items-center justify-center pt-24 overflow-hidden border-b border-primary/10">
         {/* Background Layers */}
         <div className="absolute inset-0 z-0">
-          <NeonBackground />
+          <NeonBackground intensity="high" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,hsl(var(--background))_85%)] opacity-95" />
           
           {/* Animated Grid Floor */}
