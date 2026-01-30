@@ -220,25 +220,25 @@ export function ServicesPage() {
 
         {/* Search and Filter Bar */}
         <div className="mb-8 space-y-4">
-          <div className="flex gap-3">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                placeholder={t("services.searchPlaceholder")}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 glass-morphism border-border/50 focus:border-primary"
-                data-testid="input-search-services"
-              />
-            </div>
+            <div className="flex gap-3">
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground icon-animate" />
+                <Input
+                  placeholder={t("services.searchPlaceholder")}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 glass-morphism border-border/50 focus:border-primary hover-scale"
+                  data-testid="input-search-services"
+                />
+              </div>
 
-            {/* Mobile Filter Button */}
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="md:hidden border-border/50" data-testid="button-filter-mobile">
-                  <SlidersHorizontal className="w-5 h-5" />
-                </Button>
-              </SheetTrigger>
+              {/* Mobile Filter Button */}
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="icon" className="md:hidden border-border/50 hover-scale" data-testid="button-filter-mobile">
+                    <SlidersHorizontal className="w-5 h-5 icon-animate" />
+                  </Button>
+                </SheetTrigger>
               <SheetContent className="glass-morphism-strong border-l border-border/50">
                 <SheetHeader>
                   <SheetTitle>{t("services.filters")}</SheetTitle>
@@ -281,10 +281,10 @@ export function ServicesPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Desktop Sidebar Filter */}
           <div className="hidden md:block lg:col-span-1">
-            <Card className="glass-morphism border-border/30 sticky top-20">
+            <Card className="glass-morphism border-border/30 sticky top-20 hover-lift">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Filter className="w-5 h-5" />
+                  <Filter className="w-5 h-5 icon-animate" />
                   {t("services.filters")}
                 </CardTitle>
               </CardHeader>
@@ -331,7 +331,7 @@ export function ServicesPage() {
                 {filteredProducts.map((product) => (
                   <div 
                     key={product.id}
-                    className="group relative flex flex-col bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 hover:border-primary/30 rounded-2xl transition-all duration-500 overflow-hidden"
+                    className="group relative flex flex-col glass-morphism hover:bg-white/[0.05] border border-white/5 hover:border-primary/30 rounded-2xl transition-all duration-500 overflow-hidden hover-lift"
                     data-testid={`card-product-${product.id}`}
                   >
                     {/* Image Container - Square Aspect Ratio */}
