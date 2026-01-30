@@ -362,7 +362,7 @@ export function WalletPage() {
         {/* Balance Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Current Balance */}
-          <Card className="glass-morphism-strong border-primary/30 neon-glow-primary col-span-1 md:col-span-2">
+          <Card className="glass-morphism border-primary/30 neon-glow-primary col-span-1 md:col-span-2 hover-lift">
             <CardHeader>
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
@@ -375,8 +375,8 @@ export function WalletPage() {
                     </CardTitle>
                   )}
                 </div>
-                <div className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0 rounded-full bg-primary/20 flex items-center justify-center neon-glow-primary">
-                  <WalletIcon className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+                <div className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0 rounded-full bg-primary/20 flex items-center justify-center neon-glow-primary group">
+                  <WalletIcon className="w-6 h-6 md:w-8 md:h-8 text-primary icon-animate" />
                 </div>
               </div>
             </CardHeader>
@@ -384,7 +384,7 @@ export function WalletPage() {
               <div className="flex items-center gap-3">
                 <Dialog open={depositDialogOpen} onOpenChange={setDepositDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="flex-1 neon-glow-secondary" data-testid="button-deposit">
+                    <Button className="flex-1 neon-glow-secondary btn-glow-primary hover-scale" data-testid="button-deposit">
                       <ArrowDownRight className="w-4 h-4 mr-2" />
                       {t("wallet.deposit")}
                     </Button>
@@ -521,7 +521,7 @@ export function WalletPage() {
                 {/* Crypto Deposit Button and Dialog */}
                 <Dialog open={cryptoDialogOpen} onOpenChange={setCryptoDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" className="flex-1 border-yellow-500/50 hover:border-yellow-500 text-yellow-500" data-testid="button-crypto-deposit">
+                    <Button variant="outline" className="flex-1 border-yellow-500/50 hover:border-yellow-500 text-yellow-500 hover-scale" data-testid="button-crypto-deposit">
                       <Bitcoin className="w-4 h-4 mr-2" />
                       كريبتو
                     </Button>

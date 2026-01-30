@@ -200,9 +200,9 @@ export function Dashboard() {
               <Button 
                 size="lg" 
                 onClick={() => setLoginDialogOpen(true)}
-                className="group relative h-14 w-full sm:flex-1 rounded-2xl overflow-hidden bg-primary hover:bg-primary transition-all duration-300 shadow-xl"
+                className="group relative h-14 w-full sm:flex-1 rounded-2xl overflow-hidden bg-primary hover:bg-primary transition-all duration-300 shadow-xl btn-glow-primary hover-scale"
               >
-                <LogIn className="w-5 h-5 ml-2" />
+                <LogIn className="w-5 h-5 ml-2 icon-animate" />
                 <span className="text-lg font-bold">{t("auth.login")}</span>
               </Button>
               
@@ -210,9 +210,9 @@ export function Dashboard() {
                 size="lg" 
                 variant="outline"
                 onClick={() => setRegisterDialogOpen(true)}
-                className="h-14 w-full sm:flex-1 rounded-2xl border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 text-lg font-bold"
+                className="h-14 w-full sm:flex-1 rounded-2xl border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 text-lg font-bold hover-scale"
               >
-                <UserPlus className="w-5 h-5 ml-2" />
+                <UserPlus className="w-5 h-5 ml-2 icon-animate" />
                 {t("auth.signUp")}
               </Button>
             </div>
