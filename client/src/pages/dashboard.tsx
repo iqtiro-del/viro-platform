@@ -199,26 +199,26 @@ export function Dashboard() {
 
           {/* Action Hub */}
           {!user ? (
-            <div className="flex flex-col sm:flex-row gap-4 items-center w-full max-w-md relative">
-              <div className="absolute -top-16 left-0 right-0 z-[200] pointer-events-none">
+            <div className="flex flex-col sm:flex-row gap-4 items-center w-full max-w-[280px] sm:max-w-md relative">
+              <div className="absolute -top-12 left-0 right-0 z-[200] pointer-events-none">
                 <RobotAnimation />
               </div>
               <Button 
-                size="lg" 
+                size="sm" 
                 onClick={() => setLoginDialogOpen(true)}
-                className="group relative h-14 w-full sm:flex-1 rounded-2xl overflow-hidden bg-primary hover:bg-primary transition-all duration-300 shadow-xl btn-glow-primary hover-scale"
+                className="group relative h-11 w-full sm:flex-1 rounded-xl overflow-hidden bg-primary hover:bg-primary transition-all duration-300 shadow-xl btn-glow-primary hover-scale"
               >
-                <LogIn className="w-5 h-5 ml-2 icon-animate" />
-                <span className="text-lg font-bold">{t("auth.login")}</span>
+                <LogIn className="w-4 h-4 ml-2 icon-animate" />
+                <span className="text-base font-bold">{t("auth.login")}</span>
               </Button>
               
               <Button 
-                size="lg" 
+                size="sm" 
                 variant="outline"
                 onClick={() => setRegisterDialogOpen(true)}
-                className="h-14 w-full sm:flex-1 rounded-2xl border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 text-lg font-bold hover-scale"
+                className="h-11 w-full sm:flex-1 rounded-xl border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 text-base font-bold hover-scale"
               >
-                <UserPlus className="w-5 h-5 ml-2 icon-animate" />
+                <UserPlus className="w-4 h-4 ml-2 icon-animate" />
                 {t("auth.signUp")}
               </Button>
             </div>
@@ -261,21 +261,21 @@ export function Dashboard() {
             return (
               <div 
                 key={index}
-                className="group relative p-px rounded-2xl bg-gradient-to-br from-white/10 to-transparent hover:from-primary/20 transition-all duration-500 hover-lift hover-scale"
+                className="group relative p-px rounded-xl bg-gradient-to-br from-white/10 to-transparent hover:from-primary/20 transition-all duration-500 hover-lift hover-scale"
               >
-                <div className="relative h-full glass-morphism rounded-[0.95rem] p-6 overflow-hidden border border-white/5">
-                  <div className="flex items-center gap-4">
+                <div className="relative h-full glass-morphism rounded-[0.7rem] p-4 overflow-hidden border border-white/5">
+                  <div className="flex items-center gap-3">
                     <div className={cn(
-                      "w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3",
+                      "w-10 h-10 rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3",
                       stat.iconBg
                     )}>
-                      <Icon className={cn("w-6 h-6 icon-animate", stat.iconColor)} />
+                      <Icon className={cn("w-5 h-5 icon-animate", stat.iconColor)} />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-black tracking-tight text-white">
+                      <h3 className="text-xl font-black tracking-tight text-white">
                         {stat.value}
                       </h3>
-                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">{stat.label}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">{stat.label}</p>
                     </div>
                   </div>
                 </div>
