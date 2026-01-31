@@ -6,19 +6,22 @@ export function RobotAnimation() {
   const [phase, setPhase] = useState("walking-in"); // walking-in, waving, walking-out, hidden
 
   useEffect(() => {
-    // Phase 1: Walk to center
-    const walkInInterval = setInterval(() => {
-      setPosition((prev) => {
-        if (prev >= 45) { // Center-ish (45% for visual balance)
-          clearInterval(walkInInterval);
-          setPhase("waving");
-          return 45;
-        }
-        return prev + 0.5;
-      });
-    }, 20);
+    // Small delay to ensure everything is rendered
+    const startTimeout = setTimeout(() => {
+      // Phase 1: Walk to center
+      const walkInInterval = setInterval(() => {
+        setPosition((prev) => {
+          if (prev >= 45) { // Center-ish
+            clearInterval(walkInInterval);
+            setPhase("waving");
+            return 45;
+          }
+          return prev + 1.2; // Increased speed for immediate feedback
+        });
+      }, 16);
+    }, 100);
 
-    return () => clearInterval(walkInInterval);
+    return () => clearTimeout(startTimeout);
   }, []);
 
   useEffect(() => {
@@ -39,9 +42,9 @@ export function RobotAnimation() {
             setPhase("hidden");
             return 110;
           }
-          return prev + 0.5;
+          return prev + 1.2; // Increased speed
         });
-      }, 20);
+      }, 16);
       return () => clearInterval(walkOutInterval);
     }
   }, [phase]);
