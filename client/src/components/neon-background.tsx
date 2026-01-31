@@ -185,8 +185,8 @@ export function NeonBackground({ intensity = "normal" }: NeonBackgroundProps) {
           50% { opacity: 0.4; }
         }
         @keyframes global-pulse {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 0.7; }
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 1; }
         }
       `}} />
     </div>
