@@ -417,12 +417,12 @@ export function Dashboard() {
 
       {/* Login Dialog */}
       <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
-        <DialogContent className="glass-morphism-strong border-primary/20 neon-glow-primary max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-2xl text-center neon-text-glow">
+        <DialogContent className="glass-morphism-strong border-primary/20 neon-glow-primary w-[90vw] max-w-[400px] rounded-3xl p-6 sm:p-8">
+          <DialogHeader className="space-y-2">
+            <DialogTitle className="text-xl sm:text-2xl text-center neon-text-glow">
               {t("auth.welcomeBack")}
             </DialogTitle>
-            <DialogDescription className="text-center">
+            <DialogDescription className="text-center text-sm">
               {t("auth.enterCredentials")}
             </DialogDescription>
           </DialogHeader>
@@ -503,12 +503,12 @@ export function Dashboard() {
 
       {/* Register Dialog */}
       <Dialog open={registerDialogOpen} onOpenChange={setRegisterDialogOpen}>
-        <DialogContent className="glass-morphism-strong border-primary/20 neon-glow-primary max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-2xl text-center neon-text-glow">
+        <DialogContent className="glass-morphism-strong border-primary/20 neon-glow-primary w-[90vw] max-w-[400px] rounded-3xl p-6 sm:p-8">
+          <DialogHeader className="space-y-2">
+            <DialogTitle className="text-xl sm:text-2xl text-center neon-text-glow">
               {t("auth.createAccount")}
             </DialogTitle>
-            <DialogDescription className="text-center">
+            <DialogDescription className="text-center text-sm">
               {t("auth.joinTiro")}
             </DialogDescription>
           </DialogHeader>
