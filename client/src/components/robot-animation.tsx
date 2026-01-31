@@ -53,22 +53,22 @@ export function RobotAnimation() {
 
   return (
     <div 
-      className="fixed bottom-10 z-[100] pointer-events-none transition-transform duration-300 select-none"
+      className="fixed bottom-32 md:bottom-10 z-[200] pointer-events-none transition-transform duration-300 select-none"
       style={{ 
         left: `${position}%`,
-        transform: `translateX(-50%) ${phase === "waving" ? "scale(1.2)" : "scale(1)"}`
+        transform: `translateX(-50%) ${phase === "waving" ? "scale(1.5)" : "scale(1.3)"}`
       }}
     >
       <div className="relative">
         {/* Robot Body */}
-        <div className="bg-primary/20 backdrop-blur-md p-3 rounded-2xl border border-primary/40 shadow-[0_0_20px_rgba(168,85,247,0.4)] flex items-center justify-center">
-          <Bot className={`w-10 h-10 text-primary ${phase === "walking-in" || phase === "walking-out" ? "animate-bounce" : ""}`} />
+        <div className="bg-primary backdrop-blur-md p-3 rounded-2xl border-2 border-white/20 shadow-[0_0_30px_rgba(168,85,247,0.8)] flex items-center justify-center">
+          <Bot className={`w-12 h-12 text-white ${phase === "walking-in" || phase === "walking-out" ? "animate-bounce" : ""}`} />
         </div>
 
         {/* Waving Arm Animation */}
         {phase === "waving" && (
           <div 
-            className="absolute -top-4 -right-2 text-2xl animate-[wave_1s_ease-in-out_infinite] pointer-events-none"
+            className="absolute -top-6 -right-4 text-3xl animate-[wave_1s_ease-in-out_infinite] pointer-events-none"
             style={{ transformOrigin: "bottom left" }}
           >
             👋
@@ -77,7 +77,7 @@ export function RobotAnimation() {
 
         {/* Small Talk Bubble */}
         {phase === "waving" && (
-          <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] font-bold px-2 py-1 rounded-lg whitespace-nowrap animate-bounce pointer-events-none">
+          <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-white text-black text-xs font-bold px-3 py-1.5 rounded-xl whitespace-nowrap animate-bounce pointer-events-none shadow-2xl">
             مرحباً بكم في فيرو!
           </div>
         )}
@@ -86,7 +86,7 @@ export function RobotAnimation() {
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes wave {
           0%, 100% { transform: rotate(0deg); }
-          50% { transform: rotate(20deg); }
+          50% { transform: rotate(30deg); }
         }
       `}} />
     </div>
