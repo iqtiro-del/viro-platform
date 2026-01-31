@@ -161,7 +161,6 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden rtl select-none">
-      <RobotAnimation />
       <NeonBackground intensity="high" />
       {/* 🚀 New Futuristic Hero Section */}
       <section className="relative min-h-[70vh] flex items-center justify-center pt-24 overflow-hidden border-b border-primary/10">
@@ -198,7 +197,10 @@ export function Dashboard() {
 
           {/* Action Hub */}
           {!user ? (
-            <div className="flex flex-col sm:flex-row gap-4 items-center w-full max-w-md">
+            <div className="flex flex-col sm:flex-row gap-4 items-center w-full max-w-md relative">
+              <div className="absolute -top-16 left-0 right-0 z-[200] pointer-events-none">
+                <RobotAnimation />
+              </div>
               <Button 
                 size="lg" 
                 onClick={() => setLoginDialogOpen(true)}
