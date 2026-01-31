@@ -18,6 +18,7 @@ import { useLanguage } from "@/lib/language-context";
 import { useToast } from "@/hooks/use-toast";
 import type { ProductWithSeller } from "@shared/schema";
 import { NeonBackground } from "@/components/neon-background";
+import { RobotAnimation } from "@/components/robot-animation";
 import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
@@ -161,6 +162,7 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden rtl select-none">
       <NeonBackground intensity="high" />
+      <RobotAnimation />
       {/* 🚀 New Futuristic Hero Section */}
       <section className="relative min-h-[70vh] flex items-center justify-center pt-24 overflow-hidden border-b border-primary/10">
         {/* Background Layers */}
