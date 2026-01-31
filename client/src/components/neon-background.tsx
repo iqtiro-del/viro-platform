@@ -149,14 +149,23 @@ export function NeonBackground({ intensity = "normal" }: NeonBackgroundProps) {
         className="absolute top-[10%] left-[20%] w-[600px] h-[600px] rounded-full blur-[120px] opacity-20 dark:opacity-10"
         style={{
           background: 'radial-gradient(circle, hsl(280 70% 65% / 0.2) 0%, transparent 70%)',
-          animation: 'slow-float 45s ease-in-out infinite',
+          animation: 'slow-float 45s ease-in-out infinite, pulse-glow 10s ease-in-out infinite',
         }}
       />
       <div 
         className="absolute bottom-[10%] right-[20%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-20 dark:opacity-10"
         style={{
           background: 'radial-gradient(circle, hsl(195 75% 60% / 0.2) 0%, transparent 70%)',
-          animation: 'slow-float 50s ease-in-out infinite reverse',
+          animation: 'slow-float 50s ease-in-out infinite reverse, pulse-glow 12s ease-in-out infinite alternate',
+        }}
+      />
+      
+      {/* Global Soft Purple Pulse */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle at center, hsl(280 80% 60% / 0.03), transparent 80%)',
+          animation: 'global-pulse 15s ease-in-out infinite',
         }}
       />
 
@@ -170,6 +179,14 @@ export function NeonBackground({ intensity = "normal" }: NeonBackgroundProps) {
           0%, 100% { transform: translate(0, 0); }
           33% { transform: translate(30px, -50px); }
           66% { transform: translate(-20px, 40px); }
+        }
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.2; }
+          50% { opacity: 0.4; }
+        }
+        @keyframes global-pulse {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.7; }
         }
       `}} />
     </div>
