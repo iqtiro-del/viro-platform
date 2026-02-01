@@ -17,7 +17,7 @@ export function NeonBackground({ intensity = "normal" }: NeonBackgroundProps) {
 
     let animationFrameId: number;
     let width = window.innerWidth;
-    let height = window.innerHeight;
+    let height = Math.max(window.innerHeight, document.documentElement.scrollHeight);
 
     // SVG paths for floating icons (shield, box, layers, dollar, spark)
     const icons = [
@@ -93,7 +93,7 @@ export function NeonBackground({ intensity = "normal" }: NeonBackgroundProps) {
 
     const handleResize = () => {
       width = window.innerWidth;
-      height = window.innerHeight;
+      height = Math.max(window.innerHeight, document.documentElement.scrollHeight);
       canvas.width = width;
       canvas.height = height;
       init();
@@ -119,10 +119,10 @@ export function NeonBackground({ intensity = "normal" }: NeonBackgroundProps) {
   }, [intensity]);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+    <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10 min-h-full">
       {/* Dynamic Animated Gradient Mesh */}
       <div 
-        className="absolute inset-0 opacity-40 dark:opacity-20"
+        className="fixed inset-0 opacity-40 dark:opacity-20"
         style={{
           background: `
             radial-gradient(circle at 0% 0%, hsl(280 80% 60% / 0.15) 0%, transparent 50%),
