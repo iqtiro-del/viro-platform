@@ -18,6 +18,7 @@ const loginSchema = z.object({
 
 const registerSchema = loginSchema.extend({
   fullName: z.string().min(2, "Full name is required"),
+  email: z.string().email("Invalid email address"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -47,10 +48,9 @@ export function AuthPage({ mode }: AuthPageProps) {
       username: "",
       password: "",
       fullName: "",
+      email: "",
     },
   });
-
-  const form = mode === "login" ? loginForm : registerForm;
 
   const onSubmit = async (data: LoginFormData | RegisterFormData) => {
     setIsLoading(true);
@@ -67,6 +67,7 @@ export function AuthPage({ mode }: AuthPageProps) {
           username: registerData.username,
           password: registerData.password,
           fullName: registerData.fullName,
+          email: registerData.email,
         });
         toast({
           title: t("auth.accountCreated"),
@@ -103,11 +104,63 @@ export function AuthPage({ mode }: AuthPageProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {mode === "register" && (
+          {mode === "login" ? (
+            <Form {...loginForm}>
+              <form onSubmit={loginForm.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
-                  control={form.control}
+                  control={loginForm.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("auth.username")}</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
+                          data-testid="input-username"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={loginForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("auth.password")}</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password" 
+                          placeholder="••••••••" 
+                          {...field} 
+                          className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
+                          data-testid="input-password"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button 
+                  type="submit" 
+                  className="w-full neon-glow-primary" 
+                  disabled={isLoading}
+                  data-testid="button-submit"
+                >
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {t("auth.login")}
+                </Button>
+              </form>
+            </Form>
+          ) : (
+            <Form {...registerForm}>
+              <form onSubmit={registerForm.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={registerForm.control}
                   name="fullName"
                   render={({ field }) => (
                     <FormItem>
@@ -123,57 +176,76 @@ export function AuthPage({ mode }: AuthPageProps) {
                     </FormItem>
                   )}
                 />
-              )}
-              
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("auth.username")}</FormLabel>
-                    <FormControl>
-                      <Input 
-                        {...field} 
-                        className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
-                        data-testid="input-username"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={registerForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("auth.email")}</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="email"
+                          placeholder="example@email.com"
+                          {...field} 
+                          className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
+                          data-testid="input-email"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={registerForm.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("auth.username")}</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
+                          data-testid="input-username"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("auth.password")}</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="password" 
-                        placeholder="••••••••" 
-                        {...field} 
-                        className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
-                        data-testid="input-password"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={registerForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("auth.password")}</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password" 
+                          placeholder="••••••••" 
+                          {...field} 
+                          className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
+                          data-testid="input-password"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <Button 
-                type="submit" 
-                className="w-full neon-glow-primary" 
-                disabled={isLoading}
-                data-testid="button-submit"
-              >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {mode === "login" ? t("auth.login") : t("auth.createAccount")}
-              </Button>
-            </form>
-          </Form>
+                <Button 
+                  type="submit" 
+                  className="w-full neon-glow-primary" 
+                  disabled={isLoading}
+                  data-testid="button-submit"
+                >
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {t("auth.createAccount")}
+                </Button>
+              </form>
+            </Form>
+          )}
 
           <div className="mt-6 text-center text-sm">
             <span className="text-muted-foreground">

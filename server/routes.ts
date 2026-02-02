@@ -48,9 +48,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const data = insertUserSchema.parse(req.body);
       
       // Check if username exists
-      const existing = await storage.getUserByUsername(data.username);
-      if (existing) {
+      const existingUsername = await storage.getUserByUsername(data.username);
+      if (existingUsername) {
         return res.status(400).json({ error: "Username already exists" });
+      }
+
+      // Check if email exists
+      const existingEmail = await storage.getUserByEmail(data.email);
+      if (existingEmail) {
+        return res.status(400).json({ error: "Email already exists" });
       }
 
       // Hash password
