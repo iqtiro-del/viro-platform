@@ -12,6 +12,7 @@ import youtubeImg from '@assets/IMG_3420_1766308410139.jpeg';
 import spotifyImg from '@assets/IMG_3441_1766385418310.jpeg';
 import telegramImg from '@assets/IMG_3442_1766387582386.jpeg';
 import subscriptionsImg from '@assets/IMG_3443_1766389462787.jpeg';
+import gamesImg from '../assets/images/games-category.png';
 
 // Default category images mapping - Professional stock images
 export const categoryImages: Record<string, string> = {
@@ -29,10 +30,11 @@ export const categoryImages: Record<string, string> = {
   "Spotify": spotifyImg,
   "Telegram Numbers": telegramImg,
   "Subscriptions": subscriptionsImg,
+  "Games": gamesImg,
 };
 
 // Categories with fixed images that sellers cannot change
-export const fixedImageCategories = ["Netflix", "YouTube", "Spotify", "Telegram Numbers", "Subscriptions"];
+export const fixedImageCategories = ["Netflix", "YouTube", "Spotify", "Telegram Numbers", "Subscriptions", "Games"];
 
 export function getProductImage(category: string, customImageUrl?: string | null): string {
   // For fixed image categories (like Netflix), always use the category image
