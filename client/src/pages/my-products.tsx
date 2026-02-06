@@ -144,6 +144,7 @@ const ProductForm = memo(function ProductForm({
   const showTelegramNumbersFields = selectedCategory === "Telegram Numbers";
   const showSubscriptionsFields = selectedCategory === "Subscriptions";
   const showCoursesFields = selectedCategory === "Courses";
+  const showGamesFields = selectedCategory === "Games";
 
   // Get translated category labels
   const categories = useMemo(() => [
@@ -299,6 +300,74 @@ const ProductForm = memo(function ProductForm({
                 </FormItem>
               )}
             />
+          </div>
+        )}
+
+        {showGamesFields && (
+          <div className="space-y-5 pt-4 border-t border-border/50">
+            <h3 className="text-sm font-medium text-foreground">{t("myProducts.gameType")}</h3>
+            
+            <FormField
+              control={form.control}
+              name="gameType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("myProducts.gameType")}</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field}
+                      value={field.value || ""}
+                      placeholder={t("myProducts.gameTypePlaceholder")}
+                      className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
+                      data-testid="input-game-type"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="accountEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("myProducts.accountEmail")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        type="email"
+                        placeholder={t("myProducts.emailPlaceholder")}
+                        className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
+                        data-testid="input-game-email"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="accountPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("myProducts.accountPassword")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        type="password"
+                        placeholder={t("myProducts.passwordPlaceholder")}
+                        className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
+                        data-testid="input-game-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
         )}
 

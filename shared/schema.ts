@@ -63,6 +63,7 @@ export const products = pgTable("products", {
   accountEmail: text("account_email").default(''),
   accountEmailPassword: text("account_email_password").default(''),
   subscriptionDuration: text("subscription_duration").default(''),
+  gameType: text("game_type").default(''),
   telegramPhoneNumber: text("telegram_phone_number").default(''),
   courseUrl: text("course_url").default(''),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -280,6 +281,7 @@ export const insertProductSchema = createInsertSchema(products).omit({
   accountEmail: z.string().optional(),
   accountEmailPassword: z.string().optional(),
   subscriptionDuration: z.string().optional(),
+  gameType: z.string().optional(),
   courseUrl: z.string().optional(),
 });
 
