@@ -112,8 +112,12 @@ function Router() {
                 <Route path="/admin" component={AdminDashboard} />
                 <Route path="/services" component={ServicesPage} />
                 <Route path="/service/:id" component={ServiceDetailPage} />
-                <Route path="/@:username" component={SellerProfilePage} />
-                <Route path="/seller/:id" component={SellerProfilePage} />
+                <Route path="/@:username">
+                  {(params: { username: string }) => <SellerProfilePage params={params} />}
+                </Route>
+                <Route path="/seller/:id">
+                  {(params: { id: string }) => <SellerProfilePage params={params} />}
+                </Route>
                 <Route path="/wallet">
                   <ProtectedRoute>
                     <WalletPage />

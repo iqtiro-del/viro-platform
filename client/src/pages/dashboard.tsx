@@ -28,7 +28,10 @@ const loginSchema = z.object({
 
 const registerSchema = loginSchema.extend({
   fullName: z.string().min(2, "Full name is required"),
+  email: z.string().email("Invalid email address"),
 });
+
+type RegisterFormData = z.infer<typeof registerSchema>;
 
 export function Dashboard() {
   const { user, login, register: registerUser } = useAuth();
@@ -66,12 +69,13 @@ export function Dashboard() {
     },
   });
 
-  const registerForm = useForm<z.infer<typeof registerSchema>>({
+  const registerForm = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       username: "",
       password: "",
       fullName: "",
+      email: "",
     },
   });
 
@@ -96,13 +100,14 @@ export function Dashboard() {
     }
   };
 
-  const onRegisterSubmit = async (data: z.infer<typeof registerSchema>) => {
+  const onRegisterSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
       await registerUser({
         username: data.username,
         password: data.password,
         fullName: data.fullName,
+        email: data.email,
       });
       toast({
         title: t("auth.accountCreated"),
@@ -525,6 +530,25 @@ export function Dashboard() {
                         {...field} 
                         className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
                         data-testid="input-register-fullname"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={registerForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("auth.email")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="email"
+                        placeholder="example@email.com"
+                        {...field} 
+                        className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
+                        data-testid="input-register-email"
                       />
                     </FormControl>
                     <FormMessage />
