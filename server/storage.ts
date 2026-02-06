@@ -274,12 +274,18 @@ export class DatabaseStorage implements IStorage {
     
     // Update seller rating
     const sellerReviews = await this.getReviewsBySeller(review.sellerId);
-    const avgRating = sellerReviews.reduce((sum, r) => sum + r.rating, 0) / sellerReviews.length;
-    
-    await this.updateUser(review.sellerId, {
-      rating: avgRating.toFixed(2),
-      totalReviews: sellerReviews.length
-    });
+    if (sellerReviews.length > 0) {
+      const avgRating = sellerReviews.reduce((sum, r) => {
+        // Map ratingType to a numerical value (excellent=5, bad=1)
+        const ratingValue = r.ratingType === 'excellent' ? 5 : 1;
+        return sum + ratingValue;
+      }, 0) / sellerReviews.length;
+      
+      await this.updateUser(review.sellerId, {
+        rating: avgRating.toFixed(2),
+        totalReviews: sellerReviews.length
+      });
+    }
     
     return newReview;
   }
