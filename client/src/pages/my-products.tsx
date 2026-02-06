@@ -83,6 +83,7 @@ const CATEGORY_VALUES = [
   "Spotify",
   "Telegram Numbers",
   "Courses",
+  "Games",
 ] as const;
 
 // Memoized ProductForm component - extracted outside to prevent re-creation on parent re-renders
@@ -319,7 +320,7 @@ const ProductForm = memo(function ProductForm({
                       value={field.value || ""}
                       placeholder={t("myProducts.gameTypePlaceholder")}
                       className="glass-morphism border-border/50 h-12 text-base touch-manipulation"
-                      data-testid="input-game-type"
+                      data-testid="input-game-name"
                     />
                   </FormControl>
                   <FormMessage />
