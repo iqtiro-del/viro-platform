@@ -195,26 +195,6 @@ export function AuthPage({ mode }: AuthPageProps) {
                     </FormItem>
                   )}
                 />
-                
-                <FormField
-                  control={registerForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("auth.email")}</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="email"
-                          placeholder="example@email.com"
-                          {...field} 
-                          className="glass-morphism border-border/50 focus:border-primary focus:ring-primary"
-                          data-testid="input-email"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <FormField
                   control={registerForm.control}
                   name="username"
