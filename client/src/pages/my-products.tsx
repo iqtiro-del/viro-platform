@@ -163,6 +163,7 @@ const ProductForm = memo(function ProductForm({
     { value: "Telegram Numbers", label: t("services.categories.telegramNumbers") },
     { value: "Subscriptions", label: t("services.categories.subscriptions") },
     { value: "Courses", label: t("services.categories.courses") },
+    { value: "Games", label: t("services.categories.games") },
   ], [t]);
 
   return (
