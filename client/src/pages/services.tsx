@@ -149,6 +149,7 @@ export function ServicesPage() {
     { value: "Telegram Numbers", label: t("services.telegramNumbers") },
     { value: "Subscriptions", label: t("services.subscriptions") },
     { value: "Courses", label: t("services.categories.courses") },
+    { value: "Games", label: t("services.categories.games") },
   ];
 
   const priceRanges = [
