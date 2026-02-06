@@ -113,10 +113,10 @@ function Router() {
                 <Route path="/services" component={ServicesPage} />
                 <Route path="/service/:id" component={ServiceDetailPage} />
                 <Route path="/@:username">
-                  {(params: { username: string }) => <SellerProfilePage params={params} />}
+                  {(params: { username: string }) => <SellerProfilePage username={params.username} />}
                 </Route>
                 <Route path="/seller/:id">
-                  {(params: { id: string }) => <SellerProfilePage params={params} />}
+                  {(params: { id: string }) => <SellerProfilePage id={params.id} />}
                 </Route>
                 <Route path="/wallet">
                   <ProtectedRoute>
