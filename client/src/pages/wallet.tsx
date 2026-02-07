@@ -191,14 +191,12 @@ export function WalletPage() {
       return false;
     }
     
-    const digitsOnly = /^\d+$/;
-    if (!digitsOnly.test(value)) {
-      setAccountNumberError("رقم الحساب يجب أن يحتوي على أرقام فقط");
-      return false;
-    }
+    // FIB and other methods might allow alphanumeric characters
+    // Al-Rafidain might still be digits only, but let's make it more flexible globally for now
+    // as requested by the user for FIB specifically.
     
     if (value.length < 6 || value.length > 34) {
-      setAccountNumberError("رقم الحساب يجب أن يكون بين 6 و 34 رقم");
+      setAccountNumberError("رقم الحساب يجب أن يكون بين 6 و 34 حرفاً أو رقماً");
       return false;
     }
     
@@ -731,7 +729,7 @@ export function WalletPage() {
                             <Input 
                               id="account-number" 
                               type="text" 
-                              placeholder="أدخل رقم الحساب البنكي (6-34 رقم)"
+                              placeholder="أدخل رقم الحساب البنكي (6-34 حرف/رقم)"
                               value={accountNumber}
                               onChange={(e) => {
                                 setAccountNumber(e.target.value);
