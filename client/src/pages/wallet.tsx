@@ -429,7 +429,7 @@ export function WalletPage() {
                             <Label>رقم حساب FIB للمنصة</Label>
                             <Input 
                               type="text"
-                              value="1234567890" // Placeholder number
+                              value="PKA4-NCFN-CPOX"
                               readOnly
                               className="glass-morphism border-border/50 mt-2 bg-muted/50 cursor-not-allowed"
                               data-testid="input-platform-fib-account"
