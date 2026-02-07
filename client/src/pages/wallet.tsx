@@ -387,7 +387,7 @@ export function WalletPage() {
                       {t("wallet.deposit")}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="glass-morphism-strong border-border/50 max-h-[90vh] flex flex-col sm:max-w-[425px] rounded-xl">
+                  <DialogContent className="glass-morphism-strong border-border/50 max-h-[90vh] flex flex-col w-[90vw] sm:max-w-[380px] rounded-2xl p-4 md:p-6">
                     <DialogHeader className="flex-shrink-0">
                       <DialogTitle>{t("wallet.depositFunds")}</DialogTitle>
                       <DialogDescription>
@@ -590,7 +590,7 @@ export function WalletPage() {
                       كريبتو
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="glass-morphism-strong border-border/50 max-h-[90vh] flex flex-col sm:max-w-[425px] rounded-xl">
+                  <DialogContent className="glass-morphism-strong border-border/50 max-h-[90vh] flex flex-col w-[90vw] sm:max-w-[380px] rounded-2xl p-4 md:p-6">
                     <DialogHeader className="flex-shrink-0">
                       <DialogTitle className="flex items-center gap-2">
                         <Bitcoin className="w-5 h-5 text-yellow-500" />
@@ -684,7 +684,7 @@ export function WalletPage() {
                       {t("wallet.withdraw")}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="glass-morphism-strong border-border/50 max-h-[90vh] flex flex-col sm:max-w-[425px] rounded-xl">
+                  <DialogContent className="glass-morphism-strong border-border/50 max-h-[90vh] flex flex-col w-[90vw] sm:max-w-[380px] rounded-2xl p-4 md:p-6">
                     <DialogHeader className="flex-shrink-0">
                       <DialogTitle>{t("wallet.withdrawFunds")}</DialogTitle>
                       <DialogDescription>
