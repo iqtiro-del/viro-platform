@@ -428,7 +428,7 @@ export function WalletPage() {
                             <Label>رقم زين كاش للمنصة</Label>
                             <Input 
                               type="text"
-                              value="0770 891 7002"
+                              value="07708917002"
                               readOnly
                               className="glass-morphism border-border/50 mt-2 bg-muted/50 cursor-not-allowed"
                               data-testid="input-platform-zaincash-account"
