@@ -417,9 +417,42 @@ export function WalletPage() {
                           </SelectTrigger>
                           <SelectContent className="glass-morphism-strong border-border/50">
                             <SelectItem value="Al-Rafidain QiServices">{t("wallet.alRafidain")}</SelectItem>
+                            <SelectItem value="FIB">FIB</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
+                      
+                      {/* Conditional fields for FIB */}
+                      {depositMethod === "FIB" && (
+                        <div className="space-y-4 p-4 bg-primary/5 border border-primary/20 rounded-md">
+                          <div>
+                            <Label>رقم حساب FIB للمنصة</Label>
+                            <Input 
+                              type="text"
+                              value="1234567890" // Placeholder number
+                              readOnly
+                              className="glass-morphism border-border/50 mt-2 bg-muted/50 cursor-not-allowed"
+                              data-testid="input-platform-fib-account"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">{t("wallet.transferToThisAccount")}</p>
+                          </div>
+                          <div>
+                            <Label htmlFor="user-fib-account">
+                              رقم حسابك في FIB <span className="text-destructive">*</span>
+                            </Label>
+                            <Input 
+                              id="user-fib-account"
+                              type="text"
+                              placeholder="أدخل رقم حسابك المستخدم للتحويل"
+                              value={userPaymentNumber}
+                              onChange={(e) => setUserPaymentNumber(e.target.value)}
+                              className="glass-morphism border-border/50 mt-2"
+                              data-testid="input-user-fib-account"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">أدخل رقم الحساب الذي قمت بالتحويل منه</p>
+                          </div>
+                        </div>
+                      )}
                       
                       {/* Conditional fields for Rafidain Services */}
                       {depositMethod === "Al-Rafidain QiServices" && (
@@ -509,7 +542,7 @@ export function WalletPage() {
                           !depositMethod || 
                           !depositScreenshot ||
                           depositMutation.isPending ||
-                          (depositMethod === "Al-Rafidain QiServices" && !userPaymentNumber)
+                          ((depositMethod === "Al-Rafidain QiServices" || depositMethod === "FIB") && !userPaymentNumber)
                         }
                       >
                         {depositMutation.isPending ? t("wallet.processing") : t("wallet.confirmDeposit")}
