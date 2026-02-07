@@ -416,9 +416,42 @@ export function WalletPage() {
                           <SelectContent className="glass-morphism-strong border-border/50">
                             <SelectItem value="Al-Rafidain QiServices">{t("wallet.alRafidain")}</SelectItem>
                             <SelectItem value="FIB">FIB</SelectItem>
+                            <SelectItem value="Zain Cash">Zain Cash</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
+                      
+                      {/* Conditional fields for Zain Cash */}
+                      {depositMethod === "Zain Cash" && (
+                        <div className="space-y-4 p-4 bg-primary/5 border border-primary/20 rounded-md">
+                          <div>
+                            <Label>رقم زين كاش للمنصة</Label>
+                            <Input 
+                              type="text"
+                              value="078xxxxxxxx"
+                              readOnly
+                              className="glass-morphism border-border/50 mt-2 bg-muted/50 cursor-not-allowed"
+                              data-testid="input-platform-zaincash-account"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">{t("wallet.transferToThisAccount")}</p>
+                          </div>
+                          <div>
+                            <Label htmlFor="user-zaincash-account">
+                              رقم محفظتك في زين كاش <span className="text-destructive">*</span>
+                            </Label>
+                            <Input 
+                              id="user-zaincash-account"
+                              type="text"
+                              placeholder="أدخل رقم المحفظة المستخدم للتحويل"
+                              value={userPaymentNumber}
+                              onChange={(e) => setUserPaymentNumber(e.target.value)}
+                              className="glass-morphism border-border/50 mt-2"
+                              data-testid="input-user-zaincash-account"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">أدخل رقم الهاتف المرتبط بمحفظتك</p>
+                          </div>
+                        </div>
+                      )}
                       
                       {/* Conditional fields for FIB */}
                       {depositMethod === "FIB" && (
@@ -540,7 +573,7 @@ export function WalletPage() {
                           !depositMethod || 
                           !depositScreenshot ||
                           depositMutation.isPending ||
-                          ((depositMethod === "Al-Rafidain QiServices" || depositMethod === "FIB") && !userPaymentNumber)
+                          ((depositMethod === "Al-Rafidain QiServices" || depositMethod === "FIB" || depositMethod === "Zain Cash") && !userPaymentNumber)
                         }
                       >
                         {depositMutation.isPending ? t("wallet.processing") : t("wallet.confirmDeposit")}
