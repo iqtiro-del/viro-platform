@@ -42,5 +42,14 @@ task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
 
+[[workflows.workflow]]
+name = "Shell"
+mode = "sequential"
+author = 48690702
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash"
+
 [agent]
 integrations = ["javascript_database:1.0.0"]
