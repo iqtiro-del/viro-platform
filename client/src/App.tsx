@@ -49,9 +49,18 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function Router() {
   const [location] = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading: authLoading } = useAuth();
   const { t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Show a simple loading state while auth is initializing to avoid white screen
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse neon-text-glow text-2xl font-accent">فيرو</div>
+      </div>
+    );
+  }
 
   // Auth routes (no navbar)
   if (location === "/login" || location === "/register") {
