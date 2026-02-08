@@ -409,6 +409,7 @@
     );
     background-size: 300% 300%;
     animation: gradient-shift 25s ease-in-out infinite;
+    will-change: background-position;
   }
 
   /* Respect user's motion preferences for accessibility */
