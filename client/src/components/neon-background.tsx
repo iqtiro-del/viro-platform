@@ -85,10 +85,10 @@ export function NeonBackground({ intensity = "normal" }: NeonBackgroundProps) {
     const init = () => {
       particles = [];
       const isMobile = width < 768;
-      const baseDensity = intensity === "high" ? 30000 : 50000;
-      // Reduce density on mobile to improve performance
-      const density = isMobile ? baseDensity * 2.5 : baseDensity;
-      const numberOfParticles = Math.floor((width * height) / density);
+      const baseDensity = intensity === "high" ? 40000 : 60000;
+      // Further reduce density on mobile to improve performance
+      const density = isMobile ? baseDensity * 4 : baseDensity;
+      const numberOfParticles = Math.min(Math.floor((width * height) / density), isMobile ? 25 : 150);
       for (let i = 0; i < numberOfParticles; i++) {
         particles.push(new Particle());
       }

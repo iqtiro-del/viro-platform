@@ -29,9 +29,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Check localStorage for saved user
     const savedUser = localStorage.getItem("tiro-user");
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        console.error("Failed to parse saved user", e);
+        localStorage.removeItem("tiro-user");
+      }
     }
-    setIsLoading(false);
+    // Artificial delay to ensure fonts and layout are ready
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   const login = async (username: string, password: string) => {
