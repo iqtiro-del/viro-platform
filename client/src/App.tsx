@@ -10,23 +10,33 @@ import { NeonBackground } from "@/components/neon-background";
 import { AppNavbar } from "@/components/app-navbar";
 import { MobileMenu } from "@/components/mobile-menu";
 import { PageTransition } from "@/components/page-transition";
-import { Menu } from "lucide-react";
+import { Menu, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import FloatingSupport from "@/components/FloatingSupport";
 import { TelegramDialog } from "@/components/telegram-dialog";
-import NotFound from "@/pages/not-found";
-import { Dashboard } from "@/pages/dashboard";
-import { AuthPage } from "@/pages/auth";
-import { ServicesPage } from "@/pages/services";
-import { ServiceDetailPage } from "@/pages/service-detail";
-import { WalletPage } from "@/pages/wallet";
-import { MyProductsPage } from "@/pages/my-products";
-import { PromotePage } from "@/pages/promote";
-import { ProfilePage } from "@/pages/profile";
-import { MyChatsPage } from "@/pages/my-chats";
-import { SellerProfilePage } from "@/pages/seller-profile";
-import AdminDashboard from "@/pages/admin";
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
+
+// Lazy load pages for better performance
+const Dashboard = lazy(() => import("./pages/dashboard").then(module => ({ default: module.Dashboard })));
+const AuthPage = lazy(() => import("./pages/auth").then(module => ({ default: module.AuthPage })));
+const ServicesPage = lazy(() => import("./pages/services").then(module => ({ default: module.ServicesPage })));
+const ServiceDetailPage = lazy(() => import("./pages/service-detail").then(module => ({ default: module.ServiceDetailPage })));
+const WalletPage = lazy(() => import("./pages/wallet").then(module => ({ default: module.WalletPage })));
+const MyProductsPage = lazy(() => import("./pages/my-products").then(module => ({ default: module.MyProductsPage })));
+const PromotePage = lazy(() => import("./pages/promote").then(module => ({ default: module.PromotePage })));
+const ProfilePage = lazy(() => import("./pages/profile").then(module => ({ default: module.ProfilePage })));
+const MyChatsPage = lazy(() => import("./pages/my-chats").then(module => ({ default: module.MyChatsPage })));
+const SellerProfilePage = lazy(() => import("./pages/seller-profile").then(module => ({ default: module.SellerProfilePage })));
+const AdminDashboard = lazy(() => import("./pages/admin"));
+const NotFound = lazy(() => import("./pages/not-found"));
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <Loader2 className="h-8 w-8 animate-spin text-primary opacity-50" />
+    </div>
+  );
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -115,46 +125,48 @@ function Router() {
 
           {/* Page Content */}
           <main className="flex-1 pb-16 md:pb-0">
-            <PageTransition>
-              <Switch>
-                <Route path="/" component={Dashboard} />
-                <Route path="/admin" component={AdminDashboard} />
-                <Route path="/services" component={ServicesPage} />
-                <Route path="/service/:id" component={ServiceDetailPage} />
-                <Route path="/@:username">
-                  {(params: { username: string }) => <SellerProfilePage username={params.username} />}
-                </Route>
-                <Route path="/seller/:id">
-                  {(params: { id: string }) => <SellerProfilePage id={params.id} />}
-                </Route>
-                <Route path="/wallet">
-                  <ProtectedRoute>
-                    <WalletPage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path="/my-products">
-                  <ProtectedRoute>
-                    <MyProductsPage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path="/promote">
-                  <ProtectedRoute>
-                    <PromotePage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path="/profile">
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path="/my-chats">
-                  <ProtectedRoute>
-                    <MyChatsPage />
-                  </ProtectedRoute>
-                </Route>
-                <Route component={NotFound} />
-              </Switch>
-            </PageTransition>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <Switch>
+                  <Route path="/" component={Dashboard} />
+                  <Route path="/admin" component={AdminDashboard} />
+                  <Route path="/services" component={ServicesPage} />
+                  <Route path="/service/:id" component={ServiceDetailPage} />
+                  <Route path="/@:username">
+                    {(params: { username: string }) => <SellerProfilePage username={params.username} />}
+                  </Route>
+                  <Route path="/seller/:id">
+                    {(params: { id: string }) => <SellerProfilePage id={params.id} />}
+                  </Route>
+                  <Route path="/wallet">
+                    <ProtectedRoute>
+                      <WalletPage />
+                    </ProtectedRoute>
+                  </Route>
+                  <Route path="/my-products">
+                    <ProtectedRoute>
+                      <MyProductsPage />
+                    </ProtectedRoute>
+                  </Route>
+                  <Route path="/promote">
+                    <ProtectedRoute>
+                      <PromotePage />
+                    </ProtectedRoute>
+                  </Route>
+                  <Route path="/profile">
+                    <ProtectedRoute>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  </Route>
+                  <Route path="/my-chats">
+                    <ProtectedRoute>
+                      <MyChatsPage />
+                    </ProtectedRoute>
+                  </Route>
+                  <Route component={NotFound} />
+                </Switch>
+              </PageTransition>
+            </Suspense>
           </main>
         </div>
       </div>
