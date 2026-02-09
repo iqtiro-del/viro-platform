@@ -52,13 +52,14 @@ export function Dashboard() {
   };
 
   const { data: products = [], isLoading: productsLoading } = useQuery<ProductWithSeller[]>({ 
-    queryKey: ['/api/products'] 
+    queryKey: ['/api/products'],
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
   const { data: statsData } = useQuery<{ activeServices: number; verifiedSellers: number; totalSales: string }>({
     queryKey: ['/api/stats'],
-    refetchInterval: 30000, // Auto-refresh every 30 seconds for real-time updates
-    staleTime: 0, // Always fetch fresh data
+    refetchInterval: 30000, 
+    staleTime: 1000 * 60, // Consider stats fresh for 1 minute
   });
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
