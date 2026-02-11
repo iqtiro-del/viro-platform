@@ -429,7 +429,7 @@ export function WalletPage() {
                             <Label>رقم FastPay للمنصة</Label>
                             <Input 
                               type="text"
-                              value="07501234567"
+                              value="07738762233"
                               readOnly
                               className="glass-morphism border-border/50 mt-2 bg-muted/50 cursor-not-allowed"
                               data-testid="input-platform-fastpay-account"
