@@ -427,13 +427,26 @@ export function WalletPage() {
                         <div className="space-y-4 p-4 bg-primary/5 border border-primary/20 rounded-md">
                           <div>
                             <Label>رقم FastPay للمنصة</Label>
-                            <Input 
-                              type="text"
-                              value="07738762233"
-                              readOnly
-                              className="glass-morphism border-border/50 mt-2 bg-muted/50 cursor-not-allowed"
-                              data-testid="input-platform-fastpay-account"
-                            />
+                            <div className="flex gap-2 mt-2">
+                              <Input 
+                                type="text"
+                                value="07738762233"
+                                readOnly
+                                className="glass-morphism border-border/50 bg-muted/50 cursor-not-allowed flex-1"
+                                data-testid="input-platform-fastpay-account"
+                              />
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="shrink-0"
+                                onClick={() => {
+                                  navigator.clipboard.writeText("07738762233");
+                                  toast({ title: "تم النسخ", description: "تم نسخ رقم FastPay" });
+                                }}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </Button>
+                            </div>
                             <p className="text-xs text-muted-foreground mt-1">{t("wallet.transferToThisAccount")}</p>
                           </div>
                           <div>
@@ -459,13 +472,26 @@ export function WalletPage() {
                         <div className="space-y-4 p-4 bg-primary/5 border border-primary/20 rounded-md">
                           <div>
                             <Label>رقم زين كاش للمنصة</Label>
-                            <Input 
-                              type="text"
-                              value="07708917002"
-                              readOnly
-                              className="glass-morphism border-border/50 mt-2 bg-muted/50 cursor-not-allowed"
-                              data-testid="input-platform-zaincash-account"
-                            />
+                            <div className="flex gap-2 mt-2">
+                              <Input 
+                                type="text"
+                                value="07708917002"
+                                readOnly
+                                className="glass-morphism border-border/50 bg-muted/50 cursor-not-allowed flex-1"
+                                data-testid="input-platform-zaincash-account"
+                              />
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="shrink-0"
+                                onClick={() => {
+                                  navigator.clipboard.writeText("07708917002");
+                                  toast({ title: "تم النسخ", description: "تم نسخ رقم زين كاش" });
+                                }}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </Button>
+                            </div>
                             <p className="text-xs text-muted-foreground mt-1">{t("wallet.transferToThisAccount")}</p>
                           </div>
                           <div>
@@ -491,13 +517,26 @@ export function WalletPage() {
                         <div className="space-y-4 p-4 bg-primary/5 border border-primary/20 rounded-md">
                           <div>
                             <Label>رقم حساب FIB للمنصة</Label>
-                            <Input 
-                              type="text"
-                              value="PKA4-NCFN-CPOX"
-                              readOnly
-                              className="glass-morphism border-border/50 mt-2 bg-muted/50 cursor-not-allowed"
-                              data-testid="input-platform-fib-account"
-                            />
+                            <div className="flex gap-2 mt-2">
+                              <Input 
+                                type="text"
+                                value="PKA4-NCFN-CPOX"
+                                readOnly
+                                className="glass-morphism border-border/50 bg-muted/50 cursor-not-allowed flex-1"
+                                data-testid="input-platform-fib-account"
+                              />
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="shrink-0"
+                                onClick={() => {
+                                  navigator.clipboard.writeText("PKA4-NCFN-CPOX");
+                                  toast({ title: "تم النسخ", description: "تم نسخ رقم حساب FIB" });
+                                }}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </Button>
+                            </div>
                             <p className="text-xs text-muted-foreground mt-1">{t("wallet.transferToThisAccount")}</p>
                           </div>
                           <div>
@@ -523,13 +562,26 @@ export function WalletPage() {
                         <div className="space-y-4 p-4 bg-primary/5 border border-primary/20 rounded-md">
                           <div>
                             <Label>{t("wallet.platformRafidainAccount")}</Label>
-                            <Input 
-                              type="text"
-                              value="5784731084"
-                              readOnly
-                              className="glass-morphism border-border/50 mt-2 bg-muted/50 cursor-not-allowed"
-                              data-testid="input-platform-rafidain-account"
-                            />
+                            <div className="flex gap-2 mt-2">
+                              <Input 
+                                type="text"
+                                value="5784731084"
+                                readOnly
+                                className="glass-morphism border-border/50 bg-muted/50 cursor-not-allowed flex-1"
+                                data-testid="input-platform-rafidain-account"
+                              />
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="shrink-0"
+                                onClick={() => {
+                                  navigator.clipboard.writeText("5784731084");
+                                  toast({ title: "تم النسخ", description: "تم نسخ رقم حساب الرافدين" });
+                                }}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </Button>
+                            </div>
                             <p className="text-xs text-muted-foreground mt-1">{t("wallet.transferToThisAccount")}</p>
                           </div>
                           <div>
