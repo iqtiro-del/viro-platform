@@ -747,6 +747,7 @@ export function WalletPage() {
                             <SelectItem value="Al-Rafidain QiServices">{t("wallet.alRafidain")}</SelectItem>
                             <SelectItem value="FIB">FIB</SelectItem>
                             <SelectItem value="Zain Cash">Zain Cash</SelectItem>
+                            <SelectItem value="FastPay">FastPay</SelectItem>
                             <SelectItem value="Crypto">Crypto (USDT - TRC20)</SelectItem>
                           </SelectContent>
                         </Select>
@@ -791,12 +792,12 @@ export function WalletPage() {
                         withdrawMethod && (
                           <div>
                             <Label htmlFor="account-number">
-                              رقم الحساب البنكي <span className="text-destructive">*</span>
+                              {withdrawMethod === "Zain Cash" || withdrawMethod === "FastPay" ? "رقم المحفظة" : "رقم الحساب البنكي"} <span className="text-destructive">*</span>
                             </Label>
                             <Input 
                               id="account-number" 
                               type="text" 
-                              placeholder="أدخل رقم الحساب البنكي (6-34 حرف/رقم)"
+                              placeholder={withdrawMethod === "Zain Cash" || withdrawMethod === "FastPay" ? "أدخل رقم الهاتف المرتبط بالمحفظة" : "أدخل رقم الحساب البنكي (6-34 حرف/رقم)"}
                               value={accountNumber}
                               onChange={(e) => {
                                 setAccountNumber(e.target.value);
