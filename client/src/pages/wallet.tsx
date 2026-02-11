@@ -417,9 +417,42 @@ export function WalletPage() {
                             <SelectItem value="Al-Rafidain QiServices">{t("wallet.alRafidain")}</SelectItem>
                             <SelectItem value="FIB">FIB</SelectItem>
                             <SelectItem value="Zain Cash">Zain Cash</SelectItem>
+                            <SelectItem value="FastPay">FastPay</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
+                      
+                      {/* Conditional fields for FastPay */}
+                      {depositMethod === "FastPay" && (
+                        <div className="space-y-4 p-4 bg-primary/5 border border-primary/20 rounded-md">
+                          <div>
+                            <Label>رقم FastPay للمنصة</Label>
+                            <Input 
+                              type="text"
+                              value="07501234567"
+                              readOnly
+                              className="glass-morphism border-border/50 mt-2 bg-muted/50 cursor-not-allowed"
+                              data-testid="input-platform-fastpay-account"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">{t("wallet.transferToThisAccount")}</p>
+                          </div>
+                          <div>
+                            <Label htmlFor="user-fastpay-account">
+                              رقم محفظتك في FastPay <span className="text-destructive">*</span>
+                            </Label>
+                            <Input 
+                              id="user-fastpay-account"
+                              type="text"
+                              placeholder="أدخل رقم المحفظة المستخدم للتحويل"
+                              value={userPaymentNumber}
+                              onChange={(e) => setUserPaymentNumber(e.target.value)}
+                              className="glass-morphism border-border/50 mt-2"
+                              data-testid="input-user-fastpay-account"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">أدخل رقم الهاتف المرتبط بمحفظتك</p>
+                          </div>
+                        </div>
+                      )}
                       
                       {/* Conditional fields for Zain Cash */}
                       {depositMethod === "Zain Cash" && (
